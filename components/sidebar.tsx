@@ -8,22 +8,31 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Gauge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-type SidebarProps = {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-};
+import { useRouter, usePathname } from "next/navigation";
 
 const sidebarItems = [
-  { value: "inquiries", label: "Inquiries", icon: FileText },
-  { value: "audit", label: "Audit Trail", icon: ListChecks },
-  { value: "reports", label: "Reports", icon: BarChart },
+  { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
+  { value: "inquiries", label: "Inquiries", icon: FileText, path: "/inquiry" },
+  {
+    value: "audit",
+    label: "Audit Trail",
+    icon: ListChecks,
+    path: "/audit-trail",
+  },
+  { value: "reports", label: "Reports", icon: BarChart, path: "/reports" },
 ];
 
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Determine the activeTab based on current path
+  const activeTab =
+    sidebarItems.find((i) => pathname.startsWith(i.path))?.value || "dashboard";
 
   return (
     <aside
@@ -70,7 +79,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           return (
             <button
               key={item.value}
-              onClick={() => onTabChange(item.value)}
+              onClick={() => router.push(item.path)}
               className={`flex items-center gap-3 text-sm rounded-md py-2 font-medium transition-colors
                 ${
                   activeTab === item.value

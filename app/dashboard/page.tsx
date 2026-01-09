@@ -1,128 +1,64 @@
 "use client";
 
-import { useState } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { StatsCards } from "@/components/stats-cards";
-import { InquiryTable } from "@/components/inquiry-table";
-import { InquiryDetailPanel } from "@/components/inquiry-detail-panel";
-import { FilterBar } from "@/components/filter-bar";
-import { AuditLog } from "@/components/audit-log";
-import { sampleInquiries, sampleRemarks } from "@/lib/data";
-import type { Inquiry } from "@/lib/types";
 import { Sidebar } from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
-  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("inquiries");
+  // Static user data (replace with real user info as needed)
+  const name = "Jane Doe";
+  const department = "Operations";
 
-  // Calculate dashboard stats
-  const stats = {
-    totalInquiries: sampleInquiries.length,
-    pendingCount: sampleInquiries.filter((i) => i.status === "Pending").length,
-    activeCount: sampleInquiries.filter((i) => i.status === "Active").length,
-    confirmedCount: sampleInquiries.filter((i) => i.status === "Confirmed")
-      .length,
-    rejectedCount: sampleInquiries.filter((i) => i.status === "Rejected")
-      .length,
-  };
-
-  // Sample audit log entries
-  const auditEntries = [
+  // Dummy stats (replace with real data)
+  const stats = [
     {
-      id: "1",
-      action: "Created",
-      user: "Admin User",
-      timestamp: "2026-01-10T09:00:00Z",
-      details: "New inquiry OMS-2026-001 created for MV Pacific Star",
+      label: "Total Inquiries",
+      value: 120,
+      color: "bg-blue-600 text-white",
     },
     {
-      id: "2",
-      action: "Assigned",
-      user: "Purchasing Head",
-      timestamp: "2026-01-10T09:15:00Z",
-      details: "OMS-2026-001 assigned to John Silva",
+      label: "Pending Inquiries",
+      value: 24,
+      color: "bg-orange-400 text-white",
     },
     {
-      id: "3",
-      action: "Updated",
-      user: "Maria Santos",
-      timestamp: "2026-01-11T15:20:00Z",
-      details: "OMS-2026-002 quotation submitted",
+      label: "Confirmed Inquiries",
+      value: 52,
+      color: "bg-green-500 text-white",
     },
     {
-      id: "4",
-      action: "Status Changed",
-      user: "Maria Santos",
-      timestamp: "2026-01-11T15:30:00Z",
-      details: "OMS-2026-002 status changed to Active",
+      label: "Active Vendors",
+      value: 12,
+      color: "bg-cyan-600 text-white",
     },
     {
-      id: "5",
-      action: "Status Changed",
-      user: "Ahmed Hassan",
-      timestamp: "2026-01-09T16:30:00Z",
-      details: "OMS-2026-003 confirmed by client",
+      label: "Active Products",
+      value: 47,
+      color: "bg-violet-500 text-white",
     },
   ];
 
-  const handleSelectInquiry = (inquiry: Inquiry) => {
-    setSelectedInquiry(inquiry);
-    setDetailPanelOpen(true);
-  };
-
-  const handleExport = () => {
-    alert(
-      "Export feature would generate Excel/PDF reports with selected filters"
-    );
-  };
-
-  const handleCreateNew = () => {
-    alert("Create new inquiry form would open");
-  };
-
-  // Main content for each tab
-  function renderTabContent() {
-    if (activeTab === "inquiries")
-      return (
-        <>
-          <FilterBar onExport={handleExport} onCreateNew={handleCreateNew} />
-          <InquiryTable
-            inquiries={sampleInquiries}
-            onSelectInquiry={handleSelectInquiry}
-          />
-        </>
-      );
-    if (activeTab === "audit") return <AuditLog entries={auditEntries} />;
-    if (activeTab === "reports")
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-lg border border-border p-6 bg-card">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Inquiry Performance Report
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              View metrics on inquiry processing times and PIC performance
-            </p>
-            <button className="text-sm text-primary hover:underline font-medium">
-              Generate Report →
-            </button>
-          </div>
-          <div className="rounded-lg border border-border p-6 bg-card">
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Status Summary Report
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Export inquiry status distribution by date range, port, or agent
-            </p>
-            <button className="text-sm text-primary hover:underline font-medium">
-              Generate Report →
-            </button>
-          </div>
-        </div>
-      );
-    return null;
-  }
+  // Sample recent activities
+  const activities = [
+    {
+      id: "1",
+      activity: "Inquiry OMS-2026-005 created",
+      by: "Maria Santos",
+      time: "2 hours ago",
+    },
+    {
+      id: "2",
+      activity: "OMS-2026-003 confirmed by vendor",
+      by: "John Silva",
+      time: "4 hours ago",
+    },
+    {
+      id: "3",
+      activity: "New vendor 'Pacific Supplies' activated",
+      by: "Purchasing Head",
+      time: "Yesterday",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -130,28 +66,65 @@ export default function Dashboard() {
 
       <main className="flex flex-1">
         {/* Sidebar */}
-        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <Sidebar />
 
-        {/* Main content */}
-        <div className="flex-1 space-y-6 p-6">
-          {/* Stats Cards */}
+        {/* Main Content */}
+        <div className="flex-1 p-6 space-y-8">
+          {/* Welcome */}
           <section>
-            <StatsCards stats={stats} />
+            <h1 className="text-3xl font-bold mb-2">Welcome, {name}!</h1>
+            <p className="text-muted-foreground text-lg">
+              Department: <span className="font-semibold">{department}</span>
+            </p>
           </section>
 
-          {/* Content changes based on active sidebar tab */}
-          <section className="space-y-4">{renderTabContent()}</section>
+          {/* Stat Cards */}
+          <section>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  className={`rounded-lg p-4 shadow ${s.color}`}
+                >
+                  <div className="text-2xl font-bold">{s.value}</div>
+                  <div className="text-sm mt-1">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Quick Actions */}
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Recent Activities</h2>
+              <Button onClick={() => alert("Create Inquiry Form Opens")}>
+                Create Inquiry
+              </Button>
+            </div>
+            {/* Activities Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm rounded-lg shadow bg-card border">
+                <thead className="bg-muted border-b">
+                  <tr>
+                    <th className="py-2 px-4">Activity</th>
+                    <th className="py-2 px-4">By</th>
+                    <th className="py-2 px-4">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activities.map((a) => (
+                    <tr key={a.id} className="border-b last:border-b-0">
+                      <td className="py-2 px-4">{a.activity}</td>
+                      <td className="py-2 px-4">{a.by}</td>
+                      <td className="py-2 px-4">{a.time}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </main>
-
-      {/* Detail Panel */}
-      {detailPanelOpen && (
-        <InquiryDetailPanel
-          inquiry={selectedInquiry}
-          remarks={sampleRemarks}
-          onClose={() => setDetailPanelOpen(false)}
-        />
-      )}
     </div>
   );
 }

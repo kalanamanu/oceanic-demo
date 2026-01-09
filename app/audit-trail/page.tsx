@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-export interface AuditEntry {
+interface AuditEntry {
   id: string;
   action: string;
   user: string;
@@ -11,8 +11,8 @@ export interface AuditEntry {
   details: string;
 }
 
-export interface AuditLogProps {
-  entries?: AuditEntry[]; // <-- make optional
+interface AuditLogProps {
+  entries: AuditEntry[];
 }
 
 const actionColors: Record<string, string> = {
@@ -25,19 +25,12 @@ const actionColors: Record<string, string> = {
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
 };
 
-// Component now handles missing entries gracefully!
 export default function AuditLog({ entries }: AuditLogProps) {
-  const safeEntries = Array.isArray(entries) ? entries : [];
   return (
     <Card className="p-6">
       <h3 className="text-lg font-bold text-foreground mb-4">Audit Trail</h3>
       <div className="space-y-3">
-        {safeEntries.length === 0 && (
-          <div className="text-muted-foreground text-center py-8">
-            No activity found.
-          </div>
-        )}
-        {safeEntries.map((entry) => (
+        {entries.map((entry) => (
           <div
             key={entry.id}
             className="flex items-start justify-between border-l-2 border-primary pl-4 py-2"
