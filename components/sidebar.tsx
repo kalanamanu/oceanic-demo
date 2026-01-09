@@ -56,7 +56,7 @@ export function Sidebar({
   return (
     <aside
       className={`fixed left-0 bg-card border-r border-border py-4 flex flex-col transition-all duration-200 z-30
-        ${collapsed ? "w-16 px-2" : "w-56 px-4"}`}
+    ${collapsed ? "w-16 px-2" : "w-56 px-4"} mt-4`}
       data-collapsed={collapsed}
       style={{
         minHeight: "0",
@@ -103,34 +103,40 @@ export function Sidebar({
             <button
               key={item.value}
               onClick={() => router.push(item.path)}
-              className={`flex items-center gap-3 text-sm rounded-md py-2 font-medium transition-colors
-                ${
-                  activeTab === item.value
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted text-muted-foreground"
-                }
-                ${collapsed ? "justify-center px-0" : "justify-start px-4"}`}
+              className={`
+            flex items-center gap-3 text-sm rounded-md py-2 transition-colors font-medium
+            px-3  // <-- consistent padding for all
+            ${collapsed ? "justify-center" : "justify-start"}
+            ${
+              activeTab === item.value
+                ? "bg-primary/10 text-primary"
+                : "hover:bg-muted text-muted-foreground"
+            }
+          `}
               data-testid={`sidebar-item-${item.value}`}
               title={collapsed ? item.label : undefined}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-5 w-5 flex-shrink-0" />
               {!collapsed && <span>{item.label}</span>}
             </button>
           );
         })}
       </nav>
       {/* Footer */}
-      <div className="mt-auto pt-4 border-t border-border flex flex-col items-center">
-        <Button
-          variant="ghost"
-          size={collapsed ? "icon-sm" : "default"}
-          className="w-full justify-center"
+      <div className="mb-2 mt-8 border-t border-border/70 pt-6 flex flex-col">
+        <button
+          className={`
+        flex items-center gap-3 rounded-md py-2 px-3 w-full transition-colors font-medium
+        hover:bg-destructive/10 hover:text-destructive text-muted-foreground
+        ${collapsed ? "justify-center" : "justify-start"}
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive
+      `}
           aria-label="Logout"
           onClick={() => alert("Logged out!")}
         >
-          <LogOut className="h-5 w-5" />
-          {!collapsed && <span className="ml-2">Logout</span>}
-        </Button>
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {!collapsed && <span>Logout</span>}
+        </button>
       </div>
     </aside>
   );

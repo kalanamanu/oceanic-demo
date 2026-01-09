@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
+import { VesselInquiryDialog } from "@/components/inquiry/VesselInquiryDialog";
 
 export default function Dashboard() {
   const name = "Jane Doe";
@@ -75,9 +76,9 @@ export default function Dashboard() {
       <section>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Recent Activities</h2>
-          <Button onClick={() => alert("Create Inquiry Form Opens")}>
-            Create Inquiry
-          </Button>
+          <VesselInquiryDialog>
+            <Button>Create Inquiry</Button>
+          </VesselInquiryDialog>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm rounded-lg shadow bg-card border">
