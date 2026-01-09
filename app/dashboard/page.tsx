@@ -1,15 +1,14 @@
 "use client";
 
-import { DashboardHeader } from "@/components/dashboard-header";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
+import StatCards from "@/components/dashboard/dashboard-statcards";
 
 export default function Dashboard() {
-  // Static user data (replace with real user info as needed)
   const name = "Jane Doe";
   const department = "Operations";
 
-  // Dummy stats (replace with real data)
   const stats = [
     {
       label: "Total Inquiries",
@@ -38,7 +37,6 @@ export default function Dashboard() {
     },
   ];
 
-  // Sample recent activities
   const activities = [
     {
       id: "1",
@@ -65,10 +63,8 @@ export default function Dashboard() {
       <DashboardHeader />
 
       <main className="flex flex-1">
-        {/* Sidebar */}
         <Sidebar />
 
-        {/* Main Content */}
         <div className="flex-1 p-6 space-y-8">
           {/* Welcome */}
           <section>
@@ -78,22 +74,12 @@ export default function Dashboard() {
             </p>
           </section>
 
-          {/* Stat Cards */}
+          {/* Refactored Stat Cards */}
           <section>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className={`rounded-lg p-4 shadow ${s.color}`}
-                >
-                  <div className="text-2xl font-bold">{s.value}</div>
-                  <div className="text-sm mt-1">{s.label}</div>
-                </div>
-              ))}
-            </div>
+            <StatCards stats={stats} />
           </section>
 
-          {/* Quick Actions */}
+          {/* Quick Actions and Recent Activities Table */}
           <section>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Recent Activities</h2>
@@ -101,7 +87,6 @@ export default function Dashboard() {
                 Create Inquiry
               </Button>
             </div>
-            {/* Activities Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm rounded-lg shadow bg-card border">
                 <thead className="bg-muted border-b">

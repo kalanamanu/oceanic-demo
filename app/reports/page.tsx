@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardHeader } from "@/components/dashboard-header";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Sidebar } from "@/components/sidebar";
 
 export default function ReportsPage() {

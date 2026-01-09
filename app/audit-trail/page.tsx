@@ -1,7 +1,7 @@
 "use client";
 
 import { Sidebar } from "@/components/sidebar";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
