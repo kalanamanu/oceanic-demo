@@ -11,23 +11,33 @@ import { sampleInquiries, sampleRemarks } from "@/lib/data";
 import type { Inquiry } from "@/lib/types";
 
 export default function InquiryPage() {
+  // Keep inquiries in state so edits can update them!
+  const [inquiries, setInquiries] = useState<Inquiry[]>(sampleInquiries);
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
 
-  // Calculate dashboard stats from sampleInquiries
+  // Calculate dashboard stats from inquiries in state
   const stats = {
-    totalInquiries: sampleInquiries.length,
-    pendingCount: sampleInquiries.filter((i) => i.status === "Pending").length,
-    activeCount: sampleInquiries.filter((i) => i.status === "Active").length,
-    confirmedCount: sampleInquiries.filter((i) => i.status === "Confirmed")
-      .length,
-    rejectedCount: sampleInquiries.filter((i) => i.status === "Rejected")
-      .length,
+    totalInquiries: inquiries.length,
+    pendingCount: inquiries.filter((i) => i.status === "Pending").length,
+    activeCount: inquiries.filter((i) => i.status === "Active").length,
+    confirmedCount: inquiries.filter((i) => i.status === "Confirmed").length,
+    rejectedCount: inquiries.filter((i) => i.status === "Rejected").length,
   };
 
+  // Select an inquiry
   const handleSelectInquiry = (inquiry: Inquiry) => {
     setSelectedInquiry(inquiry);
     setDetailPanelOpen(true);
+  };
+
+  // Update an inquiry after editing
+  const handleEditInquiry = (updatedInquiry: Inquiry) => {
+    // Update the inquiry in state
+    setInquiries((prev) =>
+      prev.map((inq) => (inq.id === updatedInquiry.id ? updatedInquiry : inq))
+    );
+    setSelectedInquiry(updatedInquiry);
   };
 
   const handleExport = () => {
@@ -51,19 +61,20 @@ export default function InquiryPage() {
           <section className="space-y-4">
             <FilterBar onExport={handleExport} onCreateNew={handleCreateNew} />
             <InquiryTable
-              inquiries={sampleInquiries}
+              inquiries={inquiries}
               onSelectInquiry={handleSelectInquiry}
             />
           </section>
         </div>
       </main>
-      {/* Inquiry Detail Panel */}
-      {detailPanelOpen && (
+      {/* Inquiry Detail Dialog with Edit support */}
+      {detailPanelOpen && selectedInquiry && (
         <InquiryDetailDialog
           inquiry={selectedInquiry}
           remarks={sampleRemarks}
           open={detailPanelOpen}
           onClose={() => setDetailPanelOpen(false)}
+          onEditInquiry={handleEditInquiry}
         />
       )}
     </div>
