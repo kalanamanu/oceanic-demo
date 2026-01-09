@@ -18,6 +18,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 
 // Example employee list; replace/fetch as needed
@@ -73,7 +74,7 @@ export function VesselInquiryDialog({
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Vessel Name *
+              Vessel Name <span className="text-red-500">*</span>
             </label>
             <input
               name="vesselName"
@@ -131,7 +132,8 @@ export function VesselInquiryDialog({
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">
-              Inquiry Received Date & Time *
+              Inquiry Received Date & Time{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               name="inquiryReceived"
