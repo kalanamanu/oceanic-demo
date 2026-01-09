@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
-import { VesselInquiryDialog } from "@/components/inquiry/VesselInquiryDialog";
+import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
 
 export default function Dashboard() {
   const name = "Jane Doe";

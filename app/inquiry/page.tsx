@@ -4,7 +4,7 @@ import { useState } from "react";
 import { StatsCards } from "@/components/inquiry/stats-cards";
 import { FilterBar } from "@/components/inquiry/filter-bar";
 import { InquiryTable } from "@/components/inquiry/inquiry-table";
-import { InquiryDetailPanel } from "@/components/inquiry/inquiry-detail-panel";
+import { InquiryDetailDialog } from "@/components/inquiry/InquiryDetailDialog";
 
 // Sample/mock data imports
 import { sampleInquiries, sampleRemarks } from "@/lib/data";
@@ -59,9 +59,10 @@ export default function InquiryPage() {
       </main>
       {/* Inquiry Detail Panel */}
       {detailPanelOpen && (
-        <InquiryDetailPanel
+        <InquiryDetailDialog
           inquiry={selectedInquiry}
           remarks={sampleRemarks}
+          open={detailPanelOpen}
           onClose={() => setDetailPanelOpen(false)}
         />
       )}

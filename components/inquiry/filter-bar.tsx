@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Filter, Download, Plus } from "lucide-react";
 import { useState } from "react";
-import { VesselInquiryDialog } from "@/components/inquiry/VesselInquiryDialog";
+import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
 
 interface FilterBarProps {
   onExport?: () => void;
