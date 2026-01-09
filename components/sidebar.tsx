@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   FileText,
   ListChecks,
@@ -9,6 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Gauge,
+  Package,
+  Clipboard,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
@@ -16,36 +18,57 @@ import { useRouter, usePathname } from "next/navigation";
 const sidebarItems = [
   { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
   { value: "inquiries", label: "Inquiries", icon: FileText, path: "/inquiry" },
+  { value: "products", label: "Products", icon: Package, path: "/products" },
+  {
+    value: "quotations",
+    label: "Quotations",
+    icon: Clipboard,
+    path: "/quotations",
+  },
   {
     value: "audit",
     label: "Audit Trail",
     icon: ListChecks,
     path: "/audit-trail",
   },
+  { value: "users", label: "Users", icon: Users, path: "/users" },
   { value: "reports", label: "Reports", icon: BarChart, path: "/reports" },
 ];
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+export interface SidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+  headerHeight?: string; // pass this or default below
+}
+
+export function Sidebar({
+  collapsed,
+  setCollapsed,
+  headerHeight = "4rem",
+}: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Determine the activeTab based on current path
+  // Determine active tab by prefix-matching ("startsWith")
   const activeTab =
     sidebarItems.find((i) => pathname.startsWith(i.path))?.value || "dashboard";
 
   return (
     <aside
-      className={`relative min-h-full bg-card border-r border-border py-4 flex flex-col transition-all duration-200 ${
-        collapsed ? "w-16 px-2" : "w-56 px-4"
-      }`}
+      className={`fixed left-0 bg-card border-r border-border py-4 flex flex-col transition-all duration-200 z-30
+        ${collapsed ? "w-16 px-2" : "w-56 px-4"}`}
       data-collapsed={collapsed}
+      style={{
+        minHeight: "0",
+        height: `calc(100vh - ${headerHeight})`,
+        top: headerHeight,
+      }}
     >
       {/* Floating middle toggle button on sidebar border */}
       <button
         type="button"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        onClick={() => setCollapsed((c) => !c)}
+        onClick={() => setCollapsed(!collapsed)}
         className={`
           absolute
           top-1/2

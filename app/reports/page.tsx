@@ -1,16 +1,10 @@
 "use client";
 
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { Sidebar } from "@/components/sidebar";
-
 export default function ReportsPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <DashboardHeader />
-
       <main className="flex flex-1">
         {/* Sidebar */}
-        <Sidebar />
 
         {/* Reports Content */}
         <div className="flex-1 p-6">

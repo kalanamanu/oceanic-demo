@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "@/components/sidebar";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { StatsCards } from "@/components/inquiry/stats-cards";
 import { FilterBar } from "@/components/inquiry/filter-bar";
 import { InquiryTable } from "@/components/inquiry/inquiry-table";
@@ -44,9 +42,7 @@ export default function InquiryPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <DashboardHeader />
       <main className="flex flex-1">
-        <Sidebar />
         <div className="flex-1 p-6 space-y-6">
           {/* Stat Cards */}
           <StatsCards stats={stats} />

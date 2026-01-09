@@ -1,7 +1,5 @@
 "use client";
 
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
 
@@ -59,57 +57,49 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <DashboardHeader />
+    <div className="space-y-8">
+      {/* Welcome */}
+      <section>
+        <h1 className="text-3xl font-bold mb-2">Welcome, {name}!</h1>
+        <p className="text-muted-foreground text-lg">
+          Department: <span className="font-semibold">{department}</span>
+        </p>
+      </section>
 
-      <main className="flex flex-1">
-        <Sidebar />
+      {/* Stat Cards */}
+      <section>
+        <StatCards stats={stats} />
+      </section>
 
-        <div className="flex-1 p-6 space-y-8">
-          {/* Welcome */}
-          <section>
-            <h1 className="text-3xl font-bold mb-2">Welcome, {name}!</h1>
-            <p className="text-muted-foreground text-lg">
-              Department: <span className="font-semibold">{department}</span>
-            </p>
-          </section>
-
-          {/* Refactored Stat Cards */}
-          <section>
-            <StatCards stats={stats} />
-          </section>
-
-          {/* Quick Actions and Recent Activities Table */}
-          <section>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Recent Activities</h2>
-              <Button onClick={() => alert("Create Inquiry Form Opens")}>
-                Create Inquiry
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm rounded-lg shadow bg-card border">
-                <thead className="bg-muted border-b">
-                  <tr>
-                    <th className="py-2 px-4">Activity</th>
-                    <th className="py-2 px-4">By</th>
-                    <th className="py-2 px-4">Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activities.map((a) => (
-                    <tr key={a.id} className="border-b last:border-b-0">
-                      <td className="py-2 px-4">{a.activity}</td>
-                      <td className="py-2 px-4">{a.by}</td>
-                      <td className="py-2 px-4">{a.time}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+      {/* Quick Actions and Recent Activities Table */}
+      <section>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Recent Activities</h2>
+          <Button onClick={() => alert("Create Inquiry Form Opens")}>
+            Create Inquiry
+          </Button>
         </div>
-      </main>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm rounded-lg shadow bg-card border">
+            <thead className="bg-muted border-b">
+              <tr>
+                <th className="py-2 px-4">Activity</th>
+                <th className="py-2 px-4">By</th>
+                <th className="py-2 px-4">Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activities.map((a) => (
+                <tr key={a.id} className="border-b last:border-b-0">
+                  <td className="py-2 px-4">{a.activity}</td>
+                  <td className="py-2 px-4">{a.by}</td>
+                  <td className="py-2 px-4">{a.time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

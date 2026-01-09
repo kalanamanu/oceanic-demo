@@ -1,7 +1,4 @@
 "use client";
-
-import { Sidebar } from "@/components/sidebar";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -125,9 +122,7 @@ function AuditLog({ entries }: { entries?: AuditEntry[] }) {
 export default function AuditTrailPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <DashboardHeader />
       <main className="flex flex-1">
-        <Sidebar />
         <div className="flex-1 p-6">
           <AuditLog entries={auditEntries} />
         </div>

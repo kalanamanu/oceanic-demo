@@ -5,7 +5,7 @@ import { Toggle } from "@/components/ui/toggle";
 export function DashboardHeader() {
   const { theme, setTheme } = useTheme();
   return (
-    <div className="border-b border-border bg-card sticky top-0 z-30">
+    <div className="sticky top-0 z-40 border-b border-border bg-card">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
