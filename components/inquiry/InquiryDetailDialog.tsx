@@ -13,15 +13,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Edit2, MessageSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import * as React from "react";
+import { EditInquiryDialog } from "@/components/inquiry/EditInquiryDialog"; // Import here
 
 interface InquiryDetailDialogProps {
   inquiry: Inquiry | null;
   remarks: Remark[];
   open: boolean;
   onClose: () => void;
-  onEditInquiry?: (updatedInquiry: Inquiry) => void; // Callback if parent wants to update
+  onEditInquiry?: (updatedInquiry: Inquiry) => void;
 }
 
 export function InquiryDetailDialog({
@@ -32,87 +32,17 @@ export function InquiryDetailDialog({
   onEditInquiry,
 }: InquiryDetailDialogProps) {
   const [editOpen, setEditOpen] = React.useState(false);
-  const [editFields, setEditFields] = React.useState<Partial<Inquiry> | null>(
-    null
-  );
-
-  React.useEffect(() => {
-    if (inquiry) setEditFields(inquiry);
-  }, [inquiry, editOpen]);
 
   if (!inquiry) return null;
 
   const inquiryRemarks = remarks.filter((r) => r.inquiryId === inquiry.id);
 
-  // Edit Inquiry Dialog (inline)
-  function EditInquiryDialog() {
-    if (!editFields) return null;
-
-    const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setEditFields({ ...editFields, [e.target.name]: e.target.value });
-    };
-
-    const handleEditSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      setEditOpen(false);
-      if (onEditInquiry) {
-        // Create a copy with updated values, using defaults for other fields
-        onEditInquiry({ ...inquiry, ...editFields } as Inquiry);
-      }
-    };
-
-    return (
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-2xl w-full">
-          <DialogHeader>
-            <DialogTitle>Edit Inquiry</DialogTitle>
-            <DialogDescription>
-              Edit vessel inquiry details here.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleEditSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Vessel Name
-              </label>
-              <Input
-                name="vesselName"
-                value={editFields.vesselName || ""}
-                onChange={handleEditChange}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Agent</label>
-              <Input
-                name="agent"
-                value={editFields.agent || ""}
-                onChange={handleEditChange}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Port</label>
-              <Input
-                name="port"
-                value={editFields.port || ""}
-                onChange={handleEditChange}
-              />
-            </div>
-            {/* Add more fields as needed (picAssigned, status, etc.) */}
-            <div className="mt-6 flex gap-3">
-              <Button type="submit">Save Changes</Button>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setEditOpen(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const handleEditSave = (updatedInquiry: Inquiry) => {
+    if (onEditInquiry) {
+      onEditInquiry(updatedInquiry);
+    }
+    setEditOpen(false);
+  };
 
   return (
     <>
@@ -133,7 +63,7 @@ export function InquiryDetailDialog({
             style={{ maxHeight: "70vh" }}
           >
             <div className="space-y-8">
-              {/* Vessel Info - use grid */}
+              {/* Vessel Info */}
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-4">
                   Vessel Information
@@ -175,11 +105,18 @@ export function InquiryDetailDialog({
                   Categories
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {inquiry.categories.map((cat) => (
-                    <Badge key={cat} variant="outline">
-                      {cat}
-                    </Badge>
-                  ))}
+                  {inquiry.categories.map(
+                    (cat: string | { name: string }, i: number) =>
+                      typeof cat === "string" ? (
+                        <Badge key={cat} variant="outline">
+                          {cat}
+                        </Badge>
+                      ) : (
+                        <Badge key={cat.name ?? i} variant="outline">
+                          {cat.name}
+                        </Badge>
+                      ),
+                  )}
                 </div>
               </div>
 
@@ -265,7 +202,14 @@ export function InquiryDetailDialog({
           </div>
         </DialogContent>
       </Dialog>
-      {editOpen && <EditInquiryDialog />}
+      {editOpen && inquiry && (
+        <EditInquiryDialog
+          inquiry={inquiry}
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          onSave={handleEditSave}
+        />
+      )}
     </>
   );
 }

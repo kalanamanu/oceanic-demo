@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,11 +29,21 @@ export function EditInquiryDialog({
 
   React.useEffect(() => setFields(inquiry), [inquiry, open]);
 
+  // Handle simple field changes (string fields)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFields({ ...fields, [e.target.name]: e.target.value });
   };
 
-  // Add custom handlers for complex fields (dates, categories, status, etc.) as needed
+  // Handle categories field as comma-separated names -> array of Category objects
+  const handleCategoriesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFields({
+      ...fields,
+      categories: e.target.value
+        .split(/\s*,\s*/)
+        .filter(Boolean) // Remove empty strings
+        .map((name) => ({ name }) as unknown as Category),
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,16 +57,15 @@ export function EditInquiryDialog({
         <DialogHeader>
           <DialogTitle>Edit Inquiry</DialogTitle>
           <DialogDescription>
-            Edit all vessel inquiry fields below.
+            Update all inquiry details below. (Remarks cannot be edited here.)
           </DialogDescription>
         </DialogHeader>
-        {/* All fields except remarks */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <Input
             name="referenceNumber"
             value={fields.referenceNumber}
             onChange={handleChange}
-            placeholder="Ref #"
+            placeholder="Reference Number"
           />
           <Input
             name="vesselName"
@@ -89,28 +97,27 @@ export function EditInquiryDialog({
             onChange={handleChange}
             placeholder="Status"
           />
-          {/* ETA/date fields: add proper date pickers if you want */}
           <Input
             name="eta"
             value={fields.eta}
             onChange={handleChange}
             placeholder="ETA"
+            type="datetime-local"
           />
-          {/* Categories: could be comma separated, or custom chip input */}
+          <Input
+            name="receivedDate"
+            value={fields.receivedDate ?? ""}
+            onChange={handleChange}
+            placeholder="Inquiry Received Date & Time"
+            type="datetime-local"
+          />
           <Input
             name="categories"
             value={fields.categories.join(", ")}
-            onChange={(e) =>
-              setFields({
-                ...fields,
-                categories: e.target.value
-                  .split(/\s*,\s*/)
-                  .map((cat) => ({ name: cat } as unknown as Category)), // ensure correct type
-              })
-            }
+            onChange={handleCategoriesChange}
             placeholder="Categories (comma separated)"
           />
-          {/* Add other custom fields as needed */}
+          {/* Add other fields as per your Inquiry type here if needed */}
           <Separator />
           <div className="mt-6 flex gap-3">
             <Button type="submit">Save Changes</Button>

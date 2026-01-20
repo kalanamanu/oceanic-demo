@@ -1,9 +1,7 @@
-import LoginForm from "@/components/auth/login-form";
+// app/page.tsx
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <LoginForm />
-    </div>
-  );
+export default function Home() {
+  redirect("/login");
+  return null;
 }
