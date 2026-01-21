@@ -214,7 +214,9 @@ export function InquiryDetailDialog({
                 <Button
                   className="w-full bg-transparent"
                   variant="outline"
-                  onClick={() => router.push("/quotation/create")}
+                  onClick={() =>
+                    router.push(`/quotation/create?inquiryId=${inquiry.id}`)
+                  }
                 >
                   <File className="mr-2 h-4 w-4" />
                   Generate Quotation
@@ -232,7 +234,6 @@ export function InquiryDetailDialog({
           onSave={handleEditSave}
         />
       )}
-      {/* Removed GenerateQuotationDialog */}
     </>
   );
 }
