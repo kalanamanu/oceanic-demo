@@ -5,8 +5,8 @@ export default function LoginLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      {children}
+    </div>
   );
 }

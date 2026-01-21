@@ -1,9 +1,8 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
-import AppShell from "@/components/AppShell";
 import "./globals.css";
+import AppLayoutClient from "@/components/AppLayoutClient";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -37,9 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AppShell>{children}</AppShell>
-        </ThemeProvider>
+        <AppLayoutClient>{children}</AppLayoutClient>
       </body>
     </html>
   );
