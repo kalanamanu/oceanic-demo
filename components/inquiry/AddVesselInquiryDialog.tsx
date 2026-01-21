@@ -44,13 +44,34 @@ export function VesselInquiryDialog({
     category: "",
     inquiryReceived: "",
     quotationSubmission: "",
-    assignedPic: "",
+    keyPic: "",
+    subPics: [] as string[],
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    setFields({ ...fields, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name.startsWith("subPic-")) {
+      const idx = parseInt(name.split("-")[1], 10);
+      setFields((prev) => ({
+        ...prev,
+        subPics: prev.subPics.map((pic, i) => (i === idx ? value : pic)),
+      }));
+    } else {
+      setFields({ ...fields, [name]: value });
+    }
+  };
+
+  const handleAddSubPic = () => {
+    setFields((prev) => ({ ...prev, subPics: [...prev.subPics, ""] }));
+  };
+
+  const handleRemoveSubPic = (idx: number) => {
+    setFields((prev) => ({
+      ...prev,
+      subPics: prev.subPics.filter((_, i) => i !== idx),
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -158,27 +179,47 @@ export function VesselInquiryDialog({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Assigned PIC
-            </label>
-            <Select
-              value={fields.assignedPic}
-              onValueChange={(val) =>
-                setFields((f) => ({ ...f, assignedPic: val }))
-              }
-              required
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an employee..." />
-              </SelectTrigger>
-              <SelectContent>
-                {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.name}>
-                    {emp.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label className="block text-sm font-medium mb-1">Key PIC</label>
+            <input
+              name="keyPic"
+              type="text"
+              className="w-full border rounded px-3 py-2"
+              value={fields.keyPic}
+              onChange={handleChange}
+              placeholder="Key Person in Charge"
+            />
+            <div className="mt-2">
+              <label className="block text-sm font-medium mb-1">Sub PICs</label>
+              {(fields.subPics || []).map((pic, idx) => (
+                <div key={idx} className="flex items-center gap-2 mb-2">
+                  <input
+                    name={`subPic-${idx}`}
+                    type="text"
+                    className="w-full border rounded px-3 py-2"
+                    value={pic}
+                    onChange={handleChange}
+                    placeholder={`Sub PIC #${idx + 1}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleRemoveSubPic(idx)}
+                    title="Remove Sub PIC"
+                  >
+                    &times;
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddSubPic}
+              >
+                + Add Sub PIC
+              </Button>
+            </div>
           </div>
           <DialogFooter className="mt-6 flex gap-3">
             <Button type="submit">Create Inquiry</Button>
