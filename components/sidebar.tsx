@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
 
 const sidebarItems = [
   { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
@@ -48,10 +49,38 @@ export function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Determine active tab by prefix-matching ("startsWith")
   const activeTab =
     sidebarItems.find((i) => pathname.startsWith(i.path))?.value || "dashboard";
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      // Clear any stored authentication data
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+
+      // If you have cookies, you might want to call an API endpoint to clear them
+      // Example:
+      // await fetch('/api/auth/logout', { method: 'POST' });
+
+      // Optional: Add a small delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Redirect to login page
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Still redirect to login even if there's an error
+      router.push("/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <aside
@@ -105,7 +134,7 @@ export function Sidebar({
               onClick={() => router.push(item.path)}
               className={`
             flex items-center gap-3 text-sm rounded-md py-2 transition-colors font-medium
-            px-3  // <-- consistent padding for all
+            px-3
             ${collapsed ? "justify-center" : "justify-start"}
             ${
               activeTab === item.value
@@ -122,7 +151,8 @@ export function Sidebar({
           );
         })}
       </nav>
-      {/* Footer */}
+
+      {/* Footer - Logout */}
       <div className="mb-2 mt-8 border-t border-border/70 pt-6 flex flex-col">
         <button
           className={`
@@ -130,12 +160,20 @@ export function Sidebar({
         hover:bg-destructive/10 hover:text-destructive text-muted-foreground
         ${collapsed ? "justify-center" : "justify-start"}
         focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive
+        disabled:opacity-50 disabled:cursor-not-allowed
       `}
           aria-label="Logout"
-          onClick={() => alert("Logged out!")}
+          onClick={handleLogout}
+          disabled={isLoggingOut}
         >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          <LogOut
+            className={`h-5 w-5 flex-shrink-0 ${
+              isLoggingOut ? "animate-pulse" : ""
+            }`}
+          />
+          {!collapsed && (
+            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+          )}
         </button>
       </div>
     </aside>
