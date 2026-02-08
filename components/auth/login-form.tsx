@@ -36,32 +36,31 @@ export default function LoginForm() {
   return (
     <div className="fixed inset-0 w-screen h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 overflow-hidden">
       <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-3 rounded-xl bg-blue-600/10">
-              <Building className="size-8 text-blue-700" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                CompanyPortal
-              </h1>
-              <p className="text-sm text-gray-600">Internal System</p>
-            </div>
+        {/* Logo & Company Name - Outside Card */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="p-3 rounded-xl bg-blue-600/10">
+            <Building className="size-8 text-blue-700" />
           </div>
-
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Sign In to Your Account
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Access the company's internal systems and resources
-            </p>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">
+              OCEANIC MARITIME SERVICES (PVT) LTD
+            </h1>
+            <p className="text-sm text-gray-600">Internal System</p>
           </div>
         </div>
 
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
+          {/* Header Inside Card */}
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Login to Your Account
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Access the company's internal systems and resources
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <div className="space-y-2.5">
@@ -145,20 +144,6 @@ export default function LoginForm() {
               </div>
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center">
-              <Checkbox
-                id="remember"
-                className="border-gray-300 data-[state=checked]:bg-blue-600"
-              />
-              <Label
-                htmlFor="remember"
-                className="ml-2 text-sm text-gray-600 font-normal cursor-pointer"
-              >
-                Keep me signed in for 30 days
-              </Label>
-            </div>
-
             {/* Error Message */}
             {error && (
               <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
@@ -176,10 +161,10 @@ export default function LoginForm() {
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing in...
+                  Login...
                 </>
               ) : (
-                "Sign In to Dashboard"
+                "Login to Dashboard"
               )}
             </Button>
 
