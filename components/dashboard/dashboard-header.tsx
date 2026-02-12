@@ -8,17 +8,13 @@ export function DashboardHeader() {
     <div className="border-b border-border bg-card sticky top-0 z-30">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Ship className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Oceanic Inquiry Management
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Maritime Services System
-            </p>
-          </div>
+          <img
+            src={
+              theme === "dark" ? "/oceanic-logo-white.png" : "/oceanic-logo.png"
+            }
+            alt="Oceanic Logo"
+            className="h-12 w-auto object-contain"
+          />
         </div>
         <div className="flex items-center gap-4">
           <Toggle
