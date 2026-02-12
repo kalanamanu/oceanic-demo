@@ -6,7 +6,7 @@ export function DashboardHeader() {
   const { theme, setTheme } = useTheme();
   return (
     <div className="border-b border-border bg-card sticky top-0 z-30">
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="flex items-center justify-between px-6 py-4">
         {/* Logo Section */}
         <div className="flex items-center gap-3">
           <img
