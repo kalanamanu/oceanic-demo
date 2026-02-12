@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils"; // if you don't have this, create a simple utility or use clsx
+import { cn } from "@/lib/utils";
 
 interface StatCardItem {
   label: string;

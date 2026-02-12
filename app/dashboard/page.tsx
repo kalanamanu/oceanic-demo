@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
+import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
 import { FileText, Clock, CheckCircle, Building2, Package } from "lucide-react";
 
@@ -66,24 +67,12 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-8 max-w-7xl space-y-8">
-        {/* Welcome Card - Clean Design */}
+        {/* Welcome Card */}
         <section>
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                Welcome, {name}! 👋
-              </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400">
-                <span className="font-medium">Department:</span> {department}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-500 mt-4 max-w-2xl">
-                Here's what's happening with your inquiries today.
-              </p>
-            </div>
-          </div>
+          <WelcomeCard name={name} department={department} />
         </section>
 
-        {/* Stat Cards with Better Spacing */}
+        {/* Stat Cards */}
         <section className="pt-2">
           <StatCards stats={stats} />
         </section>

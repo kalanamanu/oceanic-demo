@@ -123,3 +123,131 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes wave-slow {
+  0%,
+  100% {
+    transform: translateX(0) scaleY(0.9);
+  }
+  50% {
+    transform: translateX(-16px) scaleY(1.15);
+  }
+}
+
+@keyframes wave-medium {
+  0%,
+  100% {
+    transform: translateX(0) scaleY(0.85);
+  }
+  50% {
+    transform: translateX(12px) scaleY(1.2);
+  }
+}
+
+@keyframes wave-fast {
+  0%,
+  100% {
+    transform: translateX(0) scaleY(0.95);
+  }
+  50% {
+    transform: translateX(-8px) scaleY(1.1);
+  }
+}
+
+@keyframes wave-slow-reverse {
+  0%,
+  100% {
+    transform: translateX(0) scaleY(0.9);
+  }
+  50% {
+    transform: translateX(16px) scaleY(1.1);
+  }
+}
+
+.animate-wave-slow {
+  animation: wave-slow 14s ease-in-out infinite;
+}
+.animate-wave-medium {
+  animation: wave-medium 10s ease-in-out infinite;
+}
+.animate-wave-fast {
+  animation: wave-fast 8s ease-in-out infinite;
+}
+.animate-wave-slow-reverse {
+  animation: wave-slow-reverse 16s ease-in-out infinite;
+}
+
+@keyframes wave-hand {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes wave-slow {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-10px) translateY(-5px);
+  }
+}
+
+@keyframes wave-medium {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-15px) translateY(-8px);
+  }
+}
+
+@keyframes wave-fast {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-20px) translateY(-10px);
+  }
+}
+
+.animate-wave-hand {
+  animation: wave-hand 2.5s ease-in-out infinite;
+  transform-origin: 70% 70%;
+  display: inline-block;
+}
+
+.animate-wave-slow {
+  animation: wave-slow 8s ease-in-out infinite;
+}
+
+.animate-wave-medium {
+  animation: wave-medium 6s ease-in-out infinite;
+}
+
+.animate-wave-fast {
+  animation: wave-fast 4s ease-in-out infinite;
+}
