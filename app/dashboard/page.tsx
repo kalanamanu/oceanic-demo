@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
 import WelcomeCard from "@/components/dashboard/WelcomeCard";
+import DashboardTable from "@/components/dashboard/dashboard-table";
 import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
 import { FileText, Clock, CheckCircle, Building2, Package } from "lucide-react";
 
@@ -79,60 +80,8 @@ export default function Dashboard() {
 
         {/* Recent Activities Section */}
         <section className="pt-4">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                Recent Activities
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Track the latest updates and changes
-              </p>
-            </div>
-            <VesselInquiryDialog>
-              <Button size="lg" className="shadow-sm">
-                Create Inquiry
-              </Button>
-            </VesselInquiryDialog>
-          </div>
-
           {/* Enhanced Table Card */}
-          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-muted/50 border-b">
-                  <tr>
-                    <th className="py-4 px-6 text-left font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                      Activity
-                    </th>
-                    <th className="py-4 px-6 text-left font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                      By
-                    </th>
-                    <th className="py-4 px-6 text-left font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                      Time
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {activities.map((a) => (
-                    <tr
-                      key={a.id}
-                      className="hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="py-4 px-6 text-sm font-medium text-foreground">
-                        {a.activity}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-foreground">
-                        {a.by}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-muted-foreground">
-                        {a.time}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <DashboardTable activities={activities} />
         </section>
 
         {/* Bottom Spacing */}
