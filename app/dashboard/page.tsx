@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
 import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
+import { FileText, Clock, CheckCircle, Building2, Package } from "lucide-react";
 
 export default function Dashboard() {
   const name = "Jane Doe";
@@ -12,27 +13,32 @@ export default function Dashboard() {
     {
       label: "Total Inquiries",
       value: 120,
-      color: "bg-blue-600 text-white",
+      color: "blue" as const,
+      icon: FileText,
     },
     {
       label: "Pending Inquiries",
       value: 24,
-      color: "bg-orange-400 text-white",
+      color: "orange" as const,
+      icon: Clock,
     },
     {
       label: "Confirmed Inquiries",
       value: 52,
-      color: "bg-green-500 text-white",
+      color: "green" as const,
+      icon: CheckCircle,
     },
     {
       label: "Active Vendors",
       value: 12,
-      color: "bg-cyan-600 text-white",
+      color: "cyan" as const,
+      icon: Building2,
     },
     {
       label: "Active Products",
       value: 47,
-      color: "bg-violet-500 text-white",
+      color: "violet" as const,
+      icon: Package,
     },
   ];
 
@@ -65,7 +71,7 @@ export default function Dashboard() {
           <div className="bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-900 dark:to-slate-800/80 rounded-2xl p-8 shadow-sm border border-slate-200 dark:border-slate-800">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                Welcome back, {name}!
+                Welcome, {name}! 👋
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-400">
                 <span className="font-medium">Department:</span> {department}
