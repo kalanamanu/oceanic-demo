@@ -9,11 +9,11 @@ export default function AppLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
+  const isAuthPage = pathname === "/login" || pathname === "/login-otp";
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      {isLoginPage ? children : <AppShell>{children}</AppShell>}
+      {isAuthPage ? children : <AppShell>{children}</AppShell>}
     </ThemeProvider>
   );
 }

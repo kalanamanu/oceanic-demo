@@ -1,0 +1,248 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Shield, Lock } from "lucide-react";
+
+const OTP_LENGTH = 6;
+
+function formatTime(seconds: number) {
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function maskEmail(email: string) {
+  if (!email) return "";
+  const [user, domain] = email.split("@");
+  if (!user || !domain) return email;
+  return user[0] + "*".repeat(Math.max(user.length - 1, 1)) + "@" + domain;
+}
+
+export default function LoginOtpPage() {
+  const [otpArray, setOtpArray] = useState(Array(OTP_LENGTH).fill(""));
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [isResending, setIsResending] = useState(false);
+  const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("otpEmail");
+    if (storedEmail) setEmail(storedEmail);
+  }, []);
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+    const timer = setInterval(() => setTimeLeft((p) => p - 1), 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  useEffect(() => {
+    if (
+      otpArray.every((val) => val.length === 1) &&
+      !isLoading &&
+      !hasAutoSubmitted
+    ) {
+      setHasAutoSubmitted(true);
+      handleVerify();
+    }
+    if (otpArray.some((val) => val.length === 0)) {
+      setHasAutoSubmitted(false);
+    }
+  }, [otpArray]);
+
+  const handleResendOtp = async () => {
+    setIsResending(true);
+    setError("");
+    // Simulate resend
+    setTimeout(() => {
+      setTimeLeft(300);
+      setOtpArray(Array(OTP_LENGTH).fill(""));
+      inputRefs.current[0]?.focus();
+      setIsResending(false);
+    }, 1000);
+  };
+
+  const handleOtpChange = (idx: number, value: string) => {
+    if (value.length > 1) {
+      const chars = value.slice(0, OTP_LENGTH).split("");
+      const next = Array(OTP_LENGTH).fill("");
+      chars.forEach((c, i) => (next[i] = c));
+      setOtpArray(next);
+      setTimeout(() => {
+        inputRefs.current[Math.min(chars.length, OTP_LENGTH) - 1]?.focus();
+      }, 20);
+      return;
+    }
+    if (!/^[0-9a-zA-Z]?$/.test(value)) return;
+    const updated = [...otpArray];
+    updated[idx] = value;
+    setOtpArray(updated);
+    if (value && idx < OTP_LENGTH - 1) {
+      inputRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const text = e.clipboardData.getData("text").replace(/\s+/g, "");
+    if (/^[0-9a-zA-Z]{6}$/.test(text)) {
+      const chars = text.split("");
+      setOtpArray(chars);
+      setTimeout(() => {
+        inputRefs.current[OTP_LENGTH - 1]?.focus();
+      }, 20);
+      e.preventDefault();
+    }
+  };
+
+  const handleKeyDown = (
+    idx: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace") {
+      if (otpArray[idx]) {
+        const updated = [...otpArray];
+        updated[idx] = "";
+        setOtpArray(updated);
+      } else if (idx > 0) {
+        inputRefs.current[idx - 1]?.focus();
+      }
+    } else if (e.key === "ArrowLeft" && idx > 0) {
+      inputRefs.current[idx - 1]?.focus();
+    } else if (e.key === "ArrowRight" && idx < OTP_LENGTH - 1) {
+      inputRefs.current[idx + 1]?.focus();
+    } else if (e.key === "Tab" && !e.shiftKey && idx < OTP_LENGTH - 1) {
+      e.preventDefault();
+      inputRefs.current[idx + 1]?.focus();
+    }
+  };
+
+  const handleVerify = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    const otp = otpArray.join("");
+    if (otp.length !== OTP_LENGTH) {
+      setError("Please enter all OTP digits.");
+      setIsLoading(false);
+      return;
+    }
+    // Simulate verification
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push("/dashboard");
+    }, 1200);
+  };
+
+  return (
+    <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
+      <div className="min-h-screen flex items-center justify-center p-4 py-12">
+        <div className="w-full max-w-md">
+          {/* OTP Card */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
+            {/* Header Inside Card */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 mb-2">
+                <Lock className="h-6 w-6 text-blue-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Enter Verification Code
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                We've sent a 6-digit code to
+                <span className="font-semibold text-blue-700 ml-1">
+                  {maskEmail(email)}
+                </span>
+                . Enter it below to continue.
+              </p>
+            </div>
+
+            {/* OTP Input Section */}
+            <form onSubmit={handleVerify} className="space-y-5">
+              <div className="flex justify-center items-center gap-2 mb-2">
+                {otpArray.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => {
+                      inputRefs.current[idx] = el;
+                    }}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    autoFocus={idx === 0}
+                    disabled={timeLeft === 0}
+                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(idx, e)}
+                    onPaste={handlePaste}
+                    className="w-10 h-10 text-lg font-bold text-center rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all bg-gray-50 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-900 shadow-sm"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                ))}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2 text-xs">
+                  <Shield className="h-4 w-4" />
+                  {error}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white mt-2 rounded-xl"
+                disabled={isLoading || timeLeft <= 0}
+              >
+                {timeLeft <= 0
+                  ? "OTP Expired"
+                  : isLoading
+                    ? "Verifying..."
+                    : "Verify & Continue"}
+              </Button>
+
+              {/* Timer + Resend */}
+              <div className="flex justify-between items-center text-xs text-gray-500 mt-4 w-full px-1">
+                <span>
+                  Remaining time:{" "}
+                  <span className="text-blue-700 font-semibold">
+                    {formatTime(timeLeft)}
+                  </span>
+                </span>
+                <span>
+                  Didn't get the code?{" "}
+                  <button
+                    type="button"
+                    className="text-blue-700 font-semibold hover:underline focus:outline-none"
+                    disabled={isResending || timeLeft === 0}
+                    onClick={handleResendOtp}
+                    tabIndex={0}
+                    style={{ background: "none", border: "none", padding: 0 }}
+                  >
+                    {isResending ? "Resending..." : "Resend"}
+                  </button>
+                </span>
+              </div>
+
+              {/* Security Note */}
+              <div className="mt-4 text-center">
+                <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
+                  <Shield className="h-3 w-3" />
+                  For security, this code expires in 5 minutes
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
