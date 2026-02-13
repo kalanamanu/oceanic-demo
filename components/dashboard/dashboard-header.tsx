@@ -1,6 +1,6 @@
 "use client";
 
-import { Ship, Sun, Moon, User } from "lucide-react";
+import { Sun, Moon, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Toggle } from "@/components/ui/toggle";
 import { useEffect, useState } from "react";
@@ -10,10 +10,12 @@ import type { UserData } from "@/types/auth.types";
 export function DashboardHeader() {
   const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const userData = AuthService.getCurrentUser();
     setUser(userData);
+    setIsLoading(false);
   }, []);
 
   // Format account type for display
@@ -25,22 +27,27 @@ export function DashboardHeader() {
       .join(" ");
   };
 
+  // Get user's initials for fallback avatar
+  const getUserInitials = (firstName?: string, lastName?: string) => {
+    if (!firstName || !lastName) return "U";
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
   return (
-    <div className="sticky top-0 z-40 border-b border-border bg-card">
+    <div className="border-b border-border bg-card sticky top-0 z-30">
       <div className="flex items-center justify-between px-6 py-4">
+        {/* Logo Section */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Ship className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Oceanic Inquiry Management
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Maritime Services System
-            </p>
-          </div>
+          <img
+            src={
+              theme === "dark" ? "/oceanic-logo-white.png" : "/oceanic-logo.png"
+            }
+            alt="Oceanic Logo"
+            className="h-12 w-auto object-contain"
+          />
         </div>
+
+        {/* Right Section: Theme Toggle + Profile */}
         <div className="flex items-center gap-4">
           {/* Theme Toggle */}
           <Toggle
@@ -49,6 +56,7 @@ export function DashboardHeader() {
             onPressedChange={(pressed) => setTheme(pressed ? "dark" : "light")}
             size="sm"
             variant="outline"
+            className="h-9 w-9 rounded-md p-0 hover:bg-accent hover:text-accent-foreground"
           >
             {theme === "dark" ? (
               <Moon className="h-4 w-4" />
@@ -57,30 +65,63 @@ export function DashboardHeader() {
             )}
           </Toggle>
 
-          {/* User Info */}
-          {user ? (
-            <div className="flex items-center gap-3">
-              {/* User Details */}
+          {/* Profile Section */}
+          <div className="flex items-center gap-3 pl-3 border-l border-border">
+            {isLoading ? (
+              // Loading state
               <div className="text-right">
-                <p className="text-sm font-medium text-foreground">
+                <div className="h-4 w-24 bg-muted animate-pulse rounded mb-1"></div>
+                <div className="h-3 w-20 bg-muted animate-pulse rounded"></div>
+              </div>
+            ) : user ? (
+              // User data loaded
+              <div className="text-right">
+                <p className="text-sm font-semibold text-foreground leading-tight">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {formatAccountType(user.role)}
+                <p className="text-xs text-muted-foreground leading-tight">
+                  {user.department || formatAccountType(user.role)}
                 </p>
               </div>
-              {/* User Avatar */}
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <User className="h-5 w-5" />
+            ) : (
+              // Fallback if no user
+              <div className="text-right">
+                <p className="text-sm font-semibold text-foreground leading-tight">
+                  Guest User
+                </p>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  No Role
+                </p>
               </div>
+            )}
+
+            {/* Profile Picture with Fallback */}
+            <div className="relative">
+              {user ? (
+                // Try to load user profile picture, fallback to initials
+                <div className="h-9 w-9 rounded-full border-2 border-border ring-2 ring-background overflow-hidden bg-primary/10 flex items-center justify-center">
+                  <img
+                    src="/profile-picture.png"
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      // Hide image on error and show initials
+                      e.currentTarget.style.display = "none";
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `<span class="text-sm font-semibold text-primary">${getUserInitials(user.firstName, user.lastName)}</span>`;
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                // Fallback avatar icon
+                <div className="h-9 w-9 rounded-full border-2 border-border ring-2 ring-background overflow-hidden bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-right">
-              <p className="text-sm font-medium text-muted-foreground">
-                Loading...
-              </p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
