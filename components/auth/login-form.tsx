@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Shield, KeyRound, Lock } from "lucide-react";
+import { AuthService } from "@/services/auth.service";
 
-export default function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -22,15 +23,25 @@ export default function LoginForm() {
     setError("");
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      const response = await AuthService.requestOTP({
+        email,
+        password,
+      });
 
-    if (email === "user@oceanic.com" && password === "SecurePass123") {
-      router.push("/dashboard");
-    } else {
-      setError("Invalid credentials. Please check your email and password.");
+      if (response.success) {
+        // Store email in sessionStorage to use in OTP page
+        sessionStorage.setItem("otp_email", email);
+        sessionStorage.setItem("otp_password", password); // Only if needed for resend
+
+        // Redirect to OTP verification page
+        router.push("/login-otp");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -59,7 +70,7 @@ export default function LoginForm() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8"
           >
-            {/* Header Inside Card */}
+            {/* Header */}
             <div className="text-center mb-8">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Login to Your Account
@@ -189,10 +200,10 @@ export default function LoginForm() {
                       }}
                       className="rounded-full h-4 w-4 border-b-2 border-white mr-2"
                     />
-                    Logging in...
+                    Sending OTP...
                   </>
                 ) : (
-                  "Login to Dashboard"
+                  "Continue"
                 )}
               </Button>
 
@@ -205,23 +216,6 @@ export default function LoginForm() {
               </div>
             </form>
           </motion.div>
-
-          {/* Footer */}
-          {/* <div className="mt-8 text-center space-y-3">
-            <div className="text-sm text-gray-500">
-              Need help?{" "}
-              <a
-                href="#"
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Contact IT Support
-              </a>
-            </div>
-            <div className="text-xs text-gray-400">
-              © {new Date().getFullYear()} Oceanic Maritime Services • Internal
-              Use Only
-            </div>
-          </div> */}
         </motion.div>
       </div>
     </div>
