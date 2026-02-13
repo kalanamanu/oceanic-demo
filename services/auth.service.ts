@@ -11,7 +11,7 @@ import type {
 
 export class AuthService {
   /**
-   * Step 1: Request OTP for login
+   * Request OTP for login
    */
   static async requestOTP(data: RequestOTPRequest): Promise<RequestOTPResponse> {
     try {
@@ -26,17 +26,17 @@ export class AuthService {
   }
 
   /**
-   * Step 2: Verify OTP and complete login
+   * Verify OTP and complete login
    * Token is automatically stored in HttpOnly cookie by backend
    */
   static async verifyOTP(data: VerifyOTPRequest): Promise<LoginResponse> {
     try {
       const response = await apiClient.post<LoginResponse>(
-        '/api/auth/login', // ✅ Correct endpoint from backend
+        '/api/auth/login', 
         data
       );
 
-      // Store user data in localStorage (not token - it's in HttpOnly cookie)
+      // Store user data in localStorage (on HttpOnly cookie)
       if (response.data.success && response.data.data) {
         UserStorage.saveUser(response.data.data);
       }
@@ -88,10 +88,10 @@ export class AuthService {
       return new Error(apiError.message || 'An error occurred');
     } else if (error.request) {
       // Request made but no response
-      return new Error('No response from server. Please check your connection.');
+      return new Error('No response from server. Please check your connection or Contact IT support.');
     } else {
       // Something else happened
-      return new Error(error.message || 'An unexpected error occurred');
+      return new Error(error.message || 'An unexpected error occurred. Please contact IT support');
     }
   }
 }
