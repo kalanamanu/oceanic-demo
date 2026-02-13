@@ -27,25 +27,27 @@ export default function WelcomeCard({
 
   useEffect(() => {
     const updateDateTime = () => {
+      // Sri Lanka time zone: UTC+5:30
       const now = new Date();
+      // Get UTC time and add 5 hours 30 minutes
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const sriLankaTime = new Date(utc + 5.5 * 60 * 60 * 1000);
+      // Format time as 24-hour (HH:mm:ss)
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      const time24 = `${pad(sriLankaTime.getHours())}:${pad(sriLankaTime.getMinutes())}:${pad(sriLankaTime.getSeconds())}`;
       setDateTime({
-        date: now.toLocaleDateString("en-US", {
+        date: sriLankaTime.toLocaleDateString("en-US", {
           weekday: "long",
           year: "numeric",
           month: "long",
           day: "numeric",
         }),
-        time: now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
+        time: time24,
       });
     };
 
     updateDateTime();
     const interval = setInterval(updateDateTime, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -223,7 +225,8 @@ export default function WelcomeCard({
                 transition={{ duration: 0.3 }}
                 className="text-xs font-medium text-slate-500 dark:text-slate-400 font-mono tabular-nums"
               >
-                {dateTime.time} <span className="opacity-70">local</span>
+                {dateTime.time}{" "}
+                <span className="opacity-70">Sri Lanka Time</span>
               </motion.div>
             </motion.div>
           )}
