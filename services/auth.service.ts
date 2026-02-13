@@ -1,19 +1,19 @@
 import apiClient from '@/lib/api-client';
+import { UserStorage } from '@/lib/user-storage';
 import type {
   RequestOTPRequest,
   RequestOTPResponse,
   VerifyOTPRequest,
-  VerifyOTPResponse,
+  LoginResponse,
+  LogoutResponse,
   APIError,
 } from '@/types/auth.types';
 
 export class AuthService {
   /**
-   * Request OTP for login
+   * Step 1: Request OTP for login
    */
-  static async requestOTP(
-    data: RequestOTPRequest
-  ): Promise<RequestOTPResponse> {
+  static async requestOTP(data: RequestOTPRequest): Promise<RequestOTPResponse> {
     try {
       const response = await apiClient.post<RequestOTPResponse>(
         '/api/auth/req-otp',
@@ -26,22 +26,21 @@ export class AuthService {
   }
 
   /**
-   * Verify OTP and complete login
+   * Step 2: Verify OTP and complete login
+   * Token is automatically stored in HttpOnly cookie by backend
    */
-  static async verifyOTP(
-    data: VerifyOTPRequest
-  ): Promise<VerifyOTPResponse> {
+  static async verifyOTP(data: VerifyOTPRequest): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post<VerifyOTPResponse>(
-        '/api/auth/verify-otp',
+      const response = await apiClient.post<LoginResponse>(
+        '/api/auth/login', // ✅ Correct endpoint from backend
         data
       );
-      
-      // Store token if provided
-      if (response.data.token) {
-        localStorage.setItem('auth_token', response.data.token);
+
+      // Store user data in localStorage (not token - it's in HttpOnly cookie)
+      if (response.data.success && response.data.data) {
+        UserStorage.saveUser(response.data.data);
       }
-      
+
       return response.data;
     } catch (error: any) {
       throw this.handleError(error);
@@ -49,12 +48,34 @@ export class AuthService {
   }
 
   /**
-   * Logout user
+   * Logout user - clears cookie and user data
    */
   static async logout(): Promise<void> {
-    localStorage.removeItem('auth_token');
-    // Call logout endpoint if needed
-    // await apiClient.post('/api/auth/logout');
+    try {
+      // Call backend to clear cookie
+      await apiClient.post<LogoutResponse>('/api/auth/logout');
+      
+      // Clear user data from localStorage
+      UserStorage.clearUser();
+    } catch (error: any) {
+      // Clear local data even if API call fails
+      UserStorage.clearUser();
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Get current user from localStorage
+   */
+  static getCurrentUser() {
+    return UserStorage.getUser();
+  }
+
+  /**
+   * Check if user is authenticated
+   */
+  static isAuthenticated(): boolean {
+    return UserStorage.isAuthenticated();
   }
 
   /**

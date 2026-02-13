@@ -30,9 +30,9 @@ export default function LoginPage() {
       });
 
       if (response.success) {
-        // Store email in sessionStorage to use in OTP page
+        // Store credentials temporarily for OTP page
         sessionStorage.setItem("otp_email", email);
-        sessionStorage.setItem("otp_password", password); // Only if needed for resend
+        sessionStorage.setItem("otp_password", password); // For resend functionality
 
         // Redirect to OTP verification page
         router.push("/login-otp");
@@ -93,7 +93,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="name@oceanic.com"
+                    placeholder="name@company.com"
                     value={email}
                     autoComplete="username"
                     onChange={(e) => setEmail(e.target.value)}

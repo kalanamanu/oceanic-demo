@@ -1,12 +1,7 @@
-// Request/Response types
+// Request Types
 export interface RequestOTPRequest {
   email: string;
   password: string;
-}
-
-export interface RequestOTPResponse {
-  success: boolean;
-  message: string;
 }
 
 export interface VerifyOTPRequest {
@@ -14,19 +9,35 @@ export interface VerifyOTPRequest {
   otp: string;
 }
 
-export interface VerifyOTPResponse {
+// Response Types
+export interface RequestOTPResponse {
   success: boolean;
   message: string;
-  token?: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  };
 }
 
-// Error response type
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  data: UserData;
+}
+
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+}
+
+// User Data Type (matches backend User model)
+export interface UserData {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  accountType: "admin" | "management" | "team_head" | "user";
+  department?: string;
+}
+
+// Error Response
 export interface APIError {
   success: false;
   message: string;
