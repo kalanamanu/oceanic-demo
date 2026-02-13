@@ -188,13 +188,13 @@ export default function WelcomeCard({
               className="flex items-center gap-2"
             >
               <span className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                {department} Department
+                {department}
               </span>
               {accountType && (
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded-full ${getBadgeColor(accountType)}`}
                 >
-                  {formatAccountType(accountType)}
+                  {formatAccountType(accountType)} Account
                 </span>
               )}
             </motion.div>
