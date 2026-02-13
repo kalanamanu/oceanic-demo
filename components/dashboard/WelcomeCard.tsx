@@ -6,9 +6,14 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 interface WelcomeCardProps {
   name: string;
   department: string;
+  accountType?: "admin" | "management" | "team_head" | "user";
 }
 
-export default function WelcomeCard({ name, department }: WelcomeCardProps) {
+export default function WelcomeCard({
+  name,
+  department,
+  accountType,
+}: WelcomeCardProps) {
   const [dateTime, setDateTime] = useState({
     date: "",
     time: "",
@@ -55,6 +60,29 @@ export default function WelcomeCard({ name, department }: WelcomeCardProps) {
   const handleMouseLeave = () => {
     mouseX.set(0);
     mouseY.set(0);
+  };
+
+  // Format account type for display
+  const formatAccountType = (type?: string) => {
+    if (!type) return "";
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  // Get badge color based on account type
+  const getBadgeColor = (type?: string) => {
+    switch (type) {
+      case "admin":
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      case "management":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+      case "team_head":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      default:
+        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400";
+    }
   };
 
   return (
@@ -162,6 +190,13 @@ export default function WelcomeCard({ name, department }: WelcomeCardProps) {
               <span className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 {department} Department
               </span>
+              {accountType && (
+                <span
+                  className={`text-xs font-semibold px-2 py-1 rounded-full ${getBadgeColor(accountType)}`}
+                >
+                  {formatAccountType(accountType)}
+                </span>
+              )}
             </motion.div>
           </div>
 

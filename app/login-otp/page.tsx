@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Shield, Lock, ArrowLeft } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
+import { toast } from "sonner";
 
 const OTP_LENGTH = 6;
 
@@ -27,7 +28,7 @@ export default function LoginOtpPage() {
   const [otpArray, setOtpArray] = useState(Array(OTP_LENGTH).fill(""));
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [timeLeft, setTimeLeft] = useState(300);
   const [isResending, setIsResending] = useState(false);
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
   const router = useRouter();

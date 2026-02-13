@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
+import { AuthService } from "@/services/auth.service";
 
 const sidebarItems = [
   { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
@@ -39,7 +40,7 @@ const sidebarItems = [
 export interface SidebarProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
-  headerHeight?: string; // pass this or default below
+  headerHeight?: string;
 }
 
 export function Sidebar({
@@ -51,7 +52,6 @@ export function Sidebar({
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Determine active tab by prefix-matching ("startsWith")
   const activeTab =
     sidebarItems.find((i) => pathname.startsWith(i.path))?.value || "dashboard";
 
@@ -59,14 +59,8 @@ export function Sidebar({
     try {
       setIsLoggingOut(true);
 
-      // Clear any stored authentication data
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-      sessionStorage.clear();
-
-      // If you have cookies, you might want to call an API endpoint to clear them
-      // Example:
-      // await fetch('/api/auth/logout', { method: 'POST' });
+      // Call backend logout API
+      await AuthService.logout();
 
       // Optional: Add a small delay for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -76,6 +70,7 @@ export function Sidebar({
     } catch (error) {
       console.error("Logout failed:", error);
       // Still redirect to login even if there's an error
+      // The AuthService.logout() already clears local storage
       router.push("/login");
     } finally {
       setIsLoggingOut(false);
@@ -165,6 +160,7 @@ export function Sidebar({
           aria-label="Logout"
           onClick={handleLogout}
           disabled={isLoggingOut}
+          title={collapsed ? "Logout" : undefined}
         >
           <LogOut
             className={`h-5 w-5 flex-shrink-0 ${

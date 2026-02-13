@@ -1,15 +1,56 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import StatCards from "@/components/dashboard/dashboard-statcards";
 import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import DashboardTable from "@/components/dashboard/dashboard-table";
 import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
 import { FileText, Clock, CheckCircle, Building2, Package } from "lucide-react";
+import { AuthService } from "@/services/auth.service";
+import type { UserData } from "@/types/auth.types";
 
 export default function Dashboard() {
-  const name = "Jane Doe";
-  const department = "Operations";
+  const router = useRouter();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check authentication
+    if (!AuthService.isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
+
+    // Get user data
+    const userData = AuthService.getCurrentUser();
+    if (userData) {
+      setUser(userData);
+    } else {
+      // User data missing, redirect to login
+      router.push("/login");
+    }
+
+    setIsLoading(false);
+  }, [router]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no user
+  if (!user) {
+    return null;
+  }
 
   const stats = [
     {
@@ -70,7 +111,11 @@ export default function Dashboard() {
       <div className="container mx-auto px-6 py-8 max-w-7xl space-y-8">
         {/* Welcome Card */}
         <section>
-          <WelcomeCard name={name} department={department} />
+          <WelcomeCard
+            name={`${user.firstName} ${user.lastName}`}
+            department={user.department || user.role}
+            accountType={user.accountType}
+          />
         </section>
 
         {/* Stat Cards */}
