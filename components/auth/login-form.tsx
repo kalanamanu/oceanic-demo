@@ -3,11 +3,11 @@
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Building, Shield, KeyRound, Lock } from "lucide-react";
+import { Eye, EyeOff, Shield, KeyRound, Lock } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -35,41 +35,43 @@ export default function LoginForm() {
 
   return (
     <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
-      <div className="min-h-screen flex items-center justify-center p-4 py-12">
-        <div className="w-full max-w-md">
-          {/* Logo & Company Name - Outside Card */}
-          <div className="flex flex-col items-center text-center mb-8 space-y-4">
-            <div className="p-4 rounded-2xl bg-blue-600/10">
-              <Building className="size-10 text-blue-700" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-tight">
-                OCEANIC MARITIME SERVICES
-              </h1>
-              <p className="text-lg font-semibold text-gray-700 mt-0.5">
-                (PVT) LTD
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Internal Management System
-              </p>
-            </div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          {/* Logo */}
+          <div className="flex justify-center mb-12">
+            <img
+              src="/oceanic-logo.png"
+              alt="Oceanic Maritime Services Logo"
+              className="w-64 h-auto object-contain"
+              draggable="false"
+            />
           </div>
 
           {/* Login Card */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8"
+          >
             {/* Header Inside Card */}
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-semibold text-gray-800">
                 Login to Your Account
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-2">
                 Access the company's internal systems and resources
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <Label
                   htmlFor="email"
                   className="text-sm font-medium text-gray-700"
@@ -106,7 +108,7 @@ export default function LoginForm() {
               </div>
 
               {/* Password Field */}
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label
                     htmlFor="password"
@@ -153,22 +155,40 @@ export default function LoginForm() {
               </div>
 
               {/* Error Message */}
-              {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-                  <Lock className="size-4" />
-                  <span>{error}</span>
-                </div>
-              )}
+              <AnimatePresence mode="wait">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                      <Lock className="size-4" />
+                      <span>{error}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white mt-2"
+                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="rounded-full h-4 w-4 border-b-2 border-white mr-2"
+                    />
                     Logging in...
                   </>
                 ) : (
@@ -177,17 +197,17 @@ export default function LoginForm() {
               </Button>
 
               {/* Security Note */}
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-6 border-t border-gray-100">
                 <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                  <Shield className="size-3" />
+                  <Shield className="size-3.5" />
                   <span>Secure connection • All data is encrypted</span>
                 </div>
               </div>
             </form>
-          </div>
+          </motion.div>
 
           {/* Footer */}
-          <div className="mt-8 text-center space-y-3">
+          {/* <div className="mt-8 text-center space-y-3">
             <div className="text-sm text-gray-500">
               Need help?{" "}
               <a
@@ -201,8 +221,8 @@ export default function LoginForm() {
               © {new Date().getFullYear()} Oceanic Maritime Services • Internal
               Use Only
             </div>
-          </div>
-        </div>
+          </div> */}
+        </motion.div>
       </div>
     </div>
   );
