@@ -56,7 +56,7 @@ export function DashboardHeader() {
             onPressedChange={(pressed) => setTheme(pressed ? "dark" : "light")}
             size="sm"
             variant="outline"
-            className="h-9 w-9 rounded-md p-0 hover:bg-accent hover:text-accent-foreground"
+            className="h-9 w-9 rounded-md p-0 hover:bg-primary hover:text-primary-foreground"
           >
             {theme === "dark" ? (
               <Moon className="h-4 w-4" />
