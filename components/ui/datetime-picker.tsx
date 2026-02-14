@@ -31,7 +31,7 @@ interface DateTimePickerProps {
 export function DateTimePicker({
   date,
   onDateChange,
-  placeholder = "Select date and time",
+  placeholder = "DD.MM.YYYY HH:MM",
   disabled = false,
 }: DateTimePickerProps) {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
@@ -100,20 +100,31 @@ export function DateTimePicker({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant={"outline"}
           className={cn(
-            "w-full justify-start text-left font-normal",
-            !selectedDate && "text-muted-foreground",
+            // Base styles:
+            "w-full justify-start text-left font-normal h-10 px-3",
+            "border-2 border-input bg-background",
+            // Explicit text color for visibility:
+            "text-foreground",
+            "shadow-sm rounded-md",
+            // Custom hover:
+            "hover:bg-primary/10 hover:border-primary/50",
+            // Focus styles:
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            // Disabled state:
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            // Transition:
+            "transition-colors duration-200",
           )}
           disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
           {selectedDate ? (
-            <span>
+            <span className="text-foreground font-medium">
               {format(selectedDate, "dd.MM.yyyy")} at {hours}:{minutes}
             </span>
           ) : (
-            <span>{placeholder}</span>
+            <span className="text-muted-foreground">{placeholder}</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -134,14 +145,14 @@ export function DateTimePicker({
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
                 {hoursArray.map((hour) => (
-                  <SelectItem key={hour} value={hour}>
+                  <SelectItem key={hour} value={hour} className="font-mono">
                     {hour}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <span className="text-lg font-semibold">:</span>
+            <span className="text-lg font-semibold text-foreground">:</span>
 
             {/* Minutes Select */}
             <Select value={minutes} onValueChange={handleMinutesChange}>
@@ -150,7 +161,7 @@ export function DateTimePicker({
               </SelectTrigger>
               <SelectContent className="max-h-[200px]">
                 {minutesArray.map((minute) => (
-                  <SelectItem key={minute} value={minute}>
+                  <SelectItem key={minute} value={minute} className="font-mono">
                     {minute}
                   </SelectItem>
                 ))}
