@@ -1,18 +1,17 @@
 import { User, CreateUserRequest, UpdateUserRequest } from "@/types/user.types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// Fix: Use NEXT_PUBLIC_API_BASE_URL (matches your .env.local)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3070";
 
 export class UserService {
   /**
    * Create a new user
    */
   static async createUser(userData: CreateUserRequest): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/user`, {
+    const response = await fetch(`${API_BASE_URL}/api/user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // Add auth token if needed:
-        // "Authorization": `Bearer ${getToken()}`,
       },
       body: JSON.stringify(userData),
     });
@@ -27,10 +26,10 @@ export class UserService {
   }
 
   /**
-   * Get all users (when API is ready)
+   * Get all users
    */
   static async getAllUsers(): Promise<User[]> {
-    const response = await fetch(`${API_BASE_URL}/user`, {
+    const response = await fetch(`${API_BASE_URL}/api/user`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -46,10 +45,10 @@ export class UserService {
   }
 
   /**
-   * Get user by ID (when API is ready)
+   * Get user by ID
    */
   static async getUserById(id: string): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/user/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/user/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -65,10 +64,10 @@ export class UserService {
   }
 
   /**
-   * Update user (when API is ready)
+   * Update user
    */
   static async updateUser(userData: UpdateUserRequest): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/user/${userData.id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/user/${userData.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -86,10 +85,10 @@ export class UserService {
   }
 
   /**
-   * Delete user (when API is ready)
+   * Delete user
    */
   static async deleteUser(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/user/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/user/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

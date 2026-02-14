@@ -20,33 +20,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateUserRequest } from "@/types/user.types";
+import { User, UpdateUserRequest } from "@/types/user.types";
 import { UserService } from "@/services/user.service";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-interface UserCreateDialogProps {
+interface UserEditDialogProps {
+  user: User | null;
   open: boolean;
   onClose: () => void;
-  onUserCreated: () => void;
+  onUserUpdated: () => void;
 }
 
-export function UserCreateDialog({
+export function UserEditDialog({
+  user,
   open,
   onClose,
-  onUserCreated,
-}: UserCreateDialogProps) {
+  onUserUpdated,
+}: UserEditDialogProps) {
   const [loading, setLoading] = React.useState(false);
-  const [formData, setFormData] = React.useState<CreateUserRequest>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "",
-    accountType: "user",
-    department: "",
+  const [formData, setFormData] = React.useState<UpdateUserRequest>({
+    id: user?.id || "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    role: user?.role || "",
+    accountType: user?.accountType || "user",
+    department: user?.department || "",
   });
 
-  const handleChange = (field: keyof CreateUserRequest, value: string) => {
+  React.useEffect(() => {
+    if (user) {
+      setFormData({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        accountType: user.accountType,
+        department: user.department,
+      });
+    }
+  }, [user]);
+
+  const handleChange = (field: keyof UpdateUserRequest, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -55,32 +72,25 @@ export function UserCreateDialog({
     setLoading(true);
 
     try {
-      await UserService.createUser(formData);
-      toast.success("User created successfully!");
-      onUserCreated();
+      await UserService.updateUser(formData);
+      toast.success("User updated successfully!");
+      onUserUpdated();
       onClose();
-      // Reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        role: "",
-        accountType: "user",
-        department: "",
-      });
     } catch (error: any) {
-      toast.error(error.message || "Failed to create user");
+      toast.error(error.message || "Failed to update user");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!user) return null;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
-          <DialogDescription>Add a new user to the system</DialogDescription>
+          <DialogTitle>Edit User</DialogTitle>
+          <DialogDescription>Update user information</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -137,7 +147,6 @@ export function UserCreateDialog({
                 onChange={(e) => handleChange("role", e.target.value)}
                 required
                 className="mt-1"
-                placeholder="e.g., System Developer"
               />
             </div>
 
@@ -151,7 +160,6 @@ export function UserCreateDialog({
                 onChange={(e) => handleChange("department", e.target.value)}
                 required
                 className="mt-1"
-                placeholder="e.g., IT Department"
               />
             </div>
           </div>
@@ -185,10 +193,10 @@ export function UserCreateDialog({
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  Updating...
                 </>
               ) : (
-                "Create User"
+                "Update User"
               )}
             </Button>
             <DialogClose asChild>

@@ -1,11 +1,9 @@
-// Add this to your existing types.ts
-
 export interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
-  accountType: "admin" | "user" | "manager";
+  accountType: "admin" | "management" | "team_head" | "user";
   role: string;
   department: string;
   createdAt?: string;
@@ -18,7 +16,7 @@ export interface CreateUserRequest {
   lastName: string;
   email: string;
   role: string;
-  accountType: "admin" | "user" | "manager";
+  accountType: "admin" | "management" | "team_head" | "user";
   department: string;
 }
 
