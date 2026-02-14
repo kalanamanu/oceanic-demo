@@ -1,19 +1,19 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function QuotationPage() {
+export default function UserPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Quotations</h1>
+            <h1 className="text-2xl font-bold">Users</h1>
             <p className="text-muted-foreground mt-1">
-              Manage and view all quotations
+              Manage and view all users
             </p>
           </div>
           <Link href="/quotation/create">
-            <Button>Create Quotation</Button>
+            <Button>Create User</Button>
           </Link>
         </div>
 

@@ -25,7 +25,7 @@ const sidebarItems = [
     value: "quotations",
     label: "Quotations",
     icon: Clipboard,
-    path: "/quotations",
+    path: "/quotation",
   },
   {
     value: "audit",
