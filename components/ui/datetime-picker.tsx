@@ -106,7 +106,7 @@ export function DateTimePicker({
             "border-2 border-input bg-background",
             // Explicit text color for visibility:
             "text-foreground",
-            "shadow-sm rounded-md",
+            " rounded-md",
             // Custom hover:
             "hover:bg-primary/10 hover:border-primary/50",
             // Focus styles:
