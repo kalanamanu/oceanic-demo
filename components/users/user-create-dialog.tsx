@@ -59,7 +59,6 @@ export function UserCreateDialog({
       toast.success("User created successfully!");
       onUserCreated();
       onClose();
-      // Reset form
       setFormData({
         firstName: "",
         lastName: "",

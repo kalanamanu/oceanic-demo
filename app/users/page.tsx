@@ -39,7 +39,6 @@ export default function UsersPage() {
       setFilteredUsers(data);
     } catch (error: any) {
       toast.error(error.message || "Failed to fetch users");
-      // Fallback to mock data for development
       setUsers([]);
       setFilteredUsers([]);
     } finally {

@@ -52,10 +52,11 @@ export function FilterBar({
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="management">Management</SelectItem>
+            <SelectItem value="team_head">Team Head</SelectItem>
             <SelectItem value="user">User</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
           </SelectContent>
         </Select>
 
