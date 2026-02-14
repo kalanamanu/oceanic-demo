@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 // Example employee list; replace/fetch as needed
 const employees = [
@@ -39,11 +40,11 @@ export function VesselInquiryDialog({
   const [fields, setFields] = React.useState({
     vesselName: "",
     agent: "",
-    eta: "",
+    eta: undefined as Date | undefined,
     port: "",
     category: "",
-    inquiryReceived: "",
-    quotationSubmission: "",
+    inquiryReceived: undefined as Date | undefined,
+    quotationSubmission: undefined as Date | undefined,
     keyPic: "",
     subPics: [] as string[],
   });
@@ -63,6 +64,10 @@ export function VesselInquiryDialog({
     }
   };
 
+  const handleDateChange = (name: string, date: Date | undefined) => {
+    setFields((prev) => ({ ...prev, [name]: date }));
+  };
+
   const handleAddSubPic = () => {
     setFields((prev) => ({ ...prev, subPics: [...prev.subPics, ""] }));
   };
@@ -76,6 +81,8 @@ export function VesselInquiryDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitted data:", fields);
+    // Add your submission logic here
     setOpen(false);
   };
 
@@ -106,8 +113,11 @@ export function VesselInquiryDialog({
               onChange={handleChange}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Agent</label>
+            <label className="block text-sm font-medium mb-1">
+              Agent <span className="text-red-500">*</span>
+            </label>
             <input
               name="agent"
               type="text"
@@ -117,19 +127,22 @@ export function VesselInquiryDialog({
               onChange={handleChange}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">ETA</label>
-            <input
-              name="eta"
-              type="datetime-local"
-              className="w-full border rounded px-3 py-2"
-              required
-              value={fields.eta}
-              onChange={handleChange}
+            <label className="block text-sm font-medium mb-2">
+              ETA <span className="text-red-500">*</span>
+            </label>
+            <DateTimePicker
+              date={fields.eta}
+              onDateChange={(date) => handleDateChange("eta", date)}
+              placeholder="DD.MM.YYYY HH:MM"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Port</label>
+            <label className="block text-sm font-medium mb-1">
+              Port <span className="text-red-500">*</span>
+            </label>
             <input
               name="port"
               type="text"
@@ -139,8 +152,11 @@ export function VesselInquiryDialog({
               onChange={handleChange}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
+            <label className="block text-sm font-medium mb-1">
+              Category <span className="text-red-500">*</span>
+            </label>
             <input
               name="category"
               type="text"
@@ -151,33 +167,33 @@ export function VesselInquiryDialog({
               onChange={handleChange}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium mb-2">
               Inquiry Received Date & Time{" "}
               <span className="text-red-500">*</span>
             </label>
-            <input
-              name="inquiryReceived"
-              type="datetime-local"
-              className="w-full border rounded px-3 py-2"
-              required
-              value={fields.inquiryReceived}
-              onChange={handleChange}
+            <DateTimePicker
+              date={fields.inquiryReceived}
+              onDateChange={(date) => handleDateChange("inquiryReceived", date)}
+              placeholder="DD.MM.YYYY HH:MM"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Quotation Submission Deadline
+            <label className="block text-sm font-medium mb-2">
+              Quotation Submission Deadline{" "}
+              <span className="text-red-500">*</span>
             </label>
-            <input
-              name="quotationSubmission"
-              type="datetime-local"
-              className="w-full border rounded px-3 py-2"
-              required
-              value={fields.quotationSubmission}
-              onChange={handleChange}
+            <DateTimePicker
+              date={fields.quotationSubmission}
+              onDateChange={(date) =>
+                handleDateChange("quotationSubmission", date)
+              }
+              placeholder="DD.MM.YYYY HH:MM"
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">Key PIC</label>
             <input
@@ -188,39 +204,41 @@ export function VesselInquiryDialog({
               onChange={handleChange}
               placeholder="Key Person in Charge"
             />
-            <div className="mt-2">
-              <label className="block text-sm font-medium mb-1">Sub PICs</label>
-              {(fields.subPics || []).map((pic, idx) => (
-                <div key={idx} className="flex items-center gap-2 mb-2">
-                  <input
-                    name={`subPic-${idx}`}
-                    type="text"
-                    className="w-full border rounded px-3 py-2"
-                    value={pic}
-                    onChange={handleChange}
-                    placeholder={`Sub PIC #${idx + 1}`}
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleRemoveSubPic(idx)}
-                    title="Remove Sub PIC"
-                  >
-                    &times;
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddSubPic}
-              >
-                + Add Sub PIC
-              </Button>
-            </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Sub PICs</label>
+            {(fields.subPics || []).map((pic, idx) => (
+              <div key={idx} className="flex items-center gap-2 mb-2">
+                <input
+                  name={`subPic-${idx}`}
+                  type="text"
+                  className="w-full border rounded px-3 py-2"
+                  value={pic}
+                  onChange={handleChange}
+                  placeholder={`Sub PIC #${idx + 1}`}
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleRemoveSubPic(idx)}
+                  title="Remove Sub PIC"
+                >
+                  &times;
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddSubPic}
+            >
+              + Add Sub PIC
+            </Button>
+          </div>
+
           <DialogFooter className="mt-6 flex gap-3">
             <Button type="submit">Create Inquiry</Button>
             <DialogClose asChild>
