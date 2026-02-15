@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatsCards } from "@/components/users/stats-cards";
 import { FilterBar } from "@/components/users/filter-bar";
@@ -131,16 +132,21 @@ function UsersPageContent() {
   if (loading && currentPage === 1) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+        {/* <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading users...</p>
-        </div>
+        </div> */}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      className="min-h-screen bg-background flex flex-col"
+    >
       <main className="flex flex-1">
         <div className="flex-1 p-6 space-y-6">
           {/* Page Header */}
@@ -153,7 +159,7 @@ function UsersPageContent() {
             </p>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards with loading state */}
           <StatsCards stats={stats} />
 
           {/* Filter and Table */}
@@ -184,7 +190,12 @@ function UsersPageContent() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.2 }}
+                    className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
+                  >
                     <div className="text-sm text-muted-foreground">
                       Page {currentPage} of {totalPages} • Total {totalUsers}{" "}
                       users
@@ -237,7 +248,7 @@ function UsersPageContent() {
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
               </>
             )}
@@ -272,7 +283,7 @@ function UsersPageContent() {
         onClose={() => setDeleteDialogOpen(false)}
         onUserDeleted={() => fetchUsers(currentPage)}
       />
-    </div>
+    </motion.div>
   );
 }
 
