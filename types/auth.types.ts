@@ -26,7 +26,19 @@ export interface LogoutResponse {
   message: string;
 }
 
-// User Data Type (matches backend User model)
+export interface CheckAuthResponse {
+  authenticated: boolean;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    accountType: "admin" | "user" | "manager";
+  } | null;
+}
+
+// User Data Type 
 export interface UserData {
   id: string;
   email: string;

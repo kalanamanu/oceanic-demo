@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AuthService } from "@/services/auth.service";
 
-const sidebarItems = [
+const allSidebarItems = [
   { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
   { value: "inquiries", label: "Inquiries", icon: FileText, path: "/inquiry" },
   { value: "products", label: "Products", icon: Package, path: "/products" },
@@ -33,7 +33,13 @@ const sidebarItems = [
     icon: ListChecks,
     path: "/audit-trail",
   },
-  { value: "users", label: "Users", icon: Users, path: "/users" },
+  {
+    value: "users",
+    label: "Users",
+    icon: Users,
+    path: "/users",
+    requiredAccountTypes: ["admin"], // ✅ Only admins can see this
+  },
   { value: "reports", label: "Reports", icon: BarChart, path: "/reports" },
 ];
 
@@ -51,6 +57,23 @@ export function Sidebar({
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const currentUser = AuthService.getCurrentUser();
+  const userAccountType = currentUser?.accountType;
+
+  // Filter sidebar items based on user permissions
+  const sidebarItems = useMemo(() => {
+    return allSidebarItems.filter((item) => {
+      // If item has no permission requirement, show it
+      if (!item.requiredAccountTypes) {
+        return true;
+      }
+
+      // Check if user's account type is in the required list
+      return userAccountType
+        ? item.requiredAccountTypes.includes(userAccountType)
+        : false;
+    });
+  }, [userAccountType]);
 
   const activeTab =
     sidebarItems.find((i) => pathname.startsWith(i.path))?.value || "dashboard";
@@ -61,10 +84,7 @@ export function Sidebar({
 
       // Call backend logout API
       await AuthService.logout();
-
-      // Optional: Add a small delay for better UX
       await new Promise((resolve) => setTimeout(resolve, 300));
-
       // Redirect to login page
       router.push("/login");
     } catch (error) {

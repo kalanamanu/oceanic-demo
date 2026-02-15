@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StatsCards } from "@/components/users/stats-cards";
 import { FilterBar } from "@/components/users/filter-bar";
 import { UserTable } from "@/components/users/user-table";
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function UsersPage() {
+function UsersPageContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,5 +273,13 @@ export default function UsersPage() {
         onUserDeleted={() => fetchUsers(currentPage)}
       />
     </div>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    <ProtectedRoute requiredAccountTypes={["admin"]}>
+      <UsersPageContent />
+    </ProtectedRoute>
   );
 }

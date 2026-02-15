@@ -36,7 +36,7 @@ export class AuthService {
         data
       );
 
-      // Store user data in localStorage (on HttpOnly cookie)
+      // Store user data in localStorage (token is in HttpOnly cookie)
       if (response.data.success && response.data.data) {
         UserStorage.saveUser(response.data.data);
       }
@@ -44,6 +44,28 @@ export class AuthService {
       return response.data;
     } catch (error: any) {
       throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Check authentication status and get current user from backend
+   * This validates the session with the server
+   */
+  static async checkAuth(): Promise<any> {
+    try {
+      const response = await apiClient.get('/api/auth/me');
+      
+      if (response.data.authenticated && response.data.user) {
+        // Update localStorage with fresh user data
+        UserStorage.saveUser(response.data.user);
+        return response.data.user;
+      }
+      
+      return null;
+    } catch (error: any) {
+      // If authentication fails, clear local user data
+      UserStorage.clearUser();
+      return null;
     }
   }
 
@@ -65,14 +87,15 @@ export class AuthService {
   }
 
   /**
-   * Get current user from localStorage
+   * Get current user from localStorage (cached)
    */
   static getCurrentUser() {
     return UserStorage.getUser();
   }
 
   /**
-   * Check if user is authenticated
+   * Check if user is authenticated (from localStorage)
+   * Note: This checks local storage only. Use checkAuth() for server validation.
    */
   static isAuthenticated(): boolean {
     return UserStorage.isAuthenticated();

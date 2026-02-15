@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppLayoutClient from "@/components/AppLayoutClient";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/contexts/auth.context";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <AppLayoutClient>{children}</AppLayoutClient>
+        <AuthProvider>
+          <AppLayoutClient>{children}</AppLayoutClient>
+        </AuthProvider>
         <Toaster position="top-center" richColors />
       </body>
     </html>
