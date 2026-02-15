@@ -113,9 +113,9 @@ export function Sidebar({
         style={{ transform: "translateY(-50%)" }}
       >
         {collapsed ? (
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4 cursor-pointer" />
         ) : (
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4 cursor-pointer" />
         )}
       </button>
 
@@ -129,7 +129,7 @@ export function Sidebar({
               onClick={() => router.push(item.path)}
               className={`
             flex items-center gap-3 text-sm rounded-md py-2 transition-colors font-medium
-            px-3
+            px-3 cursor-pointer
             ${collapsed ? "justify-center" : "justify-start"}
             ${
               activeTab === item.value
@@ -155,7 +155,7 @@ export function Sidebar({
         hover:bg-destructive/10 hover:text-destructive text-muted-foreground
         ${collapsed ? "justify-center" : "justify-start"}
         focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive
-        disabled:opacity-50 disabled:cursor-not-allowed
+        disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
       `}
           aria-label="Logout"
           onClick={handleLogout}
