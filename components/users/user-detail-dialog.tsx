@@ -191,7 +191,7 @@ export function UserDetailDialog({
                   <DialogClose asChild>
                     <Button
                       variant="outline"
-                      className="text-foreground dark:text-white hover:bg-muted cursor-pointer"
+                      className="text-foreground dark:text-white hover:bg-foreground/10 hover:text-foreground dark:hover:text-white cursor-pointer"
                     >
                       Close
                     </Button>

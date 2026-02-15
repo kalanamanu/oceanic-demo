@@ -281,7 +281,7 @@ export function VesselInquiryDialog({
                     ))}
                   </AnimatePresence>
                   <Button
-                    className="text-foreground dark:text-white hover:bg-muted cursor-pointer"
+                    className="text-foreground dark:text-white hover:bg-foreground/10 hover:text-foreground dark:hover:text-white cursor-pointer"
                     type="button"
                     variant="outline"
                     size="sm"
@@ -298,7 +298,7 @@ export function VesselInquiryDialog({
                   <DialogClose asChild>
                     <Button
                       variant="outline"
-                      className="text-foreground dark:text-white hover:bg-muted cursor-pointer"
+                      className="text-foreground dark:text-white hover:bg-foreground/10 hover:text-foreground dark:hover:text-white cursor-pointer"
                     >
                       Cancel
                     </Button>
