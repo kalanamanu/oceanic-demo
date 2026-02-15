@@ -188,6 +188,7 @@ export function VesselInquiryDialog({
                   <input
                     name="vesselName"
                     type="text"
+                    placeholder="Enter vessel name (e.g., MV Ocean Star)"
                     className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     required
                     value={fields.vesselName}
@@ -206,6 +207,7 @@ export function VesselInquiryDialog({
                   <input
                     name="agent"
                     type="text"
+                    placeholder="Enter agent company name"
                     className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     required
                     value={fields.agent}
@@ -239,6 +241,7 @@ export function VesselInquiryDialog({
                   <input
                     name="port"
                     type="text"
+                    placeholder="Enter port name (e.g., Colombo)"
                     className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     required
                     value={fields.port}
@@ -257,7 +260,7 @@ export function VesselInquiryDialog({
                   <input
                     name="category"
                     type="text"
-                    placeholder="e.g., Container Vessel"
+                    placeholder="Enter vessel category (e.g., Container, Bulk Carrier)"
                     className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     required
                     value={fields.category}

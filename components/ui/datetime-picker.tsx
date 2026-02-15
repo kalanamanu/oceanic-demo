@@ -38,11 +38,19 @@ export function DateTimePicker({
     date,
   );
 
+  const getCurrentTime = () => {
+    const now = new Date();
+    return {
+      hours: format(now, "HH"),
+      minutes: format(now, "mm"),
+    };
+  };
+
   const [hours, setHours] = React.useState<string>(
-    date ? format(date, "HH") : "00",
+    date ? format(date, "HH") : getCurrentTime().hours,
   );
   const [minutes, setMinutes] = React.useState<string>(
-    date ? format(date, "mm") : "00",
+    date ? format(date, "mm") : getCurrentTime().minutes,
   );
 
   // Sync with external date prop changes
