@@ -3,11 +3,11 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 // Create axios instance with credentials support
 const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '10000'),
+  //timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '10000'),
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // ✅ CRITICAL: Send cookies with requests
+  withCredentials: true, //=CRITICAL: Send cookies with requests
 });
 
 // Request interceptor

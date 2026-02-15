@@ -48,7 +48,7 @@ export function FilterBar({
 
         {/* Role Filter */}
         <Select value={roleFilter} onValueChange={onRoleFilterChange}>
-          <SelectTrigger className="w-full lg:w-[180px]">
+          <SelectTrigger className="w-full lg:w-[180px] cursor-pointer">
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
@@ -84,7 +84,7 @@ export function FilterBar({
           </Button> */}
           <Button
             onClick={onCreateNew}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             Add User
