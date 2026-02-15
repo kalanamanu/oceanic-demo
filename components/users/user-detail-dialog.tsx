@@ -183,7 +183,7 @@ export function UserDetailDialog({
                       onEdit(user);
                       onClose();
                     }}
-                    className="flex items-center gap-2 transition-all hover:scale-105"
+                    className="bg-primary hover:bg-primary/90 cursor-pointer"
                   >
                     <Edit className="h-4 w-4" />
                     Edit User
