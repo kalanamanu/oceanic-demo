@@ -176,10 +176,10 @@ export function UserEditDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="management">Management</SelectItem>
-                <SelectItem value="team_head">Team Head</SelectItem>
-                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="admin">Admin Account</SelectItem>
+                <SelectItem value="management">Management Account</SelectItem>
+                <SelectItem value="team_head">Team Head Account</SelectItem>
+                <SelectItem value="user">User Account</SelectItem>
               </SelectContent>
             </Select>
           </div>

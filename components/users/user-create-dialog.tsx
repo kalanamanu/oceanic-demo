@@ -90,6 +90,7 @@ export function UserCreateDialog({
               </Label>
               <Input
                 id="firstName"
+                placeholder="First Name"
                 value={formData.firstName}
                 onChange={(e) => handleChange("firstName", e.target.value)}
                 required
@@ -103,6 +104,7 @@ export function UserCreateDialog({
               </Label>
               <Input
                 id="lastName"
+                placeholder="Last Name"
                 value={formData.lastName}
                 onChange={(e) => handleChange("lastName", e.target.value)}
                 required
@@ -117,6 +119,7 @@ export function UserCreateDialog({
             </Label>
             <Input
               id="email"
+              placeholder="Company Email"
               type="email"
               value={formData.email}
               onChange={(e) => handleChange("email", e.target.value)}
@@ -125,34 +128,32 @@ export function UserCreateDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="role">
-                Role <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="role"
-                value={formData.role}
-                onChange={(e) => handleChange("role", e.target.value)}
-                required
-                className="mt-1"
-                placeholder="e.g., System Developer"
-              />
-            </div>
+          <div>
+            <Label htmlFor="role">
+              Role <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="role"
+              value={formData.role}
+              onChange={(e) => handleChange("role", e.target.value)}
+              required
+              className="mt-1"
+              placeholder="e.g., Operation Manager"
+            />
+          </div>
 
-            <div>
-              <Label htmlFor="department">
-                Department <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="department"
-                value={formData.department}
-                onChange={(e) => handleChange("department", e.target.value)}
-                required
-                className="mt-1"
-                placeholder="e.g., IT Department"
-              />
-            </div>
+          <div>
+            <Label htmlFor="department">
+              Department <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="department"
+              value={formData.department}
+              onChange={(e) => handleChange("department", e.target.value)}
+              required
+              className="mt-1"
+              placeholder="e.g., Operation Department"
+            />
           </div>
 
           <div>
@@ -163,14 +164,14 @@ export function UserCreateDialog({
               value={formData.accountType}
               onValueChange={(value: any) => handleChange("accountType", value)}
             >
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-1 w-115">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="management">Management</SelectItem>
-                <SelectItem value="team_head">Team Head</SelectItem>
-                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="admin">Admin Account</SelectItem>
+                <SelectItem value="management">Management Account</SelectItem>
+                <SelectItem value="team_head">Team Head Account</SelectItem>
+                <SelectItem value="user">User Account</SelectItem>
               </SelectContent>
             </Select>
           </div>
