@@ -51,8 +51,8 @@ export function UserTable({
             <TableHead>Role</TableHead>
             <TableHead>Department</TableHead>
             <TableHead>Account Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            {/* <TableHead>Status</TableHead> */}
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -79,13 +79,13 @@ export function UserTable({
                     {user.accountType}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Badge className={getStatusBadge(user.status || "active")}>
                     {user.status || "active"}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                </TableCell> */}
+                <TableCell>
+                  <div>
                     <Button
                       variant="ghost"
                       size="icon"

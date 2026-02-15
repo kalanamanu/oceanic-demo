@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { StatsCards } from "@/components/users/stats-cards";
 import { FilterBar } from "@/components/users/filter-bar";
 import { UserTable } from "@/components/users/user-table";
@@ -11,13 +11,19 @@ import { UserDeleteDialog } from "@/components/users/user-delete-dialog";
 import { User } from "@/types/user.types";
 import { UserService } from "@/services/user.service";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // Dialog states
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -30,13 +36,16 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Fetch users
-  const fetchUsers = async () => {
+  // Fetch users with pagination
+  const fetchUsers = async (page: number = 1) => {
     setLoading(true);
     try {
-      const data = await UserService.getAllUsers();
-      setUsers(data);
-      setFilteredUsers(data);
+      const result = await UserService.getAllUsers({ page, pageSize: 20 });
+      setUsers(result.data);
+      setFilteredUsers(result.data);
+      setTotalPages(result.pagination.totalPages);
+      setTotalUsers(result.pagination.totalUsers);
+      setCurrentPage(result.pagination.currentPage);
     } catch (error: any) {
       toast.error(error.message || "Failed to fetch users");
       setUsers([]);
@@ -47,10 +56,10 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(currentPage);
+  }, [currentPage]);
 
-  // Apply filters
+  // Apply filters (client-side filtering on current page)
   useEffect(() => {
     let result = [...users];
 
@@ -79,9 +88,9 @@ export default function UsersPage() {
     setFilteredUsers(result);
   }, [searchQuery, roleFilter, statusFilter, users]);
 
-  // Calculate stats
+  // Calculate stats from all users
   const stats = {
-    totalUsers: users.length,
+    totalUsers: totalUsers,
     activeUsers: users.filter((u) => (u.status || "active") === "active")
       .length,
     inactiveUsers: users.filter((u) => u.status === "inactive").length,
@@ -106,14 +115,19 @@ export default function UsersPage() {
 
   const handleExport = () => {
     toast.info("Export feature coming soon!");
-    // Implement export logic here
   };
 
   const handleCreateNew = () => {
     setCreateDialogOpen(true);
   };
 
-  if (loading) {
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  if (loading && currentPage === 1) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -153,12 +167,79 @@ export default function UsersPage() {
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
             />
-            <UserTable
-              users={filteredUsers}
-              onSelectUser={handleSelectUser}
-              onEditUser={handleEditUser}
-              onDeleteUser={handleDeleteUser}
-            />
+
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                <UserTable
+                  users={filteredUsers}
+                  onSelectUser={handleSelectUser}
+                  onEditUser={handleEditUser}
+                  onDeleteUser={handleDeleteUser}
+                />
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4">
+                    <div className="text-sm text-muted-foreground">
+                      Page {currentPage} of {totalPages} • Total {totalUsers}{" "}
+                      users
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter(
+                            (page) =>
+                              page === 1 ||
+                              page === totalPages ||
+                              Math.abs(page - currentPage) <= 1,
+                          )
+                          .map((page, idx, arr) => (
+                            <React.Fragment key={page}>
+                              {idx > 0 && arr[idx - 1] !== page - 1 && (
+                                <span className="px-2 text-muted-foreground">
+                                  ...
+                                </span>
+                              )}
+                              <Button
+                                variant={
+                                  page === currentPage ? "default" : "outline"
+                                }
+                                size="sm"
+                                onClick={() => handlePageChange(page)}
+                                className="min-w-[40px]"
+                              >
+                                {page}
+                              </Button>
+                            </React.Fragment>
+                          ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </section>
         </div>
       </main>
@@ -174,21 +255,21 @@ export default function UsersPage() {
       <UserCreateDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        onUserCreated={fetchUsers}
+        onUserCreated={() => fetchUsers(currentPage)}
       />
 
       <UserEditDialog
         user={selectedUser}
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
-        onUserUpdated={fetchUsers}
+        onUserUpdated={() => fetchUsers(currentPage)}
       />
 
       <UserDeleteDialog
         user={selectedUser}
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        onUserDeleted={fetchUsers}
+        onUserDeleted={() => fetchUsers(currentPage)}
       />
     </div>
   );
