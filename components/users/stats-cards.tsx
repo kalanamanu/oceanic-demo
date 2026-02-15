@@ -13,7 +13,7 @@ interface StatsCardsProps {
 
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {/* Total Users */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       </div>
 
       {/* Inactive Users */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
+      {/* <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
@@ -63,7 +63,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
             <UserX className="h-6 w-6 text-red-500" />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Admin Users */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">

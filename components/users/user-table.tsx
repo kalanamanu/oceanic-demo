@@ -12,6 +12,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface UserTableProps {
   users: User[];
@@ -42,49 +48,78 @@ export function UserTable({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-      <Table>
+    <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+      <Table className="p-6">
         <TableHeader>
-          <TableRow className="bg-muted/50">
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Account Type</TableHead>
-            {/* <TableHead>Status</TableHead> */}
-            <TableHead>Actions</TableHead>
+          <TableRow className="hover:bg-transparent bg-muted/50 border-b-2 border-border">
+            <TableHead className="font-semibold text-foreground px-4">
+              Name
+            </TableHead>
+            <TableHead className="font-semibold text-foreground px-4">
+              Email
+            </TableHead>
+            <TableHead className="font-semibold text-foreground px-4">
+              Role
+            </TableHead>
+            <TableHead className="font-semibold text-foreground px-4">
+              Department
+            </TableHead>
+            <TableHead className="font-semibold text-foreground px-4">
+              Account Type
+            </TableHead>
+            <TableHead className="font-semibold text-foreground text-right px-4">
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7}
-                className="text-center py-8 text-muted-foreground"
+                colSpan={6}
+                className="text-center py-12 text-muted-foreground"
               >
-                No users found
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-lg font-medium">No users found</div>
+                  <div className="text-sm">
+                    Try adjusting your search or filters
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
             users.map((user) => (
-              <TableRow key={user.id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">
+              <TableRow
+                key={user.id}
+                className="hover:bg-muted/70 border-b border-border/50 transition-colors"
+              >
+                <TableCell className="font-medium text-foreground py-4 px-4">
                   {user.firstName} {user.lastName}
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
-                <TableCell>{user.department}</TableCell>
-                <TableCell>
+                <TableCell className="text-muted-foreground py-4 px-4">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="truncate max-w-xs block cursor-help">
+                          {user.email}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{user.email}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>
+                <TableCell className="text-foreground py-4 px-4">
+                  {user.role}
+                </TableCell>
+                <TableCell className="text-muted-foreground py-4 px-4">
+                  {user.department}
+                </TableCell>
+                <TableCell className="py-4 px-4">
                   <Badge className={getAccountTypeBadge(user.accountType)}>
                     {user.accountType}
                   </Badge>
                 </TableCell>
-                {/* <TableCell>
-                  <Badge className={getStatusBadge(user.status || "active")}>
-                    {user.status || "active"}
-                  </Badge>
-                </TableCell> */}
-                <TableCell>
+                <TableCell className="text-right py-4 px-4">
                   <div>
                     <Button
                       variant="ghost"
