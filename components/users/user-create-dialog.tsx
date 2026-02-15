@@ -203,7 +203,7 @@ export function UserCreateDialog({
                       handleChange("accountType", value)
                     }
                   >
-                    <SelectTrigger className="mt-1 w-full">
+                    <SelectTrigger className="mt-1 w-full cursor-pointer">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

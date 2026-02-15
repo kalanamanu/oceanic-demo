@@ -64,11 +64,6 @@ export function UserDetailDialog({
                 View and manage user information
               </p>
             </div>
-            <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogClose>
           </div>
         </DialogHeader>
 
@@ -90,12 +85,12 @@ export function UserDetailDialog({
               >
                 {user.accountType}
               </Badge>
-              <Badge
+              {/* <Badge
                 className={getStatusBadge(user.status || "active")}
                 variant="outline"
               >
                 {user.status || "active"}
-              </Badge>
+              </Badge> */}
             </div>
           </div>
 
