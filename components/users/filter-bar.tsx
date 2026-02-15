@@ -61,7 +61,7 @@ export function FilterBar({
         </Select>
 
         {/* Status Filter */}
-        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+        {/* <Select value={statusFilter} onValueChange={onStatusFilterChange}>
           <SelectTrigger className="w-full lg:w-[180px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
@@ -70,18 +70,18 @@ export function FilterBar({
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={onExport}
             className="flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
             Export
-          </Button>
+          </Button> */}
           <Button
             onClick={onCreateNew}
             className="flex items-center gap-2 bg-primary hover:bg-primary/90"
