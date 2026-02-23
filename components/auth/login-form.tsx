@@ -30,11 +30,8 @@ export default function LoginPage() {
       });
 
       if (response.success) {
-        // Store credentials temporarily for OTP page
         sessionStorage.setItem("otp_email", email);
-        sessionStorage.setItem("otp_password", password); // For resend functionality
-
-        // Redirect to OTP verification page
+        sessionStorage.setItem("otp_password", password);
         router.push("/login-otp");
       }
     } catch (err: any) {
@@ -45,7 +42,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
+    <div className="fixed inset-0 w-screen h-screen overflow-auto bg-gradient-to-br from-background via-background to-secondary/40">
       <div className="min-h-screen flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -68,27 +65,25 @@ export default function LoginPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8"
+            className="rounded-2xl border border-border bg-card/90 backdrop-blur shadow-lg p-8"
           >
             {/* Header */}
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold text-gray-800">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Login to Your Account
               </h2>
-              <p className="text-sm text-gray-500 mt-2">
-                Access the company's internal systems and resources
+              <p className="text-sm text-muted-foreground mt-2">
+                Access the company&apos;s internal systems and resources
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-sm font-medium text-gray-700"
-                >
+                <Label htmlFor="email" className="text-sm font-medium">
                   Company Email
                 </Label>
+
                 <div className="relative">
                   <Input
                     id="email"
@@ -98,14 +93,22 @@ export default function LoginPage() {
                     autoComplete="username"
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-12 pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className={[
+                      "h-12 pl-10",
+                      "bg-background text-foreground placeholder:text-muted-foreground",
+                      "border-input",
+                      "focus-visible:ring-ring/30 focus-visible:ring-4",
+                      "transition-all",
+                    ].join(" ")}
                   />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
                     <svg
                       className="w-5 h-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
                       <path
                         strokeLinecap="round"
@@ -121,19 +124,18 @@ export default function LoginPage() {
               {/* Password Field */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm font-medium text-gray-700"
-                  >
+                  <Label htmlFor="password" className="text-sm font-medium">
                     Password
                   </Label>
+
                   <a
                     href="#"
-                    className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                    className="text-xs font-medium text-primary hover:underline underline-offset-4"
                   >
                     Forgot password?
                   </a>
                 </div>
+
                 <div className="relative">
                   <Input
                     id="password"
@@ -143,15 +145,23 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="h-12 pl-10 pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className={[
+                      "h-12 pl-10 pr-10",
+                      "bg-background text-foreground placeholder:text-muted-foreground",
+                      "border-input",
+                      "focus-visible:ring-ring/30 focus-visible:ring-4",
+                      "transition-all",
+                    ].join(" ")}
                   />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
                     <KeyRound className="w-5 h-5" />
                   </div>
+
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -175,7 +185,7 @@ export default function LoginPage() {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                    <div className="p-3 text-sm rounded-lg flex items-center gap-2 border border-destructive/25 bg-destructive/10 text-destructive">
                       <Lock className="size-4" />
                       <span>{error}</span>
                     </div>
@@ -186,7 +196,7 @@ export default function LoginPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full h-12 text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -198,7 +208,7 @@ export default function LoginPage() {
                         repeat: Infinity,
                         ease: "linear",
                       }}
-                      className="rounded-full h-4 w-4 border-b-2 border-white mr-2"
+                      className="rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"
                     />
                     Sending OTP...
                   </>
@@ -208,8 +218,8 @@ export default function LoginPage() {
               </Button>
 
               {/* Security Note */}
-              <div className="pt-6 border-t border-gray-100">
-                <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+              <div className="pt-6 border-t border-border/60">
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <Shield className="size-3.5" />
                   <span>Secure connection • All data is encrypted</span>
                 </div>

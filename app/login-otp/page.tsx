@@ -36,13 +36,11 @@ export default function LoginOtpPage() {
   const [password, setPassword] = useState("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Check for credentials and redirect if missing
   useEffect(() => {
     const storedEmail = sessionStorage.getItem("otp_email");
     const storedPassword = sessionStorage.getItem("otp_password");
 
     if (!storedEmail || !storedPassword) {
-      // No credentials found, redirect to login
       router.push("/login");
       return;
     }
@@ -50,18 +48,15 @@ export default function LoginOtpPage() {
     setEmail(storedEmail);
     setPassword(storedPassword);
 
-    // Auto-focus first input
     setTimeout(() => inputRefs.current[0]?.focus(), 100);
   }, [router]);
 
-  // Countdown timer
   useEffect(() => {
     if (timeLeft <= 0) return;
     const timer = setInterval(() => setTimeLeft((p) => p - 1), 1000);
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Auto-submit when all digits are filled
   useEffect(() => {
     if (
       otpArray.every((val) => val.length === 1) &&
@@ -76,9 +71,6 @@ export default function LoginOtpPage() {
     }
   }, [otpArray, isLoading, hasAutoSubmitted]);
 
-  /**
-   * Handle OTP Resend
-   */
   const handleResendOtp = async () => {
     if (!email || !password) {
       setError("Session expired. Please login again.");
@@ -95,16 +87,12 @@ export default function LoginOtpPage() {
       });
 
       if (response.success) {
-        // Reset timer and OTP input
         setTimeLeft(300);
         setOtpArray(Array(OTP_LENGTH).fill(""));
         setHasAutoSubmitted(false);
-
-        // Focus first input
         setTimeout(() => inputRefs.current[0]?.focus(), 100);
 
-        // Optional: Show success message
-        // You can use a toast library here
+        toast.success("A new verification code was sent.");
       }
     } catch (err: any) {
       setError(err.message || "Failed to resend OTP. Please try again.");
@@ -113,11 +101,7 @@ export default function LoginOtpPage() {
     }
   };
 
-  /**
-   * Handle OTP Input Change
-   */
   const handleOtpChange = (idx: number, value: string) => {
-    // Handle paste of full OTP
     if (value.length > 1) {
       const chars = value.slice(0, OTP_LENGTH).split("");
       const next = Array(OTP_LENGTH).fill("");
@@ -129,22 +113,17 @@ export default function LoginOtpPage() {
       return;
     }
 
-    // Only allow digits
     if (!/^[0-9]?$/.test(value)) return;
 
     const updated = [...otpArray];
     updated[idx] = value;
     setOtpArray(updated);
 
-    // Auto-focus next input
     if (value && idx < OTP_LENGTH - 1) {
       inputRefs.current[idx + 1]?.focus();
     }
   };
 
-  /**
-   * Handle Paste Event
-   */
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const text = e.clipboardData.getData("text").replace(/\s+/g, "");
     if (/^[0-9]{6}$/.test(text)) {
@@ -157,9 +136,6 @@ export default function LoginOtpPage() {
     }
   };
 
-  /**
-   * Handle Keyboard Navigation
-   */
   const handleKeyDown = (
     idx: number,
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -182,9 +158,6 @@ export default function LoginOtpPage() {
     }
   };
 
-  /**
-   * Handle OTP Verification (Backend Integration)
-   */
   const handleVerify = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
@@ -193,14 +166,12 @@ export default function LoginOtpPage() {
 
     const otp = otpArray.join("");
 
-    // Validate OTP length
     if (otp.length !== OTP_LENGTH) {
       setError("Please enter all OTP digits.");
       setIsLoading(false);
       return;
     }
 
-    // Check if time expired
     if (timeLeft <= 0) {
       setError("OTP has expired. Please request a new one.");
       setIsLoading(false);
@@ -208,40 +179,26 @@ export default function LoginOtpPage() {
     }
 
     try {
-      // Call backend to verify OTP
       const response = await AuthService.verifyOTP({
         email,
         otp,
       });
 
       if (response.success) {
-        // User data is already saved in AuthService.verifyOTP
-        // Token is in HttpOnly cookie
-
-        // Clear session storage
         sessionStorage.removeItem("otp_email");
         sessionStorage.removeItem("otp_password");
-
-        // Redirect to dashboard
         router.push("/dashboard");
       }
     } catch (err: any) {
       setError(err.message || "Invalid OTP. Please try again.");
-
-      // Clear OTP input on error
       setOtpArray(Array(OTP_LENGTH).fill(""));
       setHasAutoSubmitted(false);
-
-      // Focus first input
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * Handle Back to Login
-   */
   const handleBack = () => {
     sessionStorage.removeItem("otp_email");
     sessionStorage.removeItem("otp_password");
@@ -249,10 +206,10 @@ export default function LoginOtpPage() {
   };
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-auto">
+    <div className="fixed inset-0 w-screen h-screen overflow-auto bg-gradient-to-br from-background via-background to-secondary/40">
       <div className="min-h-screen flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-md">
-          {/* Logo (Optional) */}
+          {/* Logo */}
           <div className="flex justify-center mb-8">
             <img
               src="/oceanic-logo.png"
@@ -263,26 +220,28 @@ export default function LoginOtpPage() {
           </div>
 
           {/* OTP Card */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
-            {/* Header Inside Card */}
+          <div className="rounded-2xl shadow-lg border border-border bg-card/90 backdrop-blur p-6 md:p-8">
+            {/* Header */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 mb-2">
-                <Lock className="h-6 w-6 text-blue-600" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
+                <Lock className="h-6 w-6 text-primary" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-800">
+
+              <h2 className="text-xl font-semibold text-foreground">
                 Enter Verification Code
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                We've sent a 6-digit code to
-                <span className="font-semibold text-blue-700 ml-1">
+
+              <p className="text-sm text-muted-foreground mt-1">
+                We&apos;ve sent a 6-digit code to
+                <span className="font-semibold text-primary ml-1">
                   {maskEmail(email)}
                 </span>
                 . Enter it below to continue.
               </p>
             </div>
 
-            {/* OTP Input Section */}
             <form onSubmit={handleVerify} className="space-y-5">
+              {/* OTP Inputs */}
               <div className="flex justify-center items-center gap-2 mb-2">
                 {otpArray.map((digit, idx) => (
                   <input
@@ -298,25 +257,33 @@ export default function LoginOtpPage() {
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(idx, e)}
                     onPaste={handlePaste}
-                    className="w-10 h-10 text-lg font-bold text-center rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-all bg-gray-50 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-900 shadow-sm"
                     inputMode="numeric"
                     pattern="[0-9]*"
+                    className={[
+                      "w-10 h-10 text-lg font-bold text-center rounded-xl border-2 shadow-sm",
+                      "bg-background text-foreground",
+                      "border-input",
+                      "hover:bg-muted/40",
+                      "focus:outline-none focus-visible:ring-4 focus-visible:ring-ring/30 focus-visible:border-ring",
+                      "disabled:opacity-60 disabled:cursor-not-allowed",
+                      "transition-all",
+                    ].join(" ")}
                   />
                 ))}
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2 text-xs">
+                <div className="px-4 py-3 rounded-xl text-center flex items-center justify-center gap-2 text-xs border border-destructive/25 bg-destructive/10 text-destructive">
                   <Shield className="h-4 w-4" />
                   {error}
                 </div>
               )}
 
-              {/* Action Buttons */}
+              {/* Verify Button */}
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white mt-2 rounded-xl"
+                className="w-full h-12 text-base font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={
                   isLoading || timeLeft <= 0 || otpArray.some((d) => !d)
                 }
@@ -329,20 +296,24 @@ export default function LoginOtpPage() {
               </Button>
 
               {/* Timer + Resend */}
-              <div className="flex justify-between items-center text-xs text-gray-500 mt-4 w-full px-1">
+              <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 w-full px-1">
                 <span>
                   Remaining time:{" "}
                   <span
-                    className={`font-semibold ${timeLeft <= 60 ? "text-red-600" : "text-blue-700"}`}
+                    className={[
+                      "font-semibold",
+                      timeLeft <= 60 ? "text-destructive" : "text-primary",
+                    ].join(" ")}
                   >
                     {formatTime(timeLeft)}
                   </span>
                 </span>
+
                 <span>
-                  Didn't get the code?{" "}
+                  Didn&apos;t get the code?{" "}
                   <button
                     type="button"
-                    className="text-blue-700 font-semibold hover:underline focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-primary font-semibold hover:underline underline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isResending || isLoading}
                     onClick={handleResendOtp}
                     tabIndex={0}
@@ -358,15 +329,15 @@ export default function LoginOtpPage() {
                 type="button"
                 onClick={handleBack}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 mt-3"
+                className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 mt-3"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to login
               </button>
 
               {/* Security Note */}
-              <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-                <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
+              <div className="mt-4 pt-4 border-t border-border/60 text-center">
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                   <Shield className="h-3 w-3" />
                   For security, this code expires in 5 minutes
                 </p>

@@ -27,14 +27,15 @@ export default function WelcomeCard({
 
   useEffect(() => {
     const updateDateTime = () => {
-      // Sri Lanka time zone: UTC+5:30
       const now = new Date();
-      // Get UTC time and add 5 hours 30 minutes
       const utc = now.getTime() + now.getTimezoneOffset() * 60000;
       const sriLankaTime = new Date(utc + 5.5 * 60 * 60 * 1000);
-      // Format time as 24-hour (HH:mm:ss)
+
       const pad = (n: number) => n.toString().padStart(2, "0");
-      const time24 = `${pad(sriLankaTime.getHours())}:${pad(sriLankaTime.getMinutes())}:${pad(sriLankaTime.getSeconds())}`;
+      const time24 = `${pad(sriLankaTime.getHours())}:${pad(
+        sriLankaTime.getMinutes(),
+      )}:${pad(sriLankaTime.getSeconds())}`;
+
       setDateTime({
         date: sriLankaTime.toLocaleDateString("en-US", {
           weekday: "long",
@@ -64,7 +65,6 @@ export default function WelcomeCard({
     mouseY.set(0);
   };
 
-  // Format account type for display
   const formatAccountType = (type?: string) => {
     if (!type) return "";
     return type
@@ -73,17 +73,17 @@ export default function WelcomeCard({
       .join(" ");
   };
 
-  // Get badge color based on account type
+  // Badge styles tuned to look good on the green theme (still role-distinct)
   const getBadgeColor = (type?: string) => {
     switch (type) {
       case "admin":
-        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+        return "bg-destructive/15 text-destructive border border-destructive/25";
       case "management":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+        return "bg-primary/12 text-primary border border-primary/20";
       case "team_head":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+        return "bg-accent/35 text-accent-foreground border border-accent/40";
       default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400";
+        return "bg-muted text-muted-foreground border border-border";
     }
   };
 
@@ -102,14 +102,18 @@ export default function WelcomeCard({
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/95 transition-shadow hover:shadow-md"
+      className={[
+        "relative overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-md",
+        "border-border bg-gradient-to-br from-card to-secondary/35",
+      ].join(" ")}
     >
-      {/* Ocean waves with parallax effect */}
+      {/* Maritime “sea glow” (green/teal) with parallax */}
       <motion.div
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute -right-16 bottom-0 h-32 w-[150%] rounded-[50%] bg-gradient-to-r from-cyan-200/40 via-blue-200/30 to-transparent blur-3xl dark:from-cyan-500/20 dark:via-blue-500/15 dark:to-transparent"
+        className="absolute -right-16 bottom-0 h-32 w-[150%] rounded-[50%] blur-3xl
+                   bg-gradient-to-r from-primary/18 via-accent/18 to-transparent"
         style={{
           x: useTransform(mouseX, [-300, 300], [-10, 10]),
         }}
@@ -118,7 +122,8 @@ export default function WelcomeCard({
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 1.4, ease: "easeOut", delay: 0.1 }}
-        className="absolute -right-20 bottom-8 h-28 w-[160%] rounded-[50%] bg-gradient-to-r from-blue-200/30 via-indigo-200/25 to-transparent blur-2xl dark:from-blue-500/15 dark:via-indigo-500/15 dark:to-transparent"
+        className="absolute -right-20 bottom-8 h-28 w-[160%] rounded-[50%] blur-2xl
+                   bg-gradient-to-r from-primary/14 via-primary/8 to-transparent"
         style={{
           x: useTransform(mouseX, [-300, 300], [-15, 15]),
         }}
@@ -127,7 +132,8 @@ export default function WelcomeCard({
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 1.6, ease: "easeOut", delay: 0.2 }}
-        className="absolute -right-24 bottom-16 h-24 w-[170%] rounded-[50%] bg-gradient-to-r from-sky-200/25 via-cyan-200/20 to-transparent blur-2xl dark:from-sky-500/10 dark:via-cyan-500/10 dark:to-transparent"
+        className="absolute -right-24 bottom-16 h-24 w-[170%] rounded-[50%] blur-2xl
+                   bg-gradient-to-r from-accent/16 via-primary/10 to-transparent"
         style={{
           x: useTransform(mouseX, [-300, 300], [-20, 20]),
         }}
@@ -135,9 +141,9 @@ export default function WelcomeCard({
 
       {/* Content */}
       <div className="relative z-10 px-8 py-6">
-        {/* Top Section: Welcome + Date/Time */}
+        {/* Top Section */}
         <div className="flex items-start justify-between gap-6 mb-6">
-          {/* Left: Welcome Message */}
+          {/* Left */}
           <div className="flex-1 space-y-2">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -145,7 +151,7 @@ export default function WelcomeCard({
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex items-center gap-2"
             >
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 Welcome,{" "}
                 <motion.span
                   initial={{ opacity: 0, y: 10 }}
@@ -161,6 +167,7 @@ export default function WelcomeCard({
                   {name}!
                 </motion.span>
               </h1>
+
               <motion.span
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -172,10 +179,7 @@ export default function WelcomeCard({
                 }}
                 whileHover={{
                   rotate: [0, 14, -8, 14, -4, 10, 0],
-                  transition: {
-                    duration: 0.6,
-                    ease: "easeInOut",
-                  },
+                  transition: { duration: 0.6, ease: "easeInOut" },
                 }}
                 className="text-3xl cursor-pointer inline-block"
                 aria-hidden="true"
@@ -183,18 +187,23 @@ export default function WelcomeCard({
                 👋
               </motion.span>
             </motion.div>
+
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex items-center gap-2"
             >
-              <span className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                 {department}
               </span>
+
               {accountType && (
                 <span
-                  className={`text-xs font-semibold px-2 py-1 rounded-full ${getBadgeColor(accountType)}`}
+                  className={[
+                    "text-xs font-semibold px-2 py-1 rounded-full",
+                    getBadgeColor(accountType),
+                  ].join(" ")}
                 >
                   {formatAccountType(accountType)} Account
                 </span>
@@ -202,7 +211,7 @@ export default function WelcomeCard({
             </motion.div>
           </div>
 
-          {/* Right: Date & Time */}
+          {/* Right */}
           {dateTime.date && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -214,16 +223,17 @@ export default function WelcomeCard({
                 key={dateTime.date}
                 initial={{ opacity: 0.7 }}
                 animate={{ opacity: 1 }}
-                className="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                className="text-sm font-semibold text-foreground/85"
               >
                 {dateTime.date}
               </motion.div>
+
               <motion.div
                 key={dateTime.time}
                 initial={{ opacity: 0.5 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className="text-xs font-medium text-slate-500 dark:text-slate-400 font-mono tabular-nums"
+                className="text-xs font-medium text-muted-foreground font-mono tabular-nums"
               >
                 {dateTime.time}{" "}
                 <span className="opacity-70">Sri Lanka Time</span>
@@ -232,14 +242,14 @@ export default function WelcomeCard({
           )}
         </div>
 
-        {/* Bottom Section: Status Message */}
+        {/* Bottom */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="pt-3 border-t border-slate-200/50 dark:border-slate-700/50"
+          className="pt-3 border-t border-border/60"
         >
-          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Here&apos;s what&apos;s happening with your inquiries today.
           </p>
         </motion.div>
