@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthService } from "@/services/auth.service";
+import { UserStorage } from "@/lib/user-storage";
 import { useRouter } from "next/navigation";
 
 interface AuthUser {
@@ -39,7 +40,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentUser = await AuthService.checkAuth();
       setUser(currentUser);
     } catch (error) {
-      setUser(null);
+      // This prevents logout on page refresh from temporary network issues
+      const cachedUser = UserStorage.getUser();
+      if (cachedUser) {
+        const mappedAccountType: "admin" | "user" | "manager" =
+          cachedUser.accountType === "management"
+            ? "manager"
+            : cachedUser.accountType === "team_head"
+              ? "manager"
+              : (cachedUser.accountType as "admin" | "user" | "manager");
+        setUser({
+          ...cachedUser,
+          accountType: mappedAccountType,
+        });
+      } else {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
