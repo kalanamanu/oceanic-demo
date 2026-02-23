@@ -107,9 +107,33 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen bg-background">
+      {/* Background layers */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* Base dark maritime gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/10" />
+
+        {/* Teal wave glows */}
+        <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute top-1/3 -right-48 h-[36rem] w-[36rem] rounded-full bg-accent/18 blur-3xl" />
+        <div className="absolute -bottom-56 left-1/4 h-[40rem] w-[40rem] rounded-full bg-primary/12 blur-3xl" />
+
+        {/* Subtle mesh/grid lines (gives that “network” feel like the image) */}
+        <div
+          className="absolute inset-0 opacity-[0.12]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
+
+        {/* Vignette to keep edges darker */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.55)_70%,rgba(0,0,0,0.75)_100%)]" />
+      </div>
+
+      {/* Content */}
       <div className="container mx-auto px-6 py-8 max-w-7xl space-y-8">
-        {/* Welcome Card */}
         <section>
           <WelcomeCard
             name={`${user.firstName} ${user.lastName}`}
@@ -118,18 +142,14 @@ export default function Dashboard() {
           />
         </section>
 
-        {/* Stat Cards */}
         <section className="pt-2">
           <StatCards stats={stats} />
         </section>
 
-        {/* Recent Activities Section */}
         <section className="pt-4">
-          {/* Enhanced Table Card */}
           <DashboardTable activities={activities} />
         </section>
 
-        {/* Bottom Spacing */}
         <div className="h-8" />
       </div>
     </div>

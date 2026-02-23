@@ -58,13 +58,13 @@
 
 .dark {
   /* Dark (Premium Green / Maritime) */
-  --background: oklch(0.16 0.02 170); /* deep green-charcoal */
+  --background: oklch(0.14 0.02 170); /* deep green-charcoal */
   --foreground: oklch(0.97 0.01 160);
 
-  --card: oklch(0.2 0.02 170);
+  --card: oklch(0.18 0.02 170);
   --card-foreground: oklch(0.97 0.01 160);
 
-  --popover: oklch(0.2 0.02 170);
+  --popover: oklch(0.18 0.02 170);
   --popover-foreground: oklch(0.97 0.01 160);
 
   --primary: oklch(0.76 0.1 160); /* premium mint highlight */
@@ -73,7 +73,7 @@
   --secondary: oklch(0.26 0.02 170);
   --secondary-foreground: oklch(0.97 0.01 160);
 
-  --muted: oklch(0.26 0.02 170);
+  --muted: oklch(21.277% 0.02086 162.288);
   --muted-foreground: oklch(0.72 0.02 160);
 
   --accent: oklch(0.3 0.04 165); /* muted sea-glass */
@@ -82,8 +82,8 @@
   --destructive: oklch(0.5 0.18 27);
   --destructive-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.28 0.02 170);
-  --input: oklch(0.28 0.02 170);
+  --border: oklch(0.3 0.02 170);
+  --input: oklch(0.3 0.02 170);
   --ring: oklch(0.68 0.1 160); /* bright green ring */
 
   --chart-1: oklch(0.7 0.12 160);
@@ -92,11 +92,11 @@
   --chart-4: oklch(0.78 0.09 110);
   --chart-5: oklch(0.68 0.1 210);
 
-  --sidebar: oklch(0.19 0.02 170);
+  --sidebar: oklch(0.16 0.02 170);
   --sidebar-foreground: oklch(0.97 0.01 160);
   --sidebar-primary: oklch(0.76 0.1 160);
   --sidebar-primary-foreground: oklch(0.18 0.02 170);
-  --sidebar-accent: oklch(0.26 0.03 165);
+  --sidebar-accent: oklch(0.2 0.02 170);
   --sidebar-accent-foreground: oklch(0.97 0.01 160);
   --sidebar-border: oklch(0.28 0.02 170);
   --sidebar-ring: oklch(0.68 0.1 160);
@@ -278,4 +278,114 @@
 
 .animate-wave-fast {
   animation: wave-fast 4s ease-in-out infinite;
+}
+
+@layer utilities {
+  /* ===== Premium Ocean Background (CSS only) ===== */
+  .ocean-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    pointer-events: none;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        1200px 700px at 15% 70%,
+        color-mix(in oklab, var(--primary) 28%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 600px at 75% 25%,
+        color-mix(in oklab, var(--accent) 22%, transparent),
+        transparent 58%
+      ),
+      radial-gradient(
+        1100px 700px at 70% 85%,
+        color-mix(in oklab, var(--primary) 18%, transparent),
+        transparent 62%
+      ),
+      linear-gradient(
+        135deg,
+        var(--background),
+        color-mix(in oklab, var(--background) 80%, var(--secondary) 20%)
+      );
+  }
+
+  /* Soft “wave ribbons” */
+  .ocean-bg::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    background:
+      radial-gradient(closest-side, rgba(255, 255, 255, 0.1), transparent 65%) 0
+        0 / 280px 180px,
+      radial-gradient(closest-side, rgba(255, 255, 255, 0.06), transparent 70%)
+        120px 90px / 320px 220px;
+    filter: blur(0px);
+    opacity: 0.22;
+    transform: rotate(-8deg);
+    animation: ocean-drift 18s ease-in-out infinite;
+  }
+
+  /* Subtle mesh / network lines */
+  .ocean-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(
+      circle at 40% 35%,
+      rgba(0, 0, 0, 0.9),
+      transparent 68%
+    );
+    opacity: 0.14;
+  }
+
+  @keyframes ocean-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(-8deg) scale(1);
+    }
+    50% {
+      transform: translate3d(-4%, -2%, 0) rotate(-8deg) scale(1.02);
+    }
+  }
+
+  /* Vignette to add premium depth */
+  .ocean-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: -9;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(0, 0, 0, 0.55) 70%,
+      rgba(0, 0, 0, 0.78) 100%
+    );
+  }
+
+  /* ===== Dark Glass Panels (cards/sidebar/header) ===== */
+  .glass {
+    background-color: color-mix(in oklab, var(--card) 60%, transparent);
+    border: 1px solid color-mix(in oklab, var(--border) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow:
+      0 14px 40px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-strong {
+    background-color: color-mix(in oklab, var(--card) 72%, transparent);
+    border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 16px 44px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
 }
