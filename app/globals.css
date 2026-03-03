@@ -1,5 +1,5 @@
 body {
-  background-image: url("/background.jpg");
+  background-image: url("/background.png");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
@@ -14,6 +14,7 @@ body {
   /* Light (Premium Green / Maritime) */
   --background: oklch(0.99 0.01 160); /* near-white w/ green tint */
   --foreground: oklch(0.18 0.02 170); /* deep ink green/charcoal */
+  --backgroundColor: rgba(13, 81, 240, 0.901);
 
   --card: oklch(0.985 0.01 160);
   --card-foreground: oklch(0.18 0.02 170);

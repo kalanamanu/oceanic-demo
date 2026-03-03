@@ -51,7 +51,7 @@ export default function InquiryPage() {
   };
 
   return (
-    <div className="min-h-screen  flex flex-col">
+    <div className="min-h-screen bg-backgroundColor flex flex-col">
       <main className="flex flex-1">
         <div className="flex-1 p-6 space-y-6">
           {/* Stat Cards */}

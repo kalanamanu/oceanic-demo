@@ -15,7 +15,7 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
   const [showFilters, setShowFilters] = useState(false);
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 glass bg-gradient-to-br from-card to-secondary/35">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
           <Button
