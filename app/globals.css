@@ -5,6 +5,10 @@ body {
   background-position: center center;
   min-height: 100vh;
 }
+
+.dark body {
+  background-image: url("/background2.png");
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 
