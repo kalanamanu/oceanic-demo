@@ -45,10 +45,11 @@ export default function AppShell({ children }: AppShellProps) {
 
       {/* MAIN CONTENT */}
       <div
-        className="bg-background min-h-screen transition-all duration-200"
+        className="min-h-screen transition-all duration-200"
         style={{
           marginLeft: sidebarWidth,
           paddingTop: HEADER_HEIGHT,
+          //backgroundColor: "rgba(15, 23, 42, 0.14)", // lighter tint with 50% opacity
         }}
       >
         <div className="p-6">{children}</div>

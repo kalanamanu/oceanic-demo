@@ -50,7 +50,7 @@ export default function ProductsPage() {
     : products.filter(
         (p) =>
           p.id.toLowerCase().includes(search.toLowerCase()) ||
-          p.name.toLowerCase().includes(search.toLowerCase())
+          p.name.toLowerCase().includes(search.toLowerCase()),
       );
 
   // Table "onSelectProduct" action, e.g. view modal/detail
@@ -59,7 +59,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <main className="flex flex-1">
         <div className="flex-1 p-6 space-y-6">
           <h1 className="text-2xl font-bold mb-2">Products</h1>

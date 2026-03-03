@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function QuotationPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         <div className="flex items-center justify-between">
           <div>

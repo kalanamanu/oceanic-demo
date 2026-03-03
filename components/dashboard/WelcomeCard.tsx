@@ -103,7 +103,7 @@ export default function WelcomeCard({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={[
-        "relative overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-md",
+        "relative overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-md glass",
         "border-border bg-gradient-to-br from-card to-secondary/35",
       ].join(" ")}
     >

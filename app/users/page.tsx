@@ -131,7 +131,7 @@ function UsersPageContent() {
 
   if (loading && currentPage === 1) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         {/* <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading users...</p>
@@ -145,7 +145,7 @@ function UsersPageContent() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      className="min-h-screen bg-background flex flex-col"
+      className="min-h-screen  flex flex-col"
     >
       <main className="flex flex-1">
         <div className="flex-1 p-6 space-y-6">

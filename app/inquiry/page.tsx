@@ -35,14 +35,14 @@ export default function InquiryPage() {
   const handleEditInquiry = (updatedInquiry: Inquiry) => {
     // Update the inquiry in state
     setInquiries((prev) =>
-      prev.map((inq) => (inq.id === updatedInquiry.id ? updatedInquiry : inq))
+      prev.map((inq) => (inq.id === updatedInquiry.id ? updatedInquiry : inq)),
     );
     setSelectedInquiry(updatedInquiry);
   };
 
   const handleExport = () => {
     alert(
-      "Export feature would generate Excel/PDF reports with selected filters"
+      "Export feature would generate Excel/PDF reports with selected filters",
     );
   };
 
@@ -51,7 +51,7 @@ export default function InquiryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen  flex flex-col">
       <main className="flex flex-1">
         <div className="flex-1 p-6 space-y-6">
           {/* Stat Cards */}

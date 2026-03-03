@@ -107,7 +107,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-screen">
       {/* Background layers */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* Base dark maritime gradient */}
