@@ -111,7 +111,7 @@ export default function Dashboard() {
       {/* Background layers */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* Base dark maritime gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/10" />
+        {/* <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/10" /> */}
 
         {/* Teal wave glows */}
         <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-primary/20 blur-3xl" />
