@@ -29,7 +29,7 @@ export default function Dashboard() {
       setUser(userData);
     } else {
       // User data missing, redirect to login
-      router.push("/login");
+      //router.push("/login");
     }
 
     setIsLoading(false);
