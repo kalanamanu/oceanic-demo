@@ -106,7 +106,7 @@ function AuditLog({ entries }: { entries?: AuditEntry[] }) {
               <p className="text-sm text-foreground">{entry.details}</p>
             </div>
             <p className="text-xs text-muted-foreground whitespace-nowrap ml-4">
-              {new Date(entry.timestamp).toLocaleDateString()}{" "}
+              {new Date(entry.timestamp).toLocaleDateString("en-GB")}{" "}
               {new Date(entry.timestamp).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",

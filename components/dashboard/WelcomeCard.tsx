@@ -37,12 +37,7 @@ export default function WelcomeCard({
       )}:${pad(sriLankaTime.getSeconds())}`;
 
       setDateTime({
-        date: sriLankaTime.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
+        date: sriLankaTime.toLocaleDateString("en-GB"),
         time: time24,
       });
     };

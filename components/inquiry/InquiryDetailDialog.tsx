@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/card";
 import * as React from "react";
 import { EditInquiryDialog } from "@/components/inquiry/EditInquiryDialog";
 import { AddRemarkDialog } from "@/components/inquiry/AddRemarkDialog";
+import { EditRemarkDialog } from "@/components/inquiry/EditRemarkDialog";
 import { InquiryRemarkService } from "@/services/inquiry-remark.service";
 import { useRouter } from "next/navigation";
 interface InquiryDetailDialogProps {
@@ -34,14 +35,15 @@ export function InquiryDetailDialog({
   onClose,
   onEditInquiry,
 }: InquiryDetailDialogProps) {
-  // 0: detail, 1: edit, 2: add remark, null: none
-  const [dialogState, setDialogState] = React.useState<0 | 1 | 2 | null>(
+  // 0: detail, 1: edit, 2: add remark, 3: edit remark, null: none
+  const [dialogState, setDialogState] = React.useState<0 | 1 | 2 | 3 | null>(
     open ? 0 : null,
   );
   const router = useRouter(); // <-- Add this line
   
   const [liveRemarks, setLiveRemarks] = React.useState<InquiryRemark[]>([]);
   const [loadingRemarks, setLoadingRemarks] = React.useState(false);
+  const [editingRemark, setEditingRemark] = React.useState<InquiryRemark | null>(null);
 
   React.useEffect(() => {
     if (open) setDialogState(0);
@@ -75,6 +77,14 @@ export function InquiryDetailDialog({
       inq_id: idToUse as string,
       remark: remarkText
     });
+    await loadRemarks(idToUse as string);
+    setDialogState(0);
+  };
+
+  const handleEditRemarkSave = async (remarkId: string, remarkText: string) => {
+    const idToUse = inquiry?.inq_id || inquiry?.id;
+    if (!idToUse) return;
+    await InquiryRemarkService.updateRemark(remarkId, { remark: remarkText });
     await loadRemarks(idToUse as string);
     setDialogState(0);
   };
@@ -209,17 +219,31 @@ export function InquiryDetailDialog({
                     </p>
                   ) : (
                     liveRemarks.map((r) => (
-                      <Card key={r.remark_id} className="p-4">
+                      <Card key={r.remark_id} className="p-4 group relative">
                         <div className="space-y-2">
                           <div className="flex items-start justify-between">
-                            <p className="text-xs font-medium text-primary">
-                              {r.created_by || "Unknown User"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(r.created_date).toLocaleString("en-GB")}
-                            </p>
+                            <div>
+                              <p className="text-xs font-medium text-primary">
+                                {r.created_by || "Unknown User"}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(r.created_date).toLocaleString("en-GB")}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                setEditingRemark(r);
+                                setDialogState(3);
+                              }}
+                              title="Edit Remark"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </Button>
                           </div>
-                          <p className="text-base text-foreground">
+                          <p className="text-base text-foreground pr-4">
                             {r.remark}
                           </p>
                         </div>
@@ -277,6 +301,14 @@ export function InquiryDetailDialog({
           open={dialogState === 2}
           onClose={() => setDialogState(0)}
           onSave={handleAddRemarkSave}
+        />
+      )}
+      {dialogState === 3 && editingRemark && (
+        <EditRemarkDialog
+          remark={editingRemark}
+          open={dialogState === 3}
+          onClose={() => setDialogState(0)}
+          onSave={handleEditRemarkSave}
         />
       )}
     </>
