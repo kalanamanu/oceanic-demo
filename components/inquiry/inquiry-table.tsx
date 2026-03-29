@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { Inquiry, InquiryStatus } from "@/lib/types"
+import type { Inquiry } from "@/types/inquiry.types"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +12,7 @@ interface InquiryTableProps {
   onSelectInquiry: (inquiry: Inquiry) => void
 }
 
-const statusColors: Record<InquiryStatus, string> = {
+const statusColors: Record<string, string> = {
   Pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   "Quotation Submitted": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   Active: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
@@ -42,13 +42,13 @@ export function InquiryTable({ inquiries, onSelectInquiry }: InquiryTableProps) 
             <tbody className="divide-y divide-border">
               {inquiries.map((inquiry) => (
                 <tr key={inquiry.id} className="hover:bg-muted/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-mono font-medium text-primary">{inquiry.referenceNumber}</td>
-                  <td className="px-6 py-4 text-sm text-foreground">{inquiry.vesselName}</td>
+                  <td className="px-6 py-4 text-sm font-mono font-medium text-primary">INQ-{inquiry.id ? inquiry.id.substring(0, 6).toUpperCase() : "..."}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{inquiry.vessel_name}</td>
                   <td className="px-6 py-4 text-sm text-foreground">{inquiry.agent}</td>
                   <td className="px-6 py-4 text-sm text-foreground">{inquiry.port}</td>
-                  <td className="px-6 py-4 text-sm text-foreground">{inquiry.picAssigned || "-"}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{inquiry.pics && inquiry.pics.length > 0 ? inquiry.pics[0].pic_name : "-"}</td>
                   <td className="px-6 py-4 text-sm">
-                    <Badge className={statusColors[inquiry.status]}>{inquiry.status}</Badge>
+                    <Badge className={statusColors[inquiry.status || "Pending"] || statusColors.Pending}>{inquiry.status || "Pending"}</Badge>
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <Button

@@ -1,6 +1,7 @@
 "use client";
 
-import type { Inquiry, Remark } from "@/lib/types";
+import type { Remark } from "@/lib/types";
+import type { Inquiry } from "@/types/inquiry.types";
 import {
   Dialog,
   DialogContent,
@@ -63,7 +64,7 @@ export function InquiryDetailDialog({
         <DialogContent className="w-full max-w-screen-xl mx-auto rounded-xl shadow-lg p-0">
           <DialogHeader className="px-10 pt-10 pb-4">
             <DialogTitle className="text-2xl">
-              {inquiry.referenceNumber}
+              INQ-{inquiry.id ? inquiry.id.substring(0, 6).toUpperCase() : "UNKNOWN"}
             </DialogTitle>
             <DialogDescription className="mt-1 text-base">
               Vessel inquiry detail overview
@@ -85,7 +86,7 @@ export function InquiryDetailDialog({
                   <div>
                     <div className="text-muted-foreground">Vessel Name</div>
                     <div className="font-medium text-lg text-foreground">
-                      {inquiry.vesselName}
+                      {inquiry.vessel_name}
                     </div>
                   </div>
                   <div>
@@ -119,17 +120,12 @@ export function InquiryDetailDialog({
                   Categories
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {inquiry.categories.map(
-                    (cat: string | { name: string }, i: number) =>
-                      typeof cat === "string" ? (
-                        <Badge key={cat} variant="outline">
-                          {cat}
-                        </Badge>
-                      ) : (
-                        <Badge key={cat.name ?? i} variant="outline">
-                          {cat.name}
-                        </Badge>
-                      ),
+                  {inquiry.categories && inquiry.categories.map(
+                    (cat) => (
+                      <Badge key={cat.id || cat.name} variant="outline">
+                        {cat.name}
+                      </Badge>
+                    )
                   )}
                 </div>
               </div>
@@ -153,7 +149,7 @@ export function InquiryDetailDialog({
                       Person in Charge
                     </div>
                     <div className="font-medium text-lg text-foreground">
-                      {inquiry.picAssigned || "Unassigned"}
+                      {inquiry.pics && inquiry.pics.length > 0 ? inquiry.pics[0].pic_name : inquiry.key_pic_usr_id || "Unassigned"}
                     </div>
                   </div>
                 </div>

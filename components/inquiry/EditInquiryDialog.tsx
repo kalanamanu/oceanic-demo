@@ -10,14 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import type { Inquiry, Category } from "@/lib/types";
+import type { Inquiry, InquiryCategory } from "@/types/inquiry.types";
 
 const STATUS_OPTIONS = [
   "Pending",
   "Active",
   "Confirmed",
   "Rejected",
-  "Quotation Submitted",
 ];
 
 interface EditInquiryDialogProps {
@@ -27,75 +26,47 @@ interface EditInquiryDialogProps {
   onSave: (updatedInquiry: Inquiry) => void;
 }
 
-// Local state type for editing, allowing picAssigned as string[]
-type EditableInquiry = Omit<Inquiry, "picAssigned"> & { picAssigned: string[] };
-
 export function EditInquiryDialog({
   inquiry,
   open,
   onClose,
   onSave,
 }: EditInquiryDialogProps) {
-  // Ensure picAssigned is always an array for editing
-  const initialPicAssigned = Array.isArray(inquiry.picAssigned)
-    ? inquiry.picAssigned
-    : inquiry.picAssigned
-      ? [inquiry.picAssigned]
-      : [""];
-
-  const [fields, setFields] = React.useState<EditableInquiry>({
-    ...inquiry,
-    picAssigned: initialPicAssigned,
-  });
+  const [fields, setFields] = React.useState<Inquiry>(inquiry);
 
   React.useEffect(() => {
-    setFields({
-      ...inquiry,
-      picAssigned: Array.isArray(inquiry.picAssigned)
-        ? inquiry.picAssigned
-        : inquiry.picAssigned
-          ? [inquiry.picAssigned]
-          : [""],
-    });
+    setFields(inquiry);
   }, [inquiry, open]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    if (name.startsWith("picAssigned-")) {
-      // Handle sub PICs
-      const idx = parseInt(name.split("-")[1], 10);
-      setFields((prev) => ({
-        ...prev,
-        picAssigned: prev.picAssigned.map((pic, i) =>
-          i === idx ? value : pic,
-        ),
-      }));
-    } else if (name === "keyPicAssigned") {
-      setFields((prev) => ({
-        ...prev,
-        picAssigned: [value, ...prev.picAssigned.slice(1)],
-      }));
-    } else {
-      setFields({ ...fields, [name]: value });
-    }
+    setFields({ ...fields, [name]: value });
   };
 
-  // Add a new sub PIC
+  const handlePicChange = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPics = [...(fields.pics || [])];
+    newPics[idx] = { ...newPics[idx], pic_name: e.target.value };
+    setFields((prev) => ({ ...prev, pics: newPics }));
+  };
+
   const handleAddSubPic = () => {
     setFields((prev) => ({
       ...prev,
-      picAssigned: [...(prev.picAssigned || []), ""],
+      pics: [...(prev.pics || []), { pic_name: "", pic_usr_id: "" }],
     }));
   };
 
-  // Remove a sub PIC by index (not the key PIC)
   const handleRemoveSubPic = (idx: number) => {
     setFields((prev) => ({
       ...prev,
-      picAssigned: prev.picAssigned.filter((_, i) => i !== idx),
+      pics: (prev.pics || []).filter((_, i) => i !== idx),
     }));
+  };
+
+  const handleKeyPicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFields((prev) => ({ ...prev, key_pic_usr_id: e.target.value }));
   };
 
   // Convert input into array of {name: string}
@@ -105,33 +76,17 @@ export function EditInquiryDialog({
       categories: e.target.value
         .split(/\s*,\s*/)
         .filter(Boolean)
-        .map((name) => ({ name }) as unknown as Category),
+        .map((name) => ({ name, id: "" } as InquiryCategory)),
     });
   };
 
-  // Safely extract name for both string and object cases
-  const categoriesArr: (string | Category)[] = Array.isArray(fields.categories)
-    ? (fields.categories as (string | Category)[])
-    : [];
-
-  const categoriesText = categoriesArr
-    .map((c) =>
-      typeof c === "string"
-        ? c
-        : typeof c === "object" && "name" in c
-          ? (c as any).name
-          : "",
-    )
+  const categoriesText = (fields.categories || [])
+    .map((c) => c.name)
     .join(", ");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Convert picAssigned array to string for Inquiry type
-    const inquiryToSave: Inquiry = {
-      ...fields,
-      picAssigned: fields.picAssigned.filter(Boolean).join(", "),
-    };
-    onSave(inquiryToSave);
+    onSave(fields);
     onClose();
   };
 
@@ -152,22 +107,11 @@ export function EditInquiryDialog({
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium mb-1">
-                Reference Number
-              </label>
-              <Input
-                name="referenceNumber"
-                value={fields.referenceNumber}
-                onChange={handleChange}
-                placeholder="Reference Number"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
                 Vessel Name
               </label>
               <Input
-                name="vesselName"
-                value={fields.vesselName}
+                name="vessel_name"
+                value={fields.vessel_name || ""}
                 onChange={handleChange}
                 placeholder="Vessel Name"
               />
@@ -176,7 +120,7 @@ export function EditInquiryDialog({
               <label className="block text-sm font-medium mb-1">Agent</label>
               <Input
                 name="agent"
-                value={fields.agent}
+                value={fields.agent || ""}
                 onChange={handleChange}
                 placeholder="Agent"
               />
@@ -185,39 +129,38 @@ export function EditInquiryDialog({
               <label className="block text-sm font-medium mb-1">Port</label>
               <Input
                 name="port"
-                value={fields.port}
+                value={fields.port || ""}
                 onChange={handleChange}
                 placeholder="Port"
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Key PIC <span className="text-red-500">*</span>
+                Key PIC User ID <span className="text-red-500">*</span>
               </label>
               <Input
-                name="keyPicAssigned"
-                value={fields.picAssigned[0] ?? ""}
-                onChange={handleChange}
-                placeholder="Key Person in Charge"
+                name="key_pic_usr_id"
+                value={fields.key_pic_usr_id || ""}
+                onChange={handleKeyPicChange}
+                placeholder="Key Person in Charge User ID"
                 required
               />
               <div className="mt-2">
                 <label className="block text-sm font-medium mb-1">
                   Sub PICs
                 </label>
-                {(fields.picAssigned.slice(1) || []).map((pic, idx) => (
+                {(fields.pics || []).map((pic, idx) => (
                   <div key={idx} className="flex items-center gap-2 mb-2">
                     <Input
-                      name={`picAssigned-${idx + 1}`}
-                      value={pic}
-                      onChange={handleChange}
-                      placeholder={`Sub PIC #${idx + 1}`}
+                      value={pic.pic_name || ""}
+                      onChange={(e) => handlePicChange(idx, e)}
+                      placeholder={`PIC Name #${idx + 1}`}
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
-                      onClick={() => handleRemoveSubPic(idx + 1)}
+                      onClick={() => handleRemoveSubPic(idx)}
                       title="Remove Sub PIC"
                     >
                       &times;
@@ -238,7 +181,7 @@ export function EditInquiryDialog({
               <label className="block text-sm font-medium mb-1">Status</label>
               <select
                 name="status"
-                value={fields.status}
+                value={fields.status || "Pending"}
                 onChange={handleChange}
                 className="block w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm text-foreground"
               >
@@ -256,7 +199,7 @@ export function EditInquiryDialog({
               <label className="block text-sm font-medium mb-1">ETA</label>
               <Input
                 name="eta"
-                value={fields.eta}
+                value={fields.eta || ""}
                 onChange={handleChange}
                 placeholder="ETA"
                 type="datetime-local"
@@ -264,14 +207,26 @@ export function EditInquiryDialog({
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Inquiry Received Date & Time
+                Inquiry Received Date
               </label>
               <Input
-                name="receivedDate"
-                value={fields.receivedDate ?? ""}
+                name="received_date"
+                value={fields.received_date || ""}
                 onChange={handleChange}
-                placeholder="Inquiry Received Date & Time"
-                type="datetime-local"
+                placeholder="Inquiry Received Date"
+                type="date"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Inquiry Received Time
+              </label>
+              <Input
+                name="received_time"
+                value={fields.received_time || ""}
+                onChange={handleChange}
+                placeholder="HH:MM"
+                type="time"
               />
             </div>
             <div>
@@ -298,3 +253,4 @@ export function EditInquiryDialog({
     </Dialog>
   );
 }
+
