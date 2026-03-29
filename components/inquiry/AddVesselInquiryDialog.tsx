@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { UserSelect } from "@/components/inquiry/user-select";
+import { CategorySelect } from "@/components/inquiry/category-select";
+import { InquiryCategory } from "@/types/inquiry.types";
 import { InquiryService } from "@/services/inquiry.service";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -40,14 +42,22 @@ export function VesselInquiryDialog({
   const [fields, setFields] = React.useState({
     vesselName: "",
     agent: "",
+    customer: "",
+    customerEmail: "",
+    customerContact: "",
+    commissionParty: "",
     eta: undefined as Date | undefined,
     port: "",
-    category: "",
+    categories: [] as InquiryCategory[],
     inquiryReceived: undefined as Date | undefined,
     quotationSubmission: undefined as Date | undefined,
     keyPicUserId: "",
     subPics: [] as SubPIC[],
   });
+
+  const handleCategoryChange = (categories: InquiryCategory[]) => {
+    setFields((prev) => ({ ...prev, categories }));
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -97,8 +107,8 @@ export function VesselInquiryDialog({
 
     try {
       // Validate required fields
-      if (!fields.eta || !fields.inquiryReceived) {
-        toast.error("Please fill all required fields");
+      if (!fields.eta || !fields.inquiryReceived || fields.categories.length === 0) {
+        toast.error("Please fill all required fields, including at least one category");
         return;
       }
 
@@ -106,12 +116,17 @@ export function VesselInquiryDialog({
       const inquiryData = {
         vessel_name: fields.vesselName,
         agent: fields.agent,
+        customer: fields.customer,
+        customerEmail: fields.customerEmail,
+        customerContact: fields.customerContact,
+        commissionParty: fields.commissionParty,
         eta: format(fields.eta, "yyyy-MM-dd"),
         port: fields.port,
-        category: fields.category,
+        categories: fields.categories,
         received_date: format(fields.inquiryReceived, "yyyy-MM-dd"),
         received_time: format(fields.inquiryReceived, "HH:mm"),
-        quote_submission_deadline_date: fields.quotationSubmission
+        // Type definition expects 'qout_' instead of 'quote_'
+        qout_submission_deadline_date: fields.quotationSubmission
           ? format(fields.quotationSubmission, "yyyy-MM-dd")
           : undefined,
         key_pic_usr_id: fields.keyPicUserId,
@@ -130,9 +145,13 @@ export function VesselInquiryDialog({
       setFields({
         vesselName: "",
         agent: "",
+        customer: "",
+        customerEmail: "",
+        customerContact: "",
+        commissionParty: "",
         eta: undefined,
         port: "",
-        category: "",
+        categories: [],
         inquiryReceived: undefined,
         quotationSubmission: undefined,
         keyPicUserId: "",
@@ -218,6 +237,63 @@ export function VesselInquiryDialog({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.16, duration: 0.2 }}
+                >
+                  <label className="block text-sm font-medium mb-1">
+                    Customer <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="customer"
+                    type="text"
+                    placeholder="Enter customer name"
+                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    required
+                    value={fields.customer}
+                    onChange={handleChange}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.17, duration: 0.2 }}
+                >
+                  <label className="block text-sm font-medium mb-1">
+                    Customer Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="customerEmail"
+                    type="email"
+                    placeholder="Enter customer email"
+                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    required
+                    value={fields.customerEmail}
+                    onChange={handleChange}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.18, duration: 0.2 }}
+                >
+                  <label className="block text-sm font-medium mb-1">
+                    Customer Contact <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="customerContact"
+                    type="text"
+                    placeholder="Enter customer contact"
+                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    required
+                    value={fields.customerContact}
+                    onChange={handleChange}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.2 }}
                 >
                   <label className="block text-sm font-medium mb-2">
@@ -252,19 +328,33 @@ export function VesselInquiryDialog({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.28, duration: 0.2 }}
+                >
+                  <label className="block text-sm font-medium mb-1">
+                    Commission Party <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="commissionParty"
+                    type="text"
+                    placeholder="Enter commission party"
+                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    required
+                    value={fields.commissionParty}
+                    onChange={handleChange}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.2 }}
                 >
                   <label className="block text-sm font-medium mb-1">
-                    Category <span className="text-red-500">*</span>
+                    Categories <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    name="category"
-                    type="text"
-                    placeholder="Enter vessel category (e.g., Container, Bulk Carrier)"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.category}
-                    onChange={handleChange}
+                  <CategorySelect
+                    selectedCategories={fields.categories}
+                    onChange={handleCategoryChange}
                   />
                 </motion.div>
 
