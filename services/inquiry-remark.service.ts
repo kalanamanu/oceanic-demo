@@ -14,7 +14,7 @@ export class InquiryRemarkService {
   static async createRemark(data: CreateInquiryRemarkRequest): Promise<InquiryRemark> {
     try {
       const response = await apiClient.post<InquiryRemarkResponse>(
-        '/api/inqRemarks',
+        '/api/inquiry-remarks',
         data
       );
       return response.data.data;
@@ -29,7 +29,7 @@ export class InquiryRemarkService {
   static async getRemarksByInquiryId(inqId: string): Promise<InquiryRemark[]> {
     try {
       const response = await apiClient.get<InquiryRemarksResponse>(
-        `/api/inqRemarks/${inqId}`
+        `/api/inquiry-remarks/${inqId}`
       );
       return response.data.data;
     } catch (error: any) {
@@ -43,7 +43,7 @@ export class InquiryRemarkService {
   static async updateRemark(remarkId: string, data: UpdateInquiryRemarkRequest): Promise<InquiryRemark> {
     try {
       const response = await apiClient.put<InquiryRemarkResponse>(
-        `/api/inqRemarks/${remarkId}`,
+        `/api/inquiry-remarks/${remarkId}`,
         data
       );
       return response.data.data;
@@ -57,7 +57,7 @@ export class InquiryRemarkService {
    */
   static async deleteRemark(remarkId: string): Promise<void> {
     try {
-      await apiClient.delete(`/api/inqRemarks/${remarkId}`);
+      await apiClient.delete(`/api/inquiry-remarks/${remarkId}`);
     } catch (error: any) {
       throw this.handleError(error);
     }

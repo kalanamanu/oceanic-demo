@@ -139,7 +139,7 @@ export function InquiryDetailDialog({
                   <div>
                     <div className="text-muted-foreground">ETA</div>
                     <div className="font-medium text-lg text-foreground">
-                      {new Date(inquiry.eta).toLocaleDateString() +
+                      {new Date(inquiry.eta).toLocaleDateString("en-GB") +
                         " " +
                         new Date(inquiry.eta).toLocaleTimeString()}
                     </div>
@@ -216,7 +216,7 @@ export function InquiryDetailDialog({
                               {r.created_by || "Unknown User"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(r.created_date).toLocaleString()}
+                              {new Date(r.created_date).toLocaleString("en-GB")}
                             </p>
                           </div>
                           <p className="text-base text-foreground">
