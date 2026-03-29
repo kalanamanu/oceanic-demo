@@ -9,10 +9,12 @@ import type { UserData } from "@/types/auth.types";
 
 export function DashboardHeader() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setMounted(true);
     const userData = AuthService.getCurrentUser();
     setUser(userData);
     setIsLoading(false);
@@ -40,7 +42,7 @@ export function DashboardHeader() {
         <div className="flex items-center gap-3">
           <img
             src={
-              theme === "dark" ? "/oceanic-logo-white.png" : "/oceanic-logo.png"
+              mounted && theme === "dark" ? "/oceanic-logo-white.png" : "/oceanic-logo.png"
             }
             alt="Oceanic Logo"
             className="h-12 w-auto object-contain"
@@ -52,13 +54,13 @@ export function DashboardHeader() {
           {/* Theme Toggle */}
           <Toggle
             aria-label="Toggle theme"
-            pressed={theme === "dark"}
+            pressed={mounted ? theme === "dark" : false}
             onPressedChange={(pressed) => setTheme(pressed ? "dark" : "light")}
             size="sm"
             variant="outline"
             className="h-9 w-9 rounded-md p-0 hover:bg-primary hover:text-primary-foreground cursor-pointer"
           >
-            {theme === "dark" ? (
+            {mounted && theme === "dark" ? (
               <Moon className="h-4 w-4" />
             ) : (
               <Sun className="h-4 w-4" />

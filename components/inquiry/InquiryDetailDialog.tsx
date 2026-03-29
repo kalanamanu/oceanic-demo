@@ -1,7 +1,7 @@
 "use client";
 
 import type { Remark } from "@/lib/types";
-import type { Inquiry } from "@/types/inquiry.types";
+import type { Inquiry, InquiryRemark } from "@/types/inquiry.types";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,9 @@ import { Edit2, MessageSquare, File } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import * as React from "react";
 import { EditInquiryDialog } from "@/components/inquiry/EditInquiryDialog";
-import { useRouter } from "next/navigation"; // <-- Add this import
-
+import { AddRemarkDialog } from "@/components/inquiry/AddRemarkDialog";
+import { InquiryRemarkService } from "@/services/inquiry-remark.service";
+import { useRouter } from "next/navigation";
 interface InquiryDetailDialogProps {
   inquiry: Inquiry | null;
   remarks: Remark[];
@@ -33,20 +34,54 @@ export function InquiryDetailDialog({
   onClose,
   onEditInquiry,
 }: InquiryDetailDialogProps) {
-  // 0: detail, 1: edit, null: none
-  const [dialogState, setDialogState] = React.useState<0 | 1 | null>(
+  // 0: detail, 1: edit, 2: add remark, null: none
+  const [dialogState, setDialogState] = React.useState<0 | 1 | 2 | null>(
     open ? 0 : null,
   );
   const router = useRouter(); // <-- Add this line
+  
+  const [liveRemarks, setLiveRemarks] = React.useState<InquiryRemark[]>([]);
+  const [loadingRemarks, setLoadingRemarks] = React.useState(false);
 
   React.useEffect(() => {
     if (open) setDialogState(0);
     else setDialogState(null);
   }, [open]);
 
-  if (!inquiry) return null;
+  React.useEffect(() => {
+    const idToUse = inquiry?.inq_id || inquiry?.id;
+    if (open && idToUse) {
+      loadRemarks(idToUse as string);
+    }
+  }, [open, inquiry]);
 
-  const inquiryRemarks = remarks.filter((r) => r.inquiryId === inquiry.id);
+  const loadRemarks = async (inqId: string) => {
+    setLoadingRemarks(true);
+    try {
+      const data = await InquiryRemarkService.getRemarksByInquiryId(inqId);
+      setLiveRemarks(data);
+    } catch (e) {
+      console.error("Failed to fetch remarks", e);
+    } finally {
+      setLoadingRemarks(false);
+    }
+  };
+
+  const handleAddRemarkSave = async (remarkText: string) => {
+    if (!inquiry) return;
+    const idToUse = inquiry.inq_id || inquiry.id;
+    if (!idToUse) return;
+    await InquiryRemarkService.createRemark({
+      inq_id: idToUse as string,
+      remark: remarkText
+    });
+    await loadRemarks(idToUse as string);
+    setDialogState(0);
+  };
+
+  if (!inquiry) return null;
+  
+  const currentIdToUse = inquiry.inq_id || inquiry.id;
 
   const handleEditSave = (updatedInquiry: Inquiry) => {
     if (onEditInquiry) {
@@ -64,7 +99,7 @@ export function InquiryDetailDialog({
         <DialogContent className="w-full max-w-screen-xl mx-auto rounded-xl shadow-lg p-0">
           <DialogHeader className="px-10 pt-10 pb-4">
             <DialogTitle className="text-2xl">
-              INQ-{inquiry.id ? inquiry.id.substring(0, 6).toUpperCase() : "UNKNOWN"}
+              INQ-{currentIdToUse ? currentIdToUse.replace("inq_", "").substring(0, 6).toUpperCase() : "UNKNOWN"}
             </DialogTitle>
             <DialogDescription className="mt-1 text-base">
               Vessel inquiry detail overview
@@ -166,24 +201,26 @@ export function InquiryDetailDialog({
                   </h3>
                 </div>
                 <div className="space-y-3">
-                  {inquiryRemarks.length === 0 ? (
+                  {loadingRemarks ? (
+                    <p className="text-sm text-muted-foreground">Loading remarks...</p>
+                  ) : liveRemarks.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                       No remarks yet
                     </p>
                   ) : (
-                    inquiryRemarks.map((remark) => (
-                      <Card key={remark.id} className="p-4">
+                    liveRemarks.map((r) => (
+                      <Card key={r.remark_id} className="p-4">
                         <div className="space-y-2">
                           <div className="flex items-start justify-between">
                             <p className="text-xs font-medium text-primary">
-                              {remark.author}
+                              {r.created_by || "Unknown User"}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(remark.timestamp).toLocaleDateString()}
+                              {new Date(r.created_date).toLocaleString()}
                             </p>
                           </div>
                           <p className="text-base text-foreground">
-                            {remark.text}
+                            {r.remark}
                           </p>
                         </div>
                       </Card>
@@ -203,7 +240,11 @@ export function InquiryDetailDialog({
                   <Edit2 className="mr-2 h-4 w-4" />
                   Edit Inquiry
                 </Button>
-                <Button className="w-full bg-transparent" variant="outline">
+                <Button 
+                   className="w-full bg-transparent" 
+                   variant="outline"
+                   onClick={() => setDialogState(2)}
+                >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Add Remark
                 </Button>
@@ -211,7 +252,7 @@ export function InquiryDetailDialog({
                   className="w-full bg-transparent"
                   variant="outline"
                   onClick={() =>
-                    router.push(`/quotation/create?inquiryId=${inquiry.id}`)
+                    router.push(`/quotation/create?inquiryId=${currentIdToUse || ""}`)
                   }
                 >
                   <File className="mr-2 h-4 w-4" />
@@ -228,6 +269,14 @@ export function InquiryDetailDialog({
           open={dialogState === 1}
           onClose={() => setDialogState(0)}
           onSave={handleEditSave}
+        />
+      )}
+      {dialogState === 2 && inquiry && (
+        <AddRemarkDialog
+          inquiryId={currentIdToUse || ""}
+          open={dialogState === 2}
+          onClose={() => setDialogState(0)}
+          onSave={handleAddRemarkSave}
         />
       )}
     </>

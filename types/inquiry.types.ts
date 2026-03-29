@@ -10,7 +10,8 @@ export interface InquiryCategory {
 }
 
 export interface Inquiry {
-  id: string;
+  id?: string;
+  inq_id?: string;
   vessel_name: string;
   agent: string;
   eta: string; // ISO date string
@@ -70,4 +71,34 @@ export interface InquiryResponse {
   success: boolean;
   message: string;
   data: Inquiry;
+}
+
+export interface InquiryRemark {
+  remark_id: string;
+  inq_id: string;
+  remark: string;
+  created_by: string;
+  created_date: string;
+  last_updated: string;
+}
+
+export interface CreateInquiryRemarkRequest {
+  inq_id: string;
+  remark: string;
+}
+
+export interface UpdateInquiryRemarkRequest {
+  remark: string;
+}
+
+export interface InquiryRemarkResponse {
+  success: boolean;
+  message: string;
+  data: InquiryRemark;
+}
+
+export interface InquiryRemarksResponse {
+  success: boolean;
+  message: string;
+  data: InquiryRemark[];
 }

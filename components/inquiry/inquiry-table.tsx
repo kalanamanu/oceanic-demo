@@ -40,9 +40,11 @@ export function InquiryTable({ inquiries, onSelectInquiry }: InquiryTableProps) 
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {inquiries.map((inquiry) => (
-                <tr key={inquiry.id} className="hover:bg-muted/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-mono font-medium text-primary">INQ-{inquiry.id ? inquiry.id.substring(0, 6).toUpperCase() : "..."}</td>
+              {inquiries.map((inquiry, index) => {
+                const idToUse = inquiry.inq_id || inquiry.id;
+                return (
+                <tr key={idToUse || index} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-6 py-4 text-sm font-mono font-medium text-primary">INQ-{idToUse ? idToUse.replace("inq_", "").substring(0, 6).toUpperCase() : "..."}</td>
                   <td className="px-6 py-4 text-sm text-foreground">{inquiry.vessel_name}</td>
                   <td className="px-6 py-4 text-sm text-foreground">{inquiry.agent}</td>
                   <td className="px-6 py-4 text-sm text-foreground">{inquiry.port}</td>
@@ -55,7 +57,7 @@ export function InquiryTable({ inquiries, onSelectInquiry }: InquiryTableProps) 
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        setExpandedId(expandedId === inquiry.id ? null : inquiry.id)
+                        setExpandedId(expandedId === idToUse ? null : idToUse || null)
                         onSelectInquiry(inquiry)
                       }}
                     >
@@ -63,7 +65,7 @@ export function InquiryTable({ inquiries, onSelectInquiry }: InquiryTableProps) 
                     </Button>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>
