@@ -12,12 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import type { Inquiry, InquiryCategory } from "@/types/inquiry.types";
 
-const STATUS_OPTIONS = [
-  "Pending",
-  "Active",
-  "Confirmed",
-  "Rejected",
-];
+const STATUS_OPTIONS = ["Pending", "Active", "Confirmed", "Rejected"];
 
 interface EditInquiryDialogProps {
   inquiry: Inquiry;
@@ -32,7 +27,10 @@ export function EditInquiryDialog({
   onClose,
   onSave,
 }: EditInquiryDialogProps) {
-  const [fields, setFields] = React.useState<Inquiry>(inquiry);
+  const [fields, setFields] = React.useState<Inquiry>({
+    ...inquiry,
+    other_pics: inquiry.other_pics ?? [],
+  });
 
   React.useEffect(() => {
     setFields(inquiry);
@@ -45,23 +43,30 @@ export function EditInquiryDialog({
     setFields({ ...fields, [name]: value });
   };
 
-  const handlePicChange = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPics = [...(fields.pics || [])];
-    newPics[idx] = { ...newPics[idx], pic_name: e.target.value };
-    setFields((prev) => ({ ...prev, pics: newPics }));
+  const handlePicChange = (
+    idx: number,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newPics = [...(fields.other_pics || [])];
+    newPics[idx] = { ...newPics[idx], name: e.target.value };
+
+    setFields((prev) => ({
+      ...prev,
+      other_pics: newPics,
+    }));
   };
 
   const handleAddSubPic = () => {
     setFields((prev) => ({
       ...prev,
-      pics: [...(prev.pics || []), { pic_name: "", pic_usr_id: "" }],
+      other_pics: [...(prev.other_pics || []), { id: "", name: "" }],
     }));
   };
 
   const handleRemoveSubPic = (idx: number) => {
     setFields((prev) => ({
       ...prev,
-      pics: (prev.pics || []).filter((_, i) => i !== idx),
+      other_pics: (prev.other_pics || []).filter((_, i) => i !== idx),
     }));
   };
 
@@ -76,7 +81,7 @@ export function EditInquiryDialog({
       categories: e.target.value
         .split(/\s*,\s*/)
         .filter(Boolean)
-        .map((name) => ({ name, id: "" } as InquiryCategory)),
+        .map((name) => ({ name, id: "" }) as InquiryCategory),
     });
   };
 
@@ -149,10 +154,10 @@ export function EditInquiryDialog({
                 <label className="block text-sm font-medium mb-1">
                   Sub PICs
                 </label>
-                {(fields.pics || []).map((pic, idx) => (
+                {(fields.other_pics || []).map((pic, idx) => (
                   <div key={idx} className="flex items-center gap-2 mb-2">
                     <Input
-                      value={pic.pic_name || ""}
+                      value={pic.name || ""}
                       onChange={(e) => handlePicChange(idx, e)}
                       placeholder={`PIC Name #${idx + 1}`}
                     />
@@ -161,7 +166,6 @@ export function EditInquiryDialog({
                       variant="destructive"
                       size="icon"
                       onClick={() => handleRemoveSubPic(idx)}
-                      title="Remove Sub PIC"
                     >
                       &times;
                     </Button>
@@ -253,4 +257,3 @@ export function EditInquiryDialog({
     </Dialog>
   );
 }
-

@@ -1,7 +1,8 @@
 export interface InquiryPIC {
   inq_id?: string;
-  pic_usr_id: string;
-  pic_name: string;
+  id: string;
+  name: string;
+
 }
 
 export interface InquiryCategory {
@@ -12,21 +13,32 @@ export interface InquiryCategory {
 export interface Inquiry {
   id?: string;
   inq_id?: string;
+
   vessel_name: string;
   agent: string;
-  eta: string; // ISO date string
+  eta: string;
   port: string;
-  categories: InquiryCategory[];
-  received_date: string; // ISO date string
-  received_time: string; // "HH:MM"
-  qout_submission_deadline_date?: string; // ISO date string
+
+  categories?: InquiryCategory[];
+
+  received_date: string;
+  received_time: string;
+  qout_submission_deadline_date?: string;
+
   key_pic_usr_id: string;
-  pics: InquiryPIC[];
+
+  // ✅ FIXED
+  key_pic?: InquiryPIC | null;
+  other_pics?: InquiryPIC[];
+
   customer?: string;
   customerContact?: string;
   customerEmail?: string;
   commissionParty?: string;
-  status?: "Pending" | "Active" | "Confirmed" | "Rejected";
+
+  // backend sends null sometimes
+  status?: "Pending" | "Active" | "Confirmed" | "Rejected" | null;
+
   createdAt?: string;
   updatedAt?: string;
 }

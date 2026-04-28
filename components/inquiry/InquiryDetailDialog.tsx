@@ -40,10 +40,11 @@ export function InquiryDetailDialog({
     open ? 0 : null,
   );
   const router = useRouter(); // <-- Add this line
-  
+
   const [liveRemarks, setLiveRemarks] = React.useState<InquiryRemark[]>([]);
   const [loadingRemarks, setLoadingRemarks] = React.useState(false);
-  const [editingRemark, setEditingRemark] = React.useState<InquiryRemark | null>(null);
+  const [editingRemark, setEditingRemark] =
+    React.useState<InquiryRemark | null>(null);
 
   React.useEffect(() => {
     if (open) setDialogState(0);
@@ -75,7 +76,7 @@ export function InquiryDetailDialog({
     if (!idToUse) return;
     await InquiryRemarkService.createRemark({
       inq_id: idToUse as string,
-      remark: remarkText
+      remark: remarkText,
     });
     await loadRemarks(idToUse as string);
     setDialogState(0);
@@ -90,7 +91,7 @@ export function InquiryDetailDialog({
   };
 
   if (!inquiry) return null;
-  
+
   const currentIdToUse = inquiry.inq_id || inquiry.id;
 
   const handleEditSave = (updatedInquiry: Inquiry) => {
@@ -109,7 +110,13 @@ export function InquiryDetailDialog({
         <DialogContent className="w-full max-w-screen-xl mx-auto rounded-xl shadow-lg p-0">
           <DialogHeader className="px-10 pt-10 pb-4">
             <DialogTitle className="text-2xl">
-              INQ-{currentIdToUse ? currentIdToUse.replace("inq_", "").substring(0, 6).toUpperCase() : "UNKNOWN"}
+              INQ-
+              {currentIdToUse
+                ? currentIdToUse
+                    .replace("inq_", "")
+                    .substring(0, 6)
+                    .toUpperCase()
+                : "UNKNOWN"}
             </DialogTitle>
             <DialogDescription className="mt-1 text-base">
               Vessel inquiry detail overview
@@ -165,13 +172,12 @@ export function InquiryDetailDialog({
                   Categories
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {inquiry.categories && inquiry.categories.map(
-                    (cat) => (
+                  {inquiry.categories &&
+                    inquiry.categories.map((cat) => (
                       <Badge key={cat.id || cat.name} variant="outline">
                         {cat.name}
                       </Badge>
-                    )
-                  )}
+                    ))}
                 </div>
               </div>
 
@@ -194,7 +200,9 @@ export function InquiryDetailDialog({
                       Person in Charge
                     </div>
                     <div className="font-medium text-lg text-foreground">
-                      {inquiry.pics && inquiry.pics.length > 0 ? inquiry.pics[0].pic_name : inquiry.key_pic_usr_id || "Unassigned"}
+                      {inquiry.other_pics && inquiry.other_pics.length > 0
+                        ? inquiry.other_pics[0].name
+                        : "-"}
                     </div>
                   </div>
                 </div>
@@ -212,7 +220,9 @@ export function InquiryDetailDialog({
                 </div>
                 <div className="space-y-3">
                   {loadingRemarks ? (
-                    <p className="text-sm text-muted-foreground">Loading remarks...</p>
+                    <p className="text-sm text-muted-foreground">
+                      Loading remarks...
+                    </p>
                   ) : liveRemarks.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                       No remarks yet
@@ -227,7 +237,9 @@ export function InquiryDetailDialog({
                                 {r.created_by || "Unknown User"}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {new Date(r.created_date).toLocaleString("en-GB")}
+                                {new Date(r.created_date).toLocaleString(
+                                  "en-GB",
+                                )}
                               </p>
                             </div>
                             <Button
@@ -264,10 +276,10 @@ export function InquiryDetailDialog({
                   <Edit2 className="mr-2 h-4 w-4" />
                   Edit Inquiry
                 </Button>
-                <Button 
-                   className="w-full bg-transparent" 
-                   variant="outline"
-                   onClick={() => setDialogState(2)}
+                <Button
+                  className="w-full bg-transparent"
+                  variant="outline"
+                  onClick={() => setDialogState(2)}
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
                   Add Remark
@@ -276,7 +288,9 @@ export function InquiryDetailDialog({
                   className="w-full bg-transparent"
                   variant="outline"
                   onClick={() =>
-                    router.push(`/quotation/create?inquiryId=${currentIdToUse || ""}`)
+                    router.push(
+                      `/quotation/create?inquiryId=${currentIdToUse || ""}`,
+                    )
                   }
                 >
                   <File className="mr-2 h-4 w-4" />
