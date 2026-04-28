@@ -18,10 +18,21 @@ export default function InquiryPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const filteredInquiries = inquiries.filter((inq) => {
+    const q = searchQuery.toLowerCase();
+
+    return (
+      inq.vessel_name?.toLowerCase().includes(q) ||
+      inq.agent?.toLowerCase().includes(q) ||
+      inq.port?.toLowerCase().includes(q) ||
+      inq.inq_id?.toLowerCase().includes(q)
+    );
+  });
   useEffect(() => {
     fetchInquiries(page);
   }, [page]);
@@ -29,7 +40,10 @@ export default function InquiryPage() {
   const fetchInquiries = async (pageNumber: number) => {
     setLoading(true);
     try {
-      const response = await InquiryService.getAllInquiries({ page: pageNumber, pageSize: 10 });
+      const response = await InquiryService.getAllInquiries({
+        page: pageNumber,
+        pageSize: 10,
+      });
       if (response.success && response.data) {
         setInquiries(response.data);
         if (response.pagination) {
@@ -51,7 +65,6 @@ export default function InquiryPage() {
     confirmedCount: inquiries.filter((i) => i.status === "Confirmed").length,
     rejectedCount: inquiries.filter((i) => i.status === "Rejected").length,
   };
-
   // Select an inquiry
   const handleSelectInquiry = (inquiry: Inquiry) => {
     setSelectedInquiry(inquiry);
@@ -68,7 +81,9 @@ export default function InquiryPage() {
   };
 
   const handleExport = () => {
-    alert("Export feature would generate Excel/PDF reports with selected filters");
+    alert(
+      "Export feature would generate Excel/PDF reports with selected filters",
+    );
   };
 
   const handleCreateNew = () => {
@@ -84,37 +99,45 @@ export default function InquiryPage() {
 
           {/* Filter and Table */}
           <section className="space-y-4">
-            <FilterBar onExport={handleExport} onCreateNew={handleCreateNew} />
-            
+            <FilterBar
+              onExport={handleExport}
+              onCreateNew={handleCreateNew}
+              onSearch={(value) => setSearchQuery(value)}
+            />
+
             {loading ? (
               <div className="flex justify-center items-center py-20">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/50" />
-                <span className="ml-3 text-sm text-muted-foreground font-medium">Loading inquiries...</span>
+                <span className="ml-3 text-sm text-muted-foreground font-medium">
+                  Loading inquiries...
+                </span>
               </div>
             ) : (
-               <>
+              <>
                 <InquiryTable
-                  inquiries={inquiries}
+                  inquiries={filteredInquiries}
                   onSelectInquiry={handleSelectInquiry}
                 />
-                
+
                 {/* Pagination Controls */}
                 <div className="flex justify-end items-center space-x-2 mt-4 pt-4 border-t border-border">
                   <span className="text-sm text-muted-foreground mr-4">
                     Page {page} of {totalPages || 1}
                   </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
                   >
                     Previous
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setPage((p) => Math.min(totalPages || 1, p + 1))
+                    }
                     disabled={page >= (totalPages || 1)}
                   >
                     Next
@@ -125,7 +148,7 @@ export default function InquiryPage() {
           </section>
         </div>
       </main>
-      
+
       {/* Inquiry Detail Dialog with Edit support */}
       {detailPanelOpen && selectedInquiry && (
         <InquiryDetailDialog

@@ -2,22 +2,31 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Filter, Download, Plus } from "lucide-react";
+import { Filter, Download, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
+import { Input } from "@/components/ui/input";
 
 interface FilterBarProps {
   onExport?: () => void;
   onCreateNew?: () => void;
+  onSearch?: (value: string) => void;
 }
 
-export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
+export function FilterBar({ onExport, onCreateNew, onSearch }: FilterBarProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    onSearch?.(value);
+  };
 
   return (
     <Card className="p-4 glass bg-gradient-to-br from-card to-secondary/35">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-2">
+        {/* LEFT SIDE */}
+        <div className="flex items-center gap-3 flex-1">
           <Button
             variant={showFilters ? "default" : "outline"}
             size="sm"
@@ -26,10 +35,24 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
             <Filter className="mr-2 h-4 w-4" />
             Filters
           </Button>
+
+          {/* 🔥 SEARCH BAR */}
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search vessel, agent, port..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+
           <p className="text-sm text-muted-foreground hidden md:block">
             Filter by status, port, PIC, or date range
           </p>
         </div>
+
+        {/* RIGHT SIDE */}
         <div className="flex gap-2">
           {onExport && (
             <Button variant="outline" size="sm" onClick={onExport}>
@@ -37,6 +60,7 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
               Export
             </Button>
           )}
+
           {onCreateNew && (
             <VesselInquiryDialog>
               <Button size="sm">
@@ -48,6 +72,7 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
         </div>
       </div>
 
+      {/* FILTERS */}
       {showFilters && (
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4 pt-4 border-t border-border">
           <div>
@@ -63,6 +88,7 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
               <option>Rejected</option>
             </select>
           </div>
+
           <div>
             <label className="text-xs font-medium text-muted-foreground">
               Port
@@ -75,6 +101,7 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
               <option>Galle</option>
             </select>
           </div>
+
           <div>
             <label className="text-xs font-medium text-muted-foreground">
               PIC
@@ -88,6 +115,7 @@ export function FilterBar({ onExport, onCreateNew }: FilterBarProps) {
               <option>Priya Kumar</option>
             </select>
           </div>
+
           <div>
             <label className="text-xs font-medium text-muted-foreground">
               Date Range
