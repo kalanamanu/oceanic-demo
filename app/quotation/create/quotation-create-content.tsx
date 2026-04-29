@@ -184,18 +184,14 @@ export function QuotationCreateContent() {
         {step === null && (
           <div className="rounded-xl border bg-card p-8 flex flex-col items-center gap-6">
             <p className="text-muted-foreground">
-              Choose how you want to create your quotation
+              First Download the Template and then Reupload the filled Excel
             </p>
             <div className="flex gap-4">
               <Button size="lg" onClick={() => setStep("excel")}>
-                Upload from Excel
+                Upload Excel
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setStep("manual")}
-              >
-                Enter Manually
+              <Button size="lg" variant="outline">
+                Download Template
               </Button>
             </div>
           </div>
