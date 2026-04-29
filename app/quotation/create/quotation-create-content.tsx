@@ -68,6 +68,8 @@ export function QuotationCreateContent() {
   const [addItemFields, setAddItemFields] = React.useState<any>(emptyItem);
   const [editItemFields, setEditItemFields] = React.useState<any>(emptyItem);
 
+  const [downloading, setDownloading] = React.useState(false);
+
   /* ================= EXCEL HANDLERS ================= */
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -119,6 +121,30 @@ export function QuotationCreateContent() {
     }
     setEditDialogOpen(false);
     setEditIndex(null);
+  };
+
+  /* ================= DOWNLOAD TEMPLATE ================= */
+  const handleDownloadTemplate = async () => {
+    try {
+      setDownloading(true);
+      const response = await fetch(
+        "http://localhost:3070/api/customer-excel/template",
+      );
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "quotation-template.xlsx";
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   React.useEffect(() => {
@@ -190,8 +216,13 @@ export function QuotationCreateContent() {
               <Button size="lg" onClick={() => setStep("excel")}>
                 Upload Excel
               </Button>
-              <Button size="lg" variant="outline">
-                Download Template
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDownloadTemplate}
+                disabled={downloading}
+              >
+                {downloading ? "Downloading..." : "Download Template"}
               </Button>
             </div>
           </div>
