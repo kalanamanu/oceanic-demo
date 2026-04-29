@@ -7,6 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { Trash2 } from "lucide-react";
 import { InquiryService } from "@/services/inquiry.service";
 import { QuotationService } from "@/services/quotation.service";
+import { VendorService } from "@/services/vendor.service";
+import { PreCostService } from "@/services/precost.service";
+import { BasisService } from "@/services/basis.service";
+import { QuotationCalculator } from "@/calculations/quotation-calculator";
 import type { QuotationItem } from "@/types/quotation.types";
 
 export function QuotationCreateContent() {
@@ -22,6 +26,46 @@ export function QuotationCreateContent() {
 
   const [downloading, setDownloading] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
+
+  const [vendors, setVendors] = React.useState<any[]>([]);
+  const [precostId, setPrecostId] = React.useState<string | null>(null);
+
+  const [basis, setBasis] = React.useState<any>(null);
+
+  //Load Vendors on load
+  React.useEffect(() => {
+    const loadVendors = async () => {
+      try {
+        const data = await VendorService.getAllVendors();
+        setVendors(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadVendors();
+  }, []);
+
+  //Load Basis on load
+  React.useEffect(() => {
+    const loadBasis = async () => {
+      try {
+        const data = await BasisService.getBasis();
+        const basisItem = Array.isArray(data) ? data[0] : data;
+        setBasis(basisItem);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadBasis();
+  }, []);
+
+  //Format basis
+  const formatBasis = (v: number) =>
+    new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 10,
+    }).format(v);
 
   /* ================= DOWNLOAD ================= */
   const handleDownloadTemplate = async () => {
@@ -48,8 +92,27 @@ export function QuotationCreateContent() {
 
     try {
       setUploading(true);
+
+      // 1. Create Draft PreCost
+      const draft = await PreCostService.createDraft();
+
+      const id = draft?.data;
+
+      setPrecostId(id);
+      localStorage.setItem("precost_id", id);
+
+      // 2. Upload + Validate Excel
       const validated = await QuotationService.validateExcel(file);
-      setItems(validated);
+
+      // 3. Attach vendor list into items
+      const enriched = validated.map((item) => ({
+        ...item,
+        supplier_name: "",
+      }));
+
+      setItems(enriched);
+    } catch (err) {
+      console.error(err);
     } finally {
       setUploading(false);
     }
@@ -59,15 +122,14 @@ export function QuotationCreateContent() {
   const updateItem = (index: number, field: string, value: string) => {
     setItems((prev) => {
       const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
 
-      // auto calc
-      const qty = Number(copy[index].quantity || 0);
-      const price = Number(copy[index].price || 0);
-      const unitRate = Number(copy[index].total_unit_rate_rs || 0);
-
-      copy[index].total_usd = (qty * price).toString();
-      copy[index].total_rs = (qty * unitRate).toString();
+      copy[index] = {
+        ...copy[index],
+        [field]: value,
+      };
+      if (basis) {
+        copy[index] = QuotationCalculator.calculate(copy[index], basis);
+      }
 
       return copy;
     });
@@ -120,6 +182,17 @@ export function QuotationCreateContent() {
               <div>
                 <b>ETA:</b> {new Date(inquiry.eta).toLocaleString()}
               </div>
+              <div>
+                <b>Basis:</b> {formatBasis(basis.basis)}
+              </div>
+
+              <div>
+                <b>USD Rate:</b> {basis.USDRate}
+              </div>
+
+              <div>
+                <b>Margin:</b> {basis.margin}%
+              </div>
             </div>
           )}
         </div>
@@ -156,9 +229,9 @@ export function QuotationCreateContent() {
 
             {/* CARDS */}
             {items.map((item, index) => (
-              <div key={index} className="border rounded p-4 space-y-3">
-                {/* COLLAPSED */}
-                <div className="flex justify-between items-center">
+              <div key={index} className="border rounded-xl p-4 space-y-4">
+                {/* ================= COLLAPSED VIEW ================= */}
+                <div className="flex justify-between items-start">
                   <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-sm">
                     <div>
                       <b>Item:</b> {item.item_no}
@@ -201,10 +274,10 @@ export function QuotationCreateContent() {
                   </div>
                 </div>
 
-                {/* EXPANDED */}
+                {/* ================= EXPANDED VIEW ================= */}
                 {expandedIndex === index && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
-                    {/* Editable ALL fields */}
+                    {/* TEXT INPUT FIELDS */}
                     {[
                       ["Item Number", "item_no"],
                       ["Description", "description"],
@@ -212,7 +285,6 @@ export function QuotationCreateContent() {
                       ["Quantity", "quantity"],
                       ["Unit", "unit"],
                       ["IMPA Code", "impa_code"],
-                      ["Supplier Name", "supplier_name"],
                       ["Unit Rate (RS)", "price"],
                       ["Additional Charges", "additional_charges"],
                       ["Total Unit Rate (RS)", "total_unit_rate_rs"],
@@ -220,9 +292,9 @@ export function QuotationCreateContent() {
                       ["OMS Remark", "osc_remark"],
                     ].map(([label, field]) => (
                       <div key={field}>
-                        <label className="text-xs">{label}</label>
+                        <label className="text-xs font-medium">{label}</label>
                         <input
-                          className="w-full border p-1 rounded"
+                          className="w-full border p-2 rounded"
                           value={(item as any)[field] || ""}
                           onChange={(e) =>
                             updateItem(index, field, e.target.value)
@@ -231,20 +303,41 @@ export function QuotationCreateContent() {
                       </div>
                     ))}
 
-                    {/* AUTO */}
+                    {/* ================= SUPPLIER DROPDOWN ================= */}
                     <div>
-                      <label>Total USD</label>
+                      <label className="text-xs font-medium">
+                        Supplier Name
+                      </label>
+                      <select
+                        className="w-full border p-2 rounded"
+                        value={(item as any).supplier_name || ""}
+                        onChange={(e) =>
+                          updateItem(index, "supplier_name", e.target.value)
+                        }
+                      >
+                        <option value="">Select Supplier</option>
+                        {vendors.map((v: any) => (
+                          <option key={v.id} value={v.name}>
+                            {v.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* ================= AUTO CALCULATED ================= */}
+                    <div>
+                      <label className="text-xs font-medium">Total USD</label>
                       <input
-                        className="w-full border p-1"
+                        className="w-full border p-2 rounded bg-muted"
                         value={item.total_usd}
                         readOnly
                       />
                     </div>
 
                     <div>
-                      <label>Total RS</label>
+                      <label className="text-xs font-medium">Total RS</label>
                       <input
-                        className="w-full border p-1"
+                        className="w-full border p-2 rounded bg-muted"
                         value={item.total_rs}
                         readOnly
                       />
