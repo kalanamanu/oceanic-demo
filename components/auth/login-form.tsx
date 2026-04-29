@@ -55,7 +55,7 @@ export default function LoginPage() {
             <img
               src="/oceanic-logo.png"
               alt="Oceanic Maritime Services Logo"
-              className="w-64 h-auto object-contain"
+              className="w-30 h-auto object-contain"
               draggable="false"
             />
           </div>

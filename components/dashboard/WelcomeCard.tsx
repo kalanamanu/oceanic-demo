@@ -147,7 +147,7 @@ export default function WelcomeCard({
               className="flex items-center gap-2"
             >
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Welcome,{" "}
+                Welcome to Oceanic Titan,{" "}
                 <motion.span
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

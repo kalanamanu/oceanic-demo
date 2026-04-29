@@ -214,7 +214,7 @@ export default function LoginOtpPage() {
             <img
               src="/oceanic-logo.png"
               alt="Oceanic Maritime Services Logo"
-              className="w-48 h-auto object-contain"
+              className="w-30 h-auto object-contain"
               draggable="false"
             />
           </div>

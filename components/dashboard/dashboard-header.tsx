@@ -42,7 +42,9 @@ export function DashboardHeader() {
         <div className="flex items-center gap-3">
           <img
             src={
-              mounted && theme === "dark" ? "/oceanic-logo-white.png" : "/oceanic-logo.png"
+              mounted && theme === "dark"
+                ? "/oceanic-logo.png"
+                : "/oceanic-logo.png"
             }
             alt="Oceanic Logo"
             className="h-12 w-auto object-contain"
