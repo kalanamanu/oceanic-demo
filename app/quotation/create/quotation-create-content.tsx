@@ -14,6 +14,7 @@ import {
 import * as XLSX from "xlsx";
 import { Edit2, Trash2 } from "lucide-react";
 import { InquiryService } from "@/services/inquiry.service";
+import { QuotationService } from "@/services/quotation.service";
 
 const FIELDS = [
   "Item No (When search automatically suggest the item)",
@@ -126,14 +127,9 @@ export function QuotationCreateContent() {
   /* ================= DOWNLOAD TEMPLATE ================= */
   const handleDownloadTemplate = async () => {
     try {
-      setDownloading(true);
-      const response = await fetch(
-        "http://localhost:3070/api/customer-excel/template",
-      );
+      const blob = await QuotationService.downloadTemplate();
 
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = "quotation-template.xlsx";
@@ -142,8 +138,6 @@ export function QuotationCreateContent() {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
-    } finally {
-      setDownloading(false);
     }
   };
 
