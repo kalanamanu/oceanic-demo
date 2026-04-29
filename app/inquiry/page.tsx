@@ -23,6 +23,27 @@ export default function InquiryPage() {
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const statusOptions = Array.from(
+    new Set(inquiries.map((i) => i.status || "Pending")),
+  );
+
+  const portOptions = Array.from(
+    new Set(inquiries.map((i) => i.port).filter(Boolean)),
+  );
+
+  const picOptions = Array.from(
+    new Set(
+      inquiries
+        .flatMap((i) => [
+          i.key_pic?.name,
+          ...(i.other_pics?.map((p) => p.name) || []),
+        ])
+        .filter(
+          (name): name is string => typeof name === "string" && name.length > 0,
+        ),
+    ),
+  );
+
   const filteredInquiries = inquiries.filter((inq) => {
     const q = searchQuery.toLowerCase();
 
@@ -103,6 +124,9 @@ export default function InquiryPage() {
               onExport={handleExport}
               onCreateNew={handleCreateNew}
               onSearch={(value) => setSearchQuery(value)}
+              statusOptions={statusOptions}
+              portOptions={portOptions}
+              picOptions={picOptions}
             />
 
             {loading ? (

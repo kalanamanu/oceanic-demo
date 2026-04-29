@@ -11,9 +11,20 @@ interface FilterBarProps {
   onExport?: () => void;
   onCreateNew?: () => void;
   onSearch?: (value: string) => void;
+
+  statusOptions?: string[];
+  portOptions?: string[];
+  picOptions?: string[];
 }
 
-export function FilterBar({ onExport, onCreateNew, onSearch }: FilterBarProps) {
+export function FilterBar({
+  onExport,
+  onCreateNew,
+  onSearch,
+  statusOptions,
+  portOptions,
+  picOptions,
+}: FilterBarProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -81,11 +92,11 @@ export function FilterBar({ onExport, onCreateNew, onSearch }: FilterBarProps) {
             </label>
             <select className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
               <option>All Statuses</option>
-              <option>Pending</option>
-              <option>Quotation Submitted</option>
-              <option>Active</option>
-              <option>Confirmed</option>
-              <option>Rejected</option>
+              {statusOptions?.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -95,10 +106,11 @@ export function FilterBar({ onExport, onCreateNew, onSearch }: FilterBarProps) {
             </label>
             <select className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
               <option>All Ports</option>
-              <option>Colombo</option>
-              <option>Hambantota</option>
-              <option>Trincomalee</option>
-              <option>Galle</option>
+              {portOptions?.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -108,11 +120,11 @@ export function FilterBar({ onExport, onCreateNew, onSearch }: FilterBarProps) {
             </label>
             <select className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm">
               <option>All PICs</option>
-              <option>John Silva</option>
-              <option>Maria Santos</option>
-              <option>Ahmed Hassan</option>
-              <option>Lisa Fernando</option>
-              <option>Priya Kumar</option>
+              {picOptions?.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
             </select>
           </div>
 
