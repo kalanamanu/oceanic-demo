@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import * as XLSX from "xlsx";
 import { Edit2, Trash2 } from "lucide-react";
+import { InquiryService } from "@/services/inquiry.service";
 
 const FIELDS = [
   "Item No (When search automatically suggest the item)",
@@ -38,7 +39,9 @@ const getInquiryById = (id: string) => ({
 export function QuotationCreateContent() {
   const searchParams = useSearchParams();
   const inquiryId = searchParams.get("inquiryId");
-  const inquiry = inquiryId ? getInquiryById(inquiryId) : null;
+
+  const [inquiry, setInquiry] = React.useState<any | null>(null);
+  const [loadingInquiry, setLoadingInquiry] = React.useState(false);
 
   const [step, setStep] = React.useState<null | "excel" | "manual">(null);
 
@@ -118,6 +121,24 @@ export function QuotationCreateContent() {
     setEditIndex(null);
   };
 
+  React.useEffect(() => {
+    if (!inquiryId) return;
+
+    const fetchInquiry = async () => {
+      setLoadingInquiry(true);
+      try {
+        const data = await InquiryService.getInquiryById(inquiryId);
+        setInquiry(data);
+      } catch (err) {
+        console.error("Failed to fetch inquiry", err);
+      } finally {
+        setLoadingInquiry(false);
+      }
+    };
+
+    fetchInquiry();
+  }, [inquiryId]);
+
   /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-background">
@@ -126,25 +147,35 @@ export function QuotationCreateContent() {
         <div className="space-y-4">
           <h1 className="text-2xl font-bold">Generate Quotation</h1>
 
-          {inquiry && (
+          {loadingInquiry ? (
+            <p className="text-sm text-muted-foreground">Loading inquiry...</p>
+          ) : inquiry ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-xl border bg-muted p-4 text-sm">
               <div>
-                <b>Ref:</b> {inquiry.referenceNumber}
+                <b>Ref:</b> INQ-
+                {inquiry.inq_id
+                  ?.replace("inq_", "")
+                  .substring(0, 6)
+                  .toUpperCase()}
               </div>
+
               <div>
-                <b>Vessel:</b> {inquiry.vesselName}
+                <b>Vessel:</b> {inquiry.vessel_name}
               </div>
+
               <div>
                 <b>Agent:</b> {inquiry.agent}
               </div>
+
               <div>
                 <b>Port:</b> {inquiry.port}
               </div>
+
               <div>
                 <b>ETA:</b> {new Date(inquiry.eta).toLocaleString()}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         <Separator />

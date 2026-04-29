@@ -53,6 +53,7 @@ export class InquiryService {
   /**
    * Get inquiry by ID
    */
+  
   static async getInquiryById(id: string): Promise<Inquiry> {
     try {
       const response = await apiClient.get<InquiryResponse>(
