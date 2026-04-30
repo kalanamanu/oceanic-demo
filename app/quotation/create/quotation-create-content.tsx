@@ -220,6 +220,72 @@ export function QuotationCreateContent() {
     );
   }, [items, additionalCharges, discountLKR, basis]);
 
+  /* ================= Save Pre-Cost Handler ================= */
+
+  const handleFinalizePreCost = async () => {
+    try {
+      const precost_id = localStorage.getItem("precost_id");
+
+      const payload = {
+        id: precost_id,
+        vessel_name: inquiry?.vessel_name,
+        date_arrived: dateArrived
+          ? dateArrived.toISOString().split("T")[0]
+          : null,
+        date_saild: dateSailed ? dateSailed.toISOString().split("T")[0] : null,
+        discount: Number(discountLKR || 0),
+        usd_rate: Number(basis?.USDRate || 0),
+        total_cost: Number(totalLKR || 0),
+        total_cost_usd: Number(totalUSD || 0),
+        status: "PENDING",
+        remark: remark,
+        inquiryID: inquiry?.inq_id,
+
+        items: items.map((item) => {
+          const vendor = vendors.find(
+            (v) => v.vendor_id === item.supplier_name,
+          );
+
+          return {
+            item_name: item.description,
+            customer_remark: item.customer_remark,
+            quantity: Number(item.quantity),
+            unit: item.unit,
+            impa: item.impa_code,
+
+            vendor_id: vendor?.vendor_id || null,
+            is_verified_vendor: vendor?.is_verified ?? false,
+
+            unit_price: Number(item.price || 0),
+            additional_charges: Number(item.additional_charges || 0),
+
+            total_price: Number(item.total_rs || 0),
+            basis: item.conva_basis,
+
+            unit_rate_usd: Number(item.unit_rate_usd || 0),
+            total_price_usd: Number(item.total_usd || 0),
+          };
+        }),
+
+        additional_charges: additionalCharges.map((c) => ({
+          charge_name: c.name,
+          amount: Number(c.amount || 0),
+          currency: c.currency,
+        })),
+      };
+
+      const res = await PreCostService.createPreCost(payload);
+
+      console.log("Saved:", res);
+      setPreviewOpen(false);
+
+      alert("PreCost saved successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save PreCost");
+    }
+  };
+
   /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-background">
@@ -397,12 +463,19 @@ export function QuotationCreateContent() {
                           updateItem(index, "supplier_name", e.target.value)
                         }
                       >
-                        <option value="">Select Supplier</option>
-                        {vendors.map((v: any) => (
-                          <option key={v.id} value={v.name}>
-                            {v.name}
-                          </option>
-                        ))}
+                        <option value="">Select Verified Supplier</option>
+
+                        {vendors
+                          .filter(
+                            (v: any) =>
+                              v.status?.is_md_approved &&
+                              v.status?.is_manager_approved,
+                          )
+                          .map((v: any) => (
+                            <option key={v.vendor_id} value={v.vendor_id}>
+                              {v.name}
+                            </option>
+                          ))}
                       </select>
                     </div>
 
@@ -634,10 +707,7 @@ export function QuotationCreateContent() {
         <QuotationPreviewDialog
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
-          onConfirm={() => {
-            setPreviewOpen(false);
-            alert("Confirmed! (API call next)");
-          }}
+          onConfirm={handleFinalizePreCost}
           inquiry={inquiry}
           items={items}
           additionalCharges={additionalCharges}
