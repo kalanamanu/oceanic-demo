@@ -78,7 +78,18 @@ export function QuotationPreviewDialog({
               />
               <InfoField label="USD Rate" value={basis?.USDRate} />
 
-              <InfoField label="Discount (LKR)" value={discountLKR} />
+              <InfoField
+                label="Discount (LKR)"
+                value={
+                  discountLKR ? (
+                    discountLKR
+                  ) : (
+                    <span className="text-muted-foreground/60 italic font-light">
+                      No discount applied
+                    </span>
+                  )
+                }
+              />
               <InfoField
                 label="Total LKR"
                 value={totalLKR.toLocaleString()}
@@ -161,7 +172,9 @@ export function QuotationPreviewDialog({
           <section>
             <h3 className="text-sm font-semibold mb-2">Remark</h3>
             <p className="text-sm bg-muted/20 rounded-md p-3 min-h-[2.5rem]">
-              {remark || "-"}
+              {remark || (
+                <p className="text-muted-foreground italic">No remarks added</p>
+              )}
             </p>
           </section>
         </div>
@@ -185,7 +198,7 @@ function InfoField({
   highlight = false,
 }: {
   label: string;
-  value: string | number | undefined;
+  value: React.ReactNode;
   highlight?: boolean;
 }) {
   return (
