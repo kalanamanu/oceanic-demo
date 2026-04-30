@@ -11,12 +11,18 @@ import {
   Package,
   Clipboard,
   Users,
+  BadgeDollarSign,
+  Truck,
+  Tags,
+  ListTodo,
+  ClipboardList,
+  FilePenLine,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
 import { AuthService } from "@/services/auth.service";
 
-// ✅ Role-based sidebar configuration
+// Role-based sidebar configuration
 const sidebarConfig = {
   admin: [
     { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
@@ -27,18 +33,18 @@ const sidebarConfig = {
       path: "/audit-trail",
     },
     { value: "users", label: "Users", icon: Users, path: "/users" },
-    { value: "basis", label: "Basis", icon: Package, path: "/basis" },
-    { value: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
+    { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
+    { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
     {
       value: "categories",
       label: "Categories",
-      icon: Package,
+      icon: Tags,
       path: "/categories",
     },
     {
       value: "picTasks",
       label: "PIC Tasks",
-      icon: Clipboard,
+      icon: ClipboardList,
       path: "/pic-tasks",
     },
     {
@@ -47,24 +53,29 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
-    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/quotation" },
+    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    {
+      value: "preCost",
+      label: "Pre Cost",
+      icon: FilePenLine,
+      path: "/quotation",
+    },
   ],
 
   management: [
     { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
-    { value: "basis", label: "Basis", icon: Package, path: "/basis" },
-    { value: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
+    { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
+    { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
     {
       value: "categories",
       label: "Categories",
-      icon: Package,
+      icon: Tags,
       path: "/categories",
     },
     {
       value: "picTasks",
       label: "PIC Tasks",
-      icon: Clipboard,
+      icon: ClipboardList,
       path: "/pic-tasks",
     },
     {
@@ -73,8 +84,13 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
-    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/pre-cost" },
+    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    {
+      value: "preCost",
+      label: "Pre Cost",
+      icon: FilePenLine,
+      path: "/quotation",
+    },
   ],
 
   team_head: [
@@ -82,13 +98,13 @@ const sidebarConfig = {
     {
       value: "categories",
       label: "Categories",
-      icon: Package,
+      icon: Tags,
       path: "/categories",
     },
     {
       value: "picTasks",
       label: "PIC Tasks",
-      icon: Clipboard,
+      icon: ClipboardList,
       path: "/pic-tasks",
     },
     {
@@ -97,8 +113,13 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
-    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/pre-cost" },
+    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    {
+      value: "preCost",
+      label: "Pre Cost",
+      icon: FilePenLine,
+      path: "/quotation",
+    },
   ],
 
   staff: [
@@ -109,12 +130,17 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
-    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/pre-cost" },
+    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    {
+      value: "preCost",
+      label: "Pre Cost",
+      icon: FilePenLine,
+      path: "/quotation",
+    },
   ],
 };
 
-// ✅ Map backend values if needed
+// Map backend values if needed
 const roleMap: Record<string, keyof typeof sidebarConfig> = {
   admin: "admin",
   management: "management",
@@ -139,14 +165,14 @@ export function Sidebar({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // ✅ Get user from backend (more reliable than localStorage only)
+  // Get user from backend (more reliable than localStorage only)
   useEffect(() => {
     AuthService.checkAuth().then(setUser);
   }, []);
 
   const userAccountType = user?.accountType;
 
-  // ✅ Get sidebar items based on role
+  // Get sidebar items based on role
   const sidebarItems = useMemo(() => {
     if (!userAccountType) return [];
 
