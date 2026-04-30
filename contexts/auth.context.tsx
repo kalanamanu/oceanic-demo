@@ -11,7 +11,7 @@ interface AuthUser {
   firstName: string;
   lastName: string;
   role: string;
-  accountType: "admin" | "user" | "manager";
+  accountType: "admin" | "user" | "management" | "team_head";
 }
 
 interface AuthContextType {
@@ -38,24 +38,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = async () => {
     try {
       const currentUser = await AuthService.checkAuth();
-      setUser(currentUser);
-    } catch (error) {
-      // This prevents logout on page refresh from temporary network issues
-      const cachedUser = UserStorage.getUser();
-      if (cachedUser) {
-        const mappedAccountType: "admin" | "user" | "manager" =
-          cachedUser.accountType === "management"
-            ? "manager"
-            : cachedUser.accountType === "team_head"
-              ? "manager"
-              : (cachedUser.accountType as "admin" | "user" | "manager");
-        setUser({
-          ...cachedUser,
-          accountType: mappedAccountType,
-        });
+
+      if (currentUser) {
+        setUser(currentUser);
       } else {
-        setUser(null);
+        // fallback to cached user
+        const cachedUser = UserStorage.getUser();
+        setUser(cachedUser || null);
       }
+    } catch {
+      const cachedUser = UserStorage.getUser();
+      setUser(cachedUser || null);
     } finally {
       setLoading(false);
     }
@@ -72,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isAdmin = user?.accountType === "admin";
-  const isManager = user?.accountType === "manager";
+  const isManager = user?.accountType === "management";
 
   return (
     <AuthContext.Provider

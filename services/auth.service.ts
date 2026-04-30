@@ -51,23 +51,31 @@ export class AuthService {
    * Check authentication status and get current user from backend
    * This validates the session with the server
    */
-  static async checkAuth(): Promise<any> {
-    try {
-      const response = await apiClient.get('/api/auth/me');
-      
-      if (response.data.authenticated && response.data.user) {
-        // Update localStorage with fresh user data
-        UserStorage.saveUser(response.data.user);
-        return response.data.user;
-      }
-      
-      return null;
-    } catch (error: any) {
-      // If authentication fails, clear local user data
+static async checkAuth(): Promise<any> {
+  try {
+    const response = await apiClient.get('/api/auth/me');
+
+    if (response.data?.authenticated && response.data?.user) {
+      UserStorage.saveUser(response.data.user);
+      return response.data.user;
+    }
+
+    // DO NOT clear user here
+    return UserStorage.getUser();
+  } catch (error: any) {
+    // ONLY clear user on real auth failure (401)
+
+    const status = error?.response?.status;
+
+    if (status === 401) {
       UserStorage.clearUser();
       return null;
     }
+
+    // 🔥 IMPORTANT: network/server error → KEEP USER
+    return UserStorage.getUser();
   }
+}
 
   /**
    * Logout user - clears cookie and user data
