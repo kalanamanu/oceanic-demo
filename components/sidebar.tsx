@@ -12,36 +12,115 @@ import {
   Clipboard,
   Users,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AuthService } from "@/services/auth.service";
 
-const allSidebarItems = [
-  { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
-  { value: "inquiries", label: "Inquiries", icon: FileText, path: "/inquiry" },
-  { value: "products", label: "Products", icon: Package, path: "/products" },
-  {
-    value: "quotations",
-    label: "Quotations",
-    icon: Clipboard,
-    path: "/quotation",
-  },
-  {
-    value: "audit",
-    label: "Audit Trail",
-    icon: ListChecks,
-    path: "/audit-trail",
-  },
-  {
-    value: "users",
-    label: "Users",
-    icon: Users,
-    path: "/users",
-    requiredAccountTypes: ["admin"], // ✅ Only admins can see this
-  },
-  { value: "reports", label: "Reports", icon: BarChart, path: "/reports" },
-];
+// ✅ Role-based sidebar configuration
+const sidebarConfig = {
+  admin: [
+    { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
+    {
+      value: "audit",
+      label: "Audit Trail",
+      icon: ListChecks,
+      path: "/audit-trail",
+    },
+    { value: "users", label: "Users", icon: Users, path: "/users" },
+    { value: "basis", label: "Basis", icon: Package, path: "/basis" },
+    { value: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
+    {
+      value: "categories",
+      label: "Categories",
+      icon: Package,
+      path: "/categories",
+    },
+    {
+      value: "picTasks",
+      label: "PIC Tasks",
+      icon: Clipboard,
+      path: "/pic-tasks",
+    },
+    {
+      value: "inquiries",
+      label: "Inquiries",
+      icon: FileText,
+      path: "/inquiry",
+    },
+    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
+    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/quotation" },
+  ],
+
+  management: [
+    { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
+    { value: "basis", label: "Basis", icon: Package, path: "/basis" },
+    { value: "vendors", label: "Vendors", icon: Package, path: "/vendors" },
+    {
+      value: "categories",
+      label: "Categories",
+      icon: Package,
+      path: "/categories",
+    },
+    {
+      value: "picTasks",
+      label: "PIC Tasks",
+      icon: Clipboard,
+      path: "/pic-tasks",
+    },
+    {
+      value: "inquiries",
+      label: "Inquiries",
+      icon: FileText,
+      path: "/inquiry",
+    },
+    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
+    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/pre-cost" },
+  ],
+
+  team_head: [
+    { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
+    {
+      value: "categories",
+      label: "Categories",
+      icon: Package,
+      path: "/categories",
+    },
+    {
+      value: "picTasks",
+      label: "PIC Tasks",
+      icon: Clipboard,
+      path: "/pic-tasks",
+    },
+    {
+      value: "inquiries",
+      label: "Inquiries",
+      icon: FileText,
+      path: "/inquiry",
+    },
+    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
+    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/pre-cost" },
+  ],
+
+  staff: [
+    { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
+    {
+      value: "inquiries",
+      label: "Inquiries",
+      icon: FileText,
+      path: "/inquiry",
+    },
+    { value: "myTasks", label: "My Tasks", icon: Clipboard, path: "/my-tasks" },
+    { value: "preCost", label: "Pre Cost", icon: BarChart, path: "/pre-cost" },
+  ],
+};
+
+// ✅ Map backend values if needed
+const roleMap: Record<string, keyof typeof sidebarConfig> = {
+  admin: "admin",
+  management: "management",
+  team_head: "team_head",
+  staff: "staff",
+};
 
 export interface SidebarProps {
   collapsed: boolean;
@@ -56,23 +135,23 @@ export function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const currentUser = AuthService.getCurrentUser();
-  const userAccountType = currentUser?.accountType;
+  const [user, setUser] = useState<any>(null);
 
-  // Filter sidebar items based on user permissions
+  // ✅ Get user from backend (more reliable than localStorage only)
+  useEffect(() => {
+    AuthService.checkAuth().then(setUser);
+  }, []);
+
+  const userAccountType = user?.accountType;
+
+  // ✅ Get sidebar items based on role
   const sidebarItems = useMemo(() => {
-    return allSidebarItems.filter((item) => {
-      // If item has no permission requirement, show it
-      if (!item.requiredAccountTypes) {
-        return true;
-      }
+    if (!userAccountType) return [];
 
-      // Check if user's account type is in the required list
-      return userAccountType
-        ? item.requiredAccountTypes.includes(userAccountType)
-        : false;
-    });
+    const roleKey = roleMap[userAccountType] || "staff";
+    return sidebarConfig[roleKey] || [];
   }, [userAccountType]);
 
   const activeTab =
@@ -81,26 +160,24 @@ export function Sidebar({
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-
-      // Call backend logout API
       await AuthService.logout();
       await new Promise((resolve) => setTimeout(resolve, 300));
-      // Redirect to login page
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Still redirect to login even if there's an error
-      // The AuthService.logout() already clears local storage
       router.push("/login");
     } finally {
       setIsLoggingOut(false);
     }
   };
 
+  // ⚠️ Prevent rendering before auth loads
+  if (!userAccountType) return null;
+
   return (
     <aside
       className={`fixed left-0 bg-card border-r border-border py-4 flex flex-col transition-all duration-200 z-30
-    ${collapsed ? "w-16 px-2" : "w-56 px-4"} mt-4`}
+      ${collapsed ? "w-16 px-2" : "w-56 px-4"} mt-4`}
       data-collapsed={collapsed}
       style={{
         minHeight: "0",
@@ -108,56 +185,37 @@ export function Sidebar({
         top: headerHeight,
       }}
     >
-      {/* Floating middle toggle button on sidebar border */}
+      {/* Toggle Button */}
       <button
         type="button"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         onClick={() => setCollapsed(!collapsed)}
-        className={`
-          absolute
-          top-1/2
-          -right-3
-          z-20
-          w-7 h-7 flex items-center justify-center
-          rounded-full
-          bg-primary
-          text-white
-          border border-border
-          opacity-20
-          hover:opacity-100 focus:opacity-100
-          shadow
-          transition-all duration-200
-          group
-          pointer-events-auto
-        `}
+        className="absolute top-1/2 -right-3 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-primary text-white border border-border opacity-20 hover:opacity-100 shadow transition-all"
         style={{ transform: "translateY(-50%)" }}
       >
         {collapsed ? (
-          <ChevronRight className="h-4 w-4 cursor-pointer" />
+          <ChevronRight className="h-4 w-4" />
         ) : (
-          <ChevronLeft className="h-4 w-4 cursor-pointer" />
+          <ChevronLeft className="h-4 w-4" />
         )}
       </button>
 
-      {/* Nav items */}
+      {/* Nav */}
       <nav className="flex flex-col gap-2 flex-1 mt-2">
         {sidebarItems.map((item) => {
           const Icon = item.icon;
+
           return (
             <button
               key={item.value}
               onClick={() => router.push(item.path)}
-              className={`
-            flex items-center gap-3 text-sm rounded-md py-2 transition-colors font-medium
-            px-3 cursor-pointer
-            ${collapsed ? "justify-center" : "justify-start"}
-            ${
-              activeTab === item.value
-                ? "bg-primary/10 text-primary"
-                : "hover:bg-muted text-muted-foreground"
-            }
-          `}
-              data-testid={`sidebar-item-${item.value}`}
+              className={`flex items-center gap-3 text-sm rounded-md py-2 px-3 transition-colors font-medium
+                ${collapsed ? "justify-center" : "justify-start"}
+                ${
+                  activeTab === item.value
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-muted text-muted-foreground"
+                }`}
               title={collapsed ? item.label : undefined}
             >
               <Icon className="h-5 w-5 flex-shrink-0" />
@@ -167,25 +225,18 @@ export function Sidebar({
         })}
       </nav>
 
-      {/* Footer - Logout */}
-      <div className="mb-2 mt-8 border-t border-border/70 pt-6 flex flex-col">
+      {/* Logout */}
+      <div className="mb-2 mt-8 border-t border-border/70 pt-6">
         <button
-          className={`
-        flex items-center gap-3 rounded-md py-2 px-3 w-full transition-colors font-medium
-        hover:bg-destructive/10 hover:text-destructive text-muted-foreground
-        ${collapsed ? "justify-center" : "justify-start"}
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive
-        disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
-      `}
-          aria-label="Logout"
           onClick={handleLogout}
           disabled={isLoggingOut}
-          title={collapsed ? "Logout" : undefined}
+          className={`flex items-center gap-3 rounded-md py-2 px-3 w-full transition-colors font-medium
+            hover:bg-destructive/10 hover:text-destructive text-muted-foreground
+            ${collapsed ? "justify-center" : "justify-start"}
+            disabled:opacity-50`}
         >
           <LogOut
-            className={`h-5 w-5 flex-shrink-0 ${
-              isLoggingOut ? "animate-pulse" : ""
-            }`}
+            className={`h-5 w-5 ${isLoggingOut ? "animate-pulse" : ""}`}
           />
           {!collapsed && (
             <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
