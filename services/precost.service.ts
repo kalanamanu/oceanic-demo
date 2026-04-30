@@ -9,4 +9,10 @@ export class PreCostService {
       throw new Error(err?.response?.data?.message || "Failed to create draft");
     }
   }
+
+   static async createPreCost(payload: any): Promise<any> {
+    const res = await apiClient.post("/api/precost", payload);
+    return res.data;
+  }
 }
+

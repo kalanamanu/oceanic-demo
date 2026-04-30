@@ -32,6 +32,12 @@ export function QuotationCreateContent() {
 
   const [basis, setBasis] = React.useState<any>(null);
 
+  const [additionalCharges, setAdditionalCharges] = React.useState<
+    { name: string; amount: string; currency: string }[]
+  >([]);
+
+  const [discountLKR, setDiscountLKR] = React.useState<string>("");
+
   //Load Vendors on load
   React.useEffect(() => {
     const loadVendors = async () => {
@@ -156,6 +162,50 @@ export function QuotationCreateContent() {
 
     fetchInquiry();
   }, [inquiryId]);
+
+  /* ================= Additional Charges ================= */
+  const addCharge = () => {
+    setAdditionalCharges((prev) => [
+      ...prev,
+      { name: "", amount: "", currency: "USD" },
+    ]);
+  };
+
+  const updateCharge = (index: number, field: string, value: string) => {
+    setAdditionalCharges((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+  };
+
+  const removeCharge = (index: number) => {
+    setAdditionalCharges((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  /* ================= Total amount (LKR) calculation handler ================= */
+  const totalLKR = React.useMemo(() => {
+    if (!basis) return 0;
+
+    return QuotationCalculator.calculateGrandTotalLKR(
+      items,
+      basis,
+      additionalCharges,
+      discountLKR,
+    );
+  }, [items, additionalCharges, discountLKR, basis]);
+
+  /* ================= Total amount (USD) calculation handler ================= */
+  const totalUSD = React.useMemo(() => {
+    if (!basis) return 0;
+
+    return QuotationCalculator.calculateGrandTotalUSD(
+      items,
+      basis,
+      additionalCharges,
+      discountLKR,
+    );
+  }, [items, additionalCharges, discountLKR, basis]);
 
   /* ================= UI ================= */
   return (
@@ -348,6 +398,149 @@ export function QuotationCreateContent() {
             ))}
           </div>
         )}
+        <div className="border rounded-xl p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Additional Charges</h2>
+
+            <Button size="sm" onClick={addCharge}>
+              + Add Charge
+            </Button>
+          </div>
+
+          {additionalCharges.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No additional charges added.
+            </p>
+          )}
+
+          {additionalCharges.map((charge, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-1 md:grid-cols-4 gap-4 border p-4 rounded-lg"
+            >
+              {/* Charge Name */}
+              <div>
+                <label className="text-xs font-medium">Charge Name</label>
+                <input
+                  className="w-full border p-2 rounded"
+                  value={charge.name}
+                  onChange={(e) => updateCharge(index, "name", e.target.value)}
+                />
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label className="text-xs font-medium">Amount</label>
+                <input
+                  type="number"
+                  className="w-full border p-2 rounded"
+                  value={charge.amount}
+                  onChange={(e) =>
+                    updateCharge(index, "amount", e.target.value)
+                  }
+                />
+              </div>
+
+              {/* Currency */}
+              <div>
+                <label className="text-xs font-medium">Currency</label>
+                <select
+                  className="w-full border p-2 rounded"
+                  value={charge.currency}
+                  onChange={(e) =>
+                    updateCharge(index, "currency", e.target.value)
+                  }
+                >
+                  <option value="USD">USD</option>
+                  <option value="LKR">LKR</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+
+              {/* Remove */}
+              <div className="flex items-end">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeCharge(index)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="border rounded-xl p-6 space-y-4">
+          <h2 className="text-lg font-semibold">Discount</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Amount */}
+            <div>
+              <label className="text-xs font-medium">
+                Discount Amount (LKR)
+              </label>
+              <input
+                type="number"
+                className="w-full border p-2 rounded"
+                value={discountLKR}
+                onChange={(e) => setDiscountLKR(e.target.value)}
+                placeholder="Enter discount"
+              />
+            </div>
+
+            {/* Currency (fixed) */}
+            <div>
+              <label className="text-xs font-medium">Currency</label>
+              <input
+                className="w-full border p-2 rounded bg-muted"
+                value="LKR"
+                readOnly
+              />
+            </div>
+
+            {/* Clear button */}
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDiscountLKR("")}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="border rounded-xl p-6 space-y-4 bg-muted">
+          <h2 className="text-lg font-semibold">Total Cost</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* LKR */}
+            <div>
+              <label className="text-xs font-medium">Total (LKR)</label>
+              <input
+                className="w-full border p-2 rounded font-bold text-lg bg-background"
+                value={Number(totalLKR).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                readOnly
+              />
+            </div>
+
+            {/* USD */}
+            <div>
+              <label className="text-xs font-medium">Total (USD)</label>
+              <input
+                className="w-full border p-2 rounded font-bold text-lg bg-background"
+                value={Number(totalUSD).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                readOnly
+              />
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
