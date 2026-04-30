@@ -6,27 +6,37 @@ export class QuotationCalculator {
    * Single item calculation
   */
   static calculate(item: QuotationItem, basis: Basis): QuotationItem {
-    const qty = Number(item.quantity || 0);
-    const unitRate = Number(item.price || 0);
-    const additional = Number(item.additional_charges || 0);
-    const basisValue = Number(basis?.basis || 0);
+  const qty = Number(item.quantity || 0);
+  const unitRate = Number(item.price || 0);
+  const additional = Number(item.additional_charges || 0);
 
-    const conva_basis = unitRate * basisValue;
+  const usdRate = Number(basis?.USDRate || 0);
+  const basisValue = Number(basis?.basis || 0);
 
-    const total_unit_rate_rs = unitRate + additional;
+  const unit_rate_usd = usdRate ? unitRate / usdRate : 0;
 
-    const total_rs = total_unit_rate_rs * qty;
+  const conva_basis = unitRate * basisValue;
 
-    const total_usd = conva_basis * qty;
+  const total_unit_rate_rs = unitRate + additional;
 
-    return {
-      ...item,
-      conva_basis: conva_basis.toFixed(2),
-      total_unit_rate_rs: total_unit_rate_rs.toFixed(2),
-      total_rs: total_rs.toFixed(2),
-      total_usd: total_usd.toFixed(2),
-    };
-  }
+  const total_unit_rate_usd = usdRate
+    ? total_unit_rate_rs / usdRate
+    : 0;
+
+  const total_rs = total_unit_rate_rs * qty;
+
+  const total_usd = total_unit_rate_usd * qty;
+
+  return {
+    ...item,
+    unit_rate_usd: unit_rate_usd.toFixed(2), 
+    total_unit_rate_usd: total_unit_rate_usd.toFixed(2), 
+    conva_basis: conva_basis.toFixed(2),
+    total_unit_rate_rs: total_unit_rate_rs.toFixed(2),
+    total_rs: total_rs.toFixed(2),
+    total_usd: total_usd.toFixed(2),
+  };
+}
 
   /**
    * Batch recalculation

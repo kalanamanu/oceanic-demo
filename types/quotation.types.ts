@@ -30,7 +30,9 @@ export interface QuotationItem {
   // ===== Added in Frontend =====
   supplier_name: string;
   additional_charges: string;
+  unit_rate_usd: string;
   total_unit_rate_rs: string;
+  total_unit_rate_usd: string;
   total_rs: string;
   conva_basis: string;
   total_usd: string;

@@ -124,7 +124,12 @@ export function QuotationCreateContent() {
         supplier_name: "",
       }));
 
-      setItems(enriched);
+      if (basis) {
+        const calculated = QuotationCalculator.recalculateAll(enriched, basis);
+        setItems(calculated);
+      } else {
+        setItems(enriched);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -344,22 +349,41 @@ export function QuotationCreateContent() {
                       ["Unit", "unit"],
                       ["IMPA Code", "impa_code"],
                       ["Unit Rate (RS)", "price"],
+                      ["Unit Rate (USD)", "unit_rate_usd"],
                       ["Additional Charges", "additional_charges"],
                       ["Total Unit Rate (RS)", "total_unit_rate_rs"],
+                      ["Total Unit Rate (USD)", "total_unit_rate_usd"],
                       ["CONVA (Basis)", "conva_basis"],
                       ["OMS Remark", "osc_remark"],
-                    ].map(([label, field]) => (
-                      <div key={field}>
-                        <label className="text-xs font-medium">{label}</label>
-                        <input
-                          className="w-full border p-2 rounded"
-                          value={(item as any)[field] || ""}
-                          onChange={(e) =>
-                            updateItem(index, field, e.target.value)
-                          }
-                        />
-                      </div>
-                    ))}
+                    ].map(([label, field]) => {
+                      const calculatedFields = [
+                        "unit_rate_usd",
+                        "total_unit_rate_rs",
+                        "total_unit_rate_usd",
+                        "conva_basis",
+                        "total_rs",
+                        "total_usd",
+                      ];
+
+                      const isReadOnly = calculatedFields.includes(field);
+
+                      return (
+                        <div key={field}>
+                          <label className="text-xs font-medium">{label}</label>
+                          <input
+                            className={`w-full border p-2 rounded ${
+                              isReadOnly ? "bg-muted cursor-not-allowed" : ""
+                            }`}
+                            value={(item as any)[field] || ""}
+                            readOnly={isReadOnly}
+                            onChange={(e) =>
+                              !isReadOnly &&
+                              updateItem(index, field, e.target.value)
+                            }
+                          />
+                        </div>
+                      );
+                    })}
 
                     {/* ================= SUPPLIER DROPDOWN ================= */}
                     <div>
