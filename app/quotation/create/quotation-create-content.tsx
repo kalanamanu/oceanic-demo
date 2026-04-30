@@ -12,6 +12,7 @@ import { PreCostService } from "@/services/precost.service";
 import { BasisService } from "@/services/basis.service";
 import { QuotationCalculator } from "@/calculations/quotation-calculator";
 import type { QuotationItem } from "@/types/quotation.types";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export function QuotationCreateContent() {
   const searchParams = useSearchParams();
@@ -37,6 +38,10 @@ export function QuotationCreateContent() {
   >([]);
 
   const [discountLKR, setDiscountLKR] = React.useState<string>("");
+
+  const [dateArrived, setDateArrived] = React.useState<Date | undefined>();
+  const [dateSailed, setDateSailed] = React.useState<Date | undefined>();
+  const [remark, setRemark] = React.useState<string>("");
 
   //Load Vendors on load
   React.useEffect(() => {
@@ -398,6 +403,9 @@ export function QuotationCreateContent() {
             ))}
           </div>
         )}
+
+        {/* ================= ADDITIONAL CHARGERS SECTION ================= */}
+
         <div className="border rounded-xl p-6 space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">Additional Charges</h2>
@@ -470,6 +478,9 @@ export function QuotationCreateContent() {
             </div>
           ))}
         </div>
+
+        {/* ================= DISCOUNT SECTION ================= */}
+
         <div className="border rounded-xl p-6 space-y-4">
           <h2 className="text-lg font-semibold">Discount</h2>
 
@@ -510,6 +521,51 @@ export function QuotationCreateContent() {
             </div>
           </div>
         </div>
+
+        {/* ================= ADDITIONAL DETAILS SECTION ================= */}
+
+        <div className="border rounded-xl p-6 space-y-4">
+          <h2 className="text-lg font-semibold">Additional Details</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Date Arrived */}
+            <div>
+              <label className="text-xs font-medium">Date Arrived</label>
+              <DatePicker
+                date={dateArrived}
+                onDateChange={setDateArrived}
+                placeholder="Select arrival date"
+              />
+            </div>
+
+            {/* Date Sailed */}
+            <div>
+              <label className="text-xs font-medium">Date Sailed</label>
+              <DatePicker
+                date={dateSailed}
+                onDateChange={setDateSailed}
+                placeholder="Select sailed date"
+              />
+            </div>
+
+            {/* Empty space for alignment (optional) */}
+            <div />
+          </div>
+
+          {/* Remark */}
+          <div>
+            <label className="text-xs font-medium">Remark</label>
+            <textarea
+              className="w-full border p-2 rounded min-h-[100px]"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              placeholder="Enter any notes or remarks..."
+            />
+          </div>
+        </div>
+
+        {/* ================= TOTAL COSTS SECTION ================= */}
+
         <div className="border rounded-xl p-6 space-y-4 bg-muted">
           <h2 className="text-lg font-semibold">Total Cost</h2>
 
