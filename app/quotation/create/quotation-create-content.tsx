@@ -13,6 +13,7 @@ import { BasisService } from "@/services/basis.service";
 import { QuotationCalculator } from "@/calculations/quotation-calculator";
 import type { QuotationItem } from "@/types/quotation.types";
 import { DatePicker } from "@/components/ui/date-picker";
+import { QuotationPreviewDialog } from "@/components/quatation/quotation-preview-dialog";
 
 export function QuotationCreateContent() {
   const searchParams = useSearchParams();
@@ -42,6 +43,8 @@ export function QuotationCreateContent() {
   const [dateArrived, setDateArrived] = React.useState<Date | undefined>();
   const [dateSailed, setDateSailed] = React.useState<Date | undefined>();
   const [remark, setRemark] = React.useState<string>("");
+
+  const [previewOpen, setPreviewOpen] = React.useState(false);
 
   //Load Vendors on load
   React.useEffect(() => {
@@ -597,6 +600,31 @@ export function QuotationCreateContent() {
             </div>
           </div>
         </div>
+        <div className="flex justify-between pt-6">
+          <Button variant="outline" onClick={() => window.history.back()}>
+            Back
+          </Button>
+
+          <Button onClick={() => setPreviewOpen(true)}>Save</Button>
+        </div>
+        <QuotationPreviewDialog
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          onConfirm={() => {
+            setPreviewOpen(false);
+            alert("Confirmed! (API call next)");
+          }}
+          inquiry={inquiry}
+          items={items}
+          additionalCharges={additionalCharges}
+          discountLKR={discountLKR}
+          totalLKR={totalLKR}
+          totalUSD={totalUSD}
+          basis={basis}
+          dateArrived={dateArrived}
+          dateSailed={dateSailed}
+          remark={remark}
+        />
       </main>
     </div>
   );
