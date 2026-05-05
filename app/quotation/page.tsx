@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PreCostService } from "@/services/precost.service";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Trash2, Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,7 +17,7 @@ interface PreCost {
   date_saild: string;
   total_cost: number;
   total_cost_usd: number;
-  status: string;
+  status: "PENDING" | "COMPLETED";
 }
 
 export default function QuotationPage() {
@@ -25,8 +26,11 @@ export default function QuotationPage() {
   const [data, setData] = React.useState<PreCost[]>([]);
   const [loading, setLoading] = React.useState(true);
 
+  const [statusLoading, setStatusLoading] = React.useState(false);
+
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
-  const [open, setOpen] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
 
   /* ================= FETCH ================= */
   const loadData = async () => {
@@ -47,19 +51,41 @@ export default function QuotationPage() {
   }, []);
 
   /* ================= DELETE ================= */
-  const handleDelete = async (id: string) => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this PreCost?",
-    );
-    if (!confirmDelete) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      await PreCostService.deletePreCost(id);
-      toast.success("PreCost deleted successfully");
-      loadData(); // refresh list
+      setDeleting(true);
+      await PreCostService.deletePreCost(deleteId);
+
+      toast.error("PreCost deleted successfully");
+      setOpenDelete(false);
+      setDeleteId(null);
+      loadData();
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete PreCost");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  /* ================= STATUS UPDATE ================= */
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      setStatusLoading(true);
+
+      await PreCostService.updateStatus(id, {
+        status: newStatus as "PENDING" | "COMPLETED",
+      });
+
+      toast.success("Status updated successfully");
+      loadData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status");
+    } finally {
+      setStatusLoading(false);
     }
   };
 
@@ -125,9 +151,17 @@ export default function QuotationPage() {
                     </td>
 
                     <td className="p-3">
-                      <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">
-                        {item.status}
-                      </span>
+                      <select
+                        className="px-2 py-1 text-xs rounded border bg-background"
+                        value={item.status}
+                        disabled={statusLoading}
+                        onChange={(e) =>
+                          handleStatusChange(item.pre_cost_id, e.target.value)
+                        }
+                      >
+                        <option value="PENDING">PENDING</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                      </select>
                     </td>
 
                     <td className="p-3 text-right space-x-2">
@@ -159,7 +193,7 @@ export default function QuotationPage() {
                         variant="destructive"
                         onClick={() => {
                           setDeleteId(item.pre_cost_id);
-                          setOpen(true);
+                          setOpenDelete(true);
                         }}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -173,52 +207,12 @@ export default function QuotationPage() {
         </div>
 
         {/* Delete Dialog */}
-        <div
-          className={`fixed inset-0 bg-black/50 flex items-center justify-center ${
-            open ? "" : "hidden"
-          }`}
-        >
-          <div className="bg-white rounded-xl p-6 w-[400px] space-y-4">
-            <h2 className="text-lg font-semibold">Confirm Delete</h2>
-
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete this PreCost? This action cannot
-              be undone.
-            </p>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setOpen(false);
-                  setDeleteId(null);
-                }}
-              >
-                Cancel
-              </Button>
-
-              <Button
-                variant="destructive"
-                onClick={async () => {
-                  if (!deleteId) return;
-
-                  try {
-                    await PreCostService.deletePreCost(deleteId);
-                    toast.success("PreCost deleted successfully");
-                    loadData();
-                  } catch (err) {
-                    toast.error("Failed to delete PreCost");
-                  } finally {
-                    setOpen(false);
-                    setDeleteId(null);
-                  }
-                }}
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDeleteDialog
+          open={openDelete}
+          onClose={() => setOpenDelete(false)}
+          onConfirm={handleConfirmDelete}
+          loading={deleting}
+        />
       </main>
     </div>
   );

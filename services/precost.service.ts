@@ -73,4 +73,22 @@ static async deletePreCost(id: string): Promise<any> {
     );
   }
 }
+
+/* ================= UPDATE STATUS ================= */
+static async updateStatus(
+  id: string,
+  payload: { status: "PENDING" | "COMPLETED" }
+): Promise<any> {
+  try {
+    const res = await apiClient.patch(
+      `/api/precost/${id}/status`,
+      payload
+    );
+    return res.data;
+  } catch (err: any) {
+    throw new Error(
+      err?.response?.data?.message || "Failed to update precost status"
+    );
+  }
+}
 }
