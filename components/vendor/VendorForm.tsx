@@ -22,9 +22,11 @@ interface PIC {
 
 interface Props {
   onSuccess?: () => void;
+  initialData?: any;
+  mode?: "create" | "edit";
 }
 
-export function VendorForm({ onSuccess }: Props) {
+export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
   /* ================= BASIC INFO ================= */
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -52,10 +54,52 @@ export function VendorForm({ onSuccess }: Props) {
     },
   ]);
 
-  /* ================= CATEGORY HANDLERS ================= */
-  const addCategory = () => {
+  /* ================= LOAD INITIAL DATA (EDIT MODE) ================= */
+  React.useEffect(() => {
+    if (!initialData) return;
+
+    setName(initialData.name || "");
+    setEmail(initialData.email || "");
+    setContactNumber(initialData.phone_number || "");
+    setAddress(initialData.address || "");
+    setCompanyType(initialData.company_type || "");
+    setRemark(initialData.remark || "");
+
+    setCategories(
+      initialData.categories?.length
+        ? initialData.categories.map((c: any) => ({
+            id: c.cte_id,
+            name: c.cte_name,
+          }))
+        : [{ id: "", name: "" }],
+    );
+
+    setPics(
+      initialData.pics?.length
+        ? initialData.pics.map((p: any) => ({
+            firstName: p.firstName,
+            lastName: p.lastName,
+            email: p.email,
+            picType: p.picType,
+            remark: p.remark,
+            phone_number: p.phone_number,
+          }))
+        : [
+            {
+              firstName: "",
+              lastName: "",
+              email: "",
+              picType: "",
+              remark: "",
+              phone_number: "",
+            },
+          ],
+    );
+  }, [initialData]);
+
+  /* ================= CATEGORY ================= */
+  const addCategory = () =>
     setCategories((prev) => [...prev, { id: "", name: "" }]);
-  };
 
   const updateCategory = (
     index: number,
@@ -73,7 +117,7 @@ export function VendorForm({ onSuccess }: Props) {
     setCategories((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /* ================= PIC HANDLERS ================= */
+  /* ================= PIC ================= */
   const addPic = () => {
     setPics((prev) => [
       ...prev,
@@ -123,38 +167,22 @@ export function VendorForm({ onSuccess }: Props) {
         address,
         company_type: companyType,
         remark,
-
         categories: categories.filter((c) => c.id && c.name),
-
         pic: pics.filter((p) => p.firstName && p.email && p.phone_number),
       };
 
-      await VendorService.createVendor(payload);
+      if (mode === "edit" && initialData?.vendor_id) {
+        await VendorService.updateVendor(initialData.vendor_id, payload);
+        toast.success("Vendor updated successfully");
+      } else {
+        await VendorService.createVendor(payload);
+        toast.success("Vendor created successfully");
+      }
 
-      toast.success("Vendor created successfully");
       onSuccess?.();
-
-      // reset
-      setName("");
-      setEmail("");
-      setContactNumber("");
-      setAddress("");
-      setCompanyType("");
-      setRemark("");
-      setCategories([{ id: "", name: "" }]);
-      setPics([
-        {
-          firstName: "",
-          lastName: "",
-          email: "",
-          picType: "",
-          remark: "",
-          phone_number: "",
-        },
-      ]);
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || "Failed to create vendor");
+      toast.error(err?.message || "Failed to save vendor");
     } finally {
       setLoading(false);
     }
@@ -208,7 +236,7 @@ export function VendorForm({ onSuccess }: Props) {
         onChange={(e) => setRemark(e.target.value)}
       />
 
-      {/* CATEGORIES */}
+      {/* CATEGORY */}
       <div>
         <div className="flex justify-between mb-2">
           <h3 className="font-semibold">Categories</h3>
@@ -316,7 +344,11 @@ export function VendorForm({ onSuccess }: Props) {
       {/* SUBMIT */}
       <div className="flex justify-end">
         <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Saving..." : "Create Vendor"}
+          {loading
+            ? "Saving..."
+            : mode === "edit"
+              ? "Update Vendor"
+              : "Create Vendor"}
         </Button>
       </div>
     </div>

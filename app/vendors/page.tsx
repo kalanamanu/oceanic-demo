@@ -4,7 +4,7 @@ import * as React from "react";
 import { VendorService } from "@/services/vendor.service";
 import { VendorStatusBadge } from "@/components/vendor/VendorStatusBadge";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Eye } from "lucide-react";
+import { Trash2, Plus, Eye, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -141,6 +141,13 @@ export default function VendorsPage() {
                   onClick={() => router.push(`/vendors/${v.vendor_id}`)}
                 >
                   <Eye className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => router.push(`/vendors/edit/${v.vendor_id}`)}
+                >
+                  <Pencil className="w-4 h-4" />
                 </Button>
 
                 <Button
