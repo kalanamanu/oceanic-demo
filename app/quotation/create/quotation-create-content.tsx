@@ -14,8 +14,12 @@ import { QuotationCalculator } from "@/calculations/quotation-calculator";
 import type { QuotationItem } from "@/types/quotation.types";
 import { DatePicker } from "@/components/ui/date-picker";
 import { QuotationPreviewDialog } from "@/components/quatation/quotation-preview-dialog";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function QuotationCreateContent() {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const inquiryId = searchParams.get("inquiryId");
 
@@ -276,13 +280,16 @@ export function QuotationCreateContent() {
 
       const res = await PreCostService.createPreCost(payload);
 
-      console.log("Saved:", res);
       setPreviewOpen(false);
 
-      alert("PreCost saved successfully!");
+      toast.success("PreCost created successfully");
+
+      setTimeout(() => {
+        router.push("/quotation");
+      }, 1200);
     } catch (err) {
       console.error(err);
-      alert("Failed to save PreCost");
+      toast.error("Failed to save PreCost");
     }
   };
 
