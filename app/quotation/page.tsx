@@ -25,6 +25,9 @@ export default function QuotationPage() {
   const [data, setData] = React.useState<PreCost[]>([]);
   const [loading, setLoading] = React.useState(true);
 
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [open, setOpen] = React.useState(false);
+
   /* ================= FETCH ================= */
   const loadData = async () => {
     try {
@@ -154,7 +157,10 @@ export default function QuotationPage() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => handleDelete(item.pre_cost_id)}
+                        onClick={() => {
+                          setDeleteId(item.pre_cost_id);
+                          setOpen(true);
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -164,6 +170,54 @@ export default function QuotationPage() {
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Delete Dialog */}
+        <div
+          className={`fixed inset-0 bg-black/50 flex items-center justify-center ${
+            open ? "" : "hidden"
+          }`}
+        >
+          <div className="bg-white rounded-xl p-6 w-[400px] space-y-4">
+            <h2 className="text-lg font-semibold">Confirm Delete</h2>
+
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this PreCost? This action cannot
+              be undone.
+            </p>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOpen(false);
+                  setDeleteId(null);
+                }}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  if (!deleteId) return;
+
+                  try {
+                    await PreCostService.deletePreCost(deleteId);
+                    toast.success("PreCost deleted successfully");
+                    loadData();
+                  } catch (err) {
+                    toast.error("Failed to delete PreCost");
+                  } finally {
+                    setOpen(false);
+                    setDeleteId(null);
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
