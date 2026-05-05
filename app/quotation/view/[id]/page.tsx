@@ -129,7 +129,7 @@ export default function PreCostViewPage() {
                 <b>USD Rate:</b> <span>{data.usd_rate}</span>
               </div>
               <div className="flex justify-between">
-                <b>Discount:</b> <span>{data.discount}%</span>
+                <b>Discount:</b> <span>{data.discount} LKR</span>
               </div>
             </div>
           </div>
