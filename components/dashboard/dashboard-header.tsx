@@ -44,7 +44,7 @@ export function DashboardHeader() {
             src={
               mounted && theme === "dark"
                 ? "/oceanic-logo.png"
-                : "/oceanic-logo.png"
+                : "/oceanic-logo-black.png"
             }
             alt="Oceanic Logo"
             className="h-12 w-auto object-contain"
