@@ -14,6 +14,7 @@ import { QuotationCalculator } from "@/calculations/quotation-calculator";
 import type { QuotationItem } from "@/types/quotation.types";
 import { DatePicker } from "@/components/ui/date-picker";
 import { QuotationPreviewDialog } from "@/components/quatation/quotation-preview-dialog";
+import { TempVendorDialog } from "@/components/quatation/TempVendorDialog";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -49,6 +50,12 @@ export function QuotationCreateContent() {
   const [remark, setRemark] = React.useState<string>("");
 
   const [previewOpen, setPreviewOpen] = React.useState(false);
+
+  const [tempVendorOpen, setTempVendorOpen] = React.useState(false);
+  const [tempVendorLoading, setTempVendorLoading] = React.useState(false);
+  const [activeItemIndex, setActiveItemIndex] = React.useState<number | null>(
+    null,
+  );
 
   //Load Vendors on load
   React.useEffect(() => {
@@ -293,6 +300,32 @@ export function QuotationCreateContent() {
     }
   };
 
+  /* ================= Create Temp Vendor Handler ================= */
+  const handleCreateTempVendor = async (form: any) => {
+    if (!precostId || activeItemIndex === null) return;
+
+    try {
+      setTempVendorLoading(true);
+
+      const newVendor = await PreCostService.createTempVendor(precostId, form);
+
+      // Add to vendor list
+      setVendors((prev) => [...prev, newVendor]);
+
+      // Assign to current item
+      updateItem(activeItemIndex, "supplier_name", newVendor.vendor_id);
+
+      toast.success("Temporary vendor added");
+
+      setTempVendorOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create vendor");
+    } finally {
+      setTempVendorLoading(false);
+    }
+  };
+
   /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-background">
@@ -463,27 +496,37 @@ export function QuotationCreateContent() {
                       <label className="text-xs font-medium">
                         Supplier Name
                       </label>
-                      <select
-                        className="w-full border p-2 rounded"
-                        value={(item as any).supplier_name || ""}
-                        onChange={(e) =>
-                          updateItem(index, "supplier_name", e.target.value)
-                        }
-                      >
-                        <option value="">Select Verified Supplier</option>
 
-                        {vendors
-                          .filter(
-                            (v: any) =>
-                              v.status?.is_md_approved &&
-                              v.status?.is_manager_approved,
-                          )
-                          .map((v: any) => (
+                      <div className="flex gap-2">
+                        <select
+                          className="w-full border p-2 rounded"
+                          value={(item as any).supplier_name || ""}
+                          onChange={(e) =>
+                            updateItem(index, "supplier_name", e.target.value)
+                          }
+                        >
+                          <option value="">Select Supplier</option>
+
+                          {vendors.map((v: any) => (
                             <option key={v.vendor_id} value={v.vendor_id}>
-                              {v.name}
+                              {v.vendor_name || v.name}
+                              {!v.is_verified && " (Temp)"}
                             </option>
                           ))}
-                      </select>
+                        </select>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setActiveItemIndex(index);
+                            setTempVendorOpen(true);
+                          }}
+                        >
+                          + Add
+                        </Button>
+                      </div>
                     </div>
 
                     {/* ================= AUTO CALCULATED ================= */}
@@ -725,6 +768,12 @@ export function QuotationCreateContent() {
           dateArrived={dateArrived}
           dateSailed={dateSailed}
           remark={remark}
+        />
+        <TempVendorDialog
+          open={tempVendorOpen}
+          onClose={() => setTempVendorOpen(false)}
+          onSave={handleCreateTempVendor}
+          loading={tempVendorLoading}
         />
       </main>
     </div>

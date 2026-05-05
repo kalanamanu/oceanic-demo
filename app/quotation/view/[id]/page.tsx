@@ -218,17 +218,40 @@ export default function PreCostViewPage() {
                     </div>
                     <div>
                       <b>Vendor:</b>{" "}
-                      <span
-                        className={
-                          item.vendorDetails
-                            ? "text-primary"
-                            : "text-muted-foreground"
+                      {(() => {
+                        // 1. Verified vendor
+                        if (item.vendorDetails) {
+                          return (
+                            <span className="text-primary">
+                              {item.vendorDetails.name} (
+                              {item.vendorDetails.email})
+                            </span>
+                          );
                         }
-                      >
-                        {item.vendorDetails
-                          ? `${item.vendorDetails.name} (${item.vendorDetails.email})`
-                          : "Not Assigned"}
-                      </span>
+
+                        // 2. Temporary vendor match
+                        const tempVendor = data.tempVendors?.find(
+                          (tv: any) => tv.vendor_id === item.vendor_id,
+                        );
+
+                        if (tempVendor) {
+                          return (
+                            <span className="text-blue-600">
+                              {tempVendor.vendor_name} ({tempVendor.email})
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                [Temporary]
+                              </span>
+                            </span>
+                          );
+                        }
+
+                        // 3. No vendor
+                        return (
+                          <span className="text-muted-foreground">
+                            Not Assigned
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

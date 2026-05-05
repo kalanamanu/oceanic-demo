@@ -91,4 +91,27 @@ static async updateStatus(
     );
   }
 }
+
+/* ================= CREATE TEMP VENDOR ================= */
+static async createTempVendor(
+  precostId: string,
+  payload: {
+    vendor_name: string;
+    contact_person: string;
+    email: string;
+    phone: string;
+  }
+): Promise<any> {
+  try {
+    const res = await apiClient.post(
+      `/api/precost/${precostId}/temp-vendors`,
+      payload
+    );
+    return res.data?.data;
+  } catch (err: any) {
+    throw new Error(
+      err?.response?.data?.message || "Failed to create temp vendor"
+    );
+  }
+}
 }
