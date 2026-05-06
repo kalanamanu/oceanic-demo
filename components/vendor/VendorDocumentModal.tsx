@@ -65,8 +65,7 @@ export function VendorDocumentModal({
 
       toast.success("File uploaded successfully");
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Upload failed");
+      toast.error(err.message);
     } finally {
       setUploading(false);
     }

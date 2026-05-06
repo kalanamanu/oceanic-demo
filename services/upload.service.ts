@@ -8,23 +8,28 @@ import type {
 export class UploadService {
   /* ================= UPLOAD FILE ================= */
   static async uploadFile(payload: UploadFileRequest) {
-    try {
-      const formData = new FormData();
-      formData.append("file", payload.file);
-      formData.append("use_for", payload.useFor);
+  try {
+    const formData = new FormData();
+    formData.append("file", payload.file);
+    formData.append("use_for", payload.useFor);
 
-      const res = await apiClient.post<UploadFileResponse>(
-        "/api/upload",
-        formData,
-      );
+    const res = await apiClient.post(
+      "/api/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-      return res.data.data;
-    } catch (err: any) {
-      throw new Error(
-        err?.response?.data?.message || "File upload failed",
-      );
-    }
+    return res.data.data;
+  } catch (err: any) {
+    throw new Error(
+      err?.response?.data?.message || "File upload failed"
+    );
   }
+}
 
   /* ================= GET SIGNED URL ================= */
   static async getFileUrl(fileId: number): Promise<string> {
