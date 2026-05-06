@@ -27,7 +27,7 @@ export class UploadService {
         },
       );
 
-      return res.data.data; // { id, file_url, ... }
+      return res.data.data; 
     } catch (err: any) {
       throw new Error(
         err?.response?.data?.message || "File upload failed",
