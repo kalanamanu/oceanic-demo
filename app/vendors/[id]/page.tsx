@@ -3,10 +3,13 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { VendorService } from "@/services/vendor.service";
+import { VendorDocumentModal } from "@/components/vendor/VendorDocumentModal";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
 import {
   ArrowLeft,
   Edit,
@@ -15,8 +18,13 @@ import {
   MapPin,
   Building2,
   User,
+  FileText,
+  Plus,
+  Trash2,
 } from "lucide-react";
+
 import { VendorStatusBadge } from "@/components/vendor/VendorStatusBadge";
+import { toast } from "sonner";
 
 export default function VendorViewPage() {
   const { id } = useParams();
@@ -25,28 +33,69 @@ export default function VendorViewPage() {
   const [vendor, setVendor] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
 
+  /* ================= DOCUMENTS ================= */
+  const [documents, setDocuments] = React.useState<any[]>([]);
+  const [docLoading, setDocLoading] = React.useState(false);
+  const [docModalOpen, setDocModalOpen] = React.useState(false);
+
+  /* ================= LOAD VENDOR ================= */
+  const loadVendor = async () => {
+    try {
+      setLoading(true);
+      const res = await VendorService.getVendorById(id as string);
+      setVendor(res);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load vendor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================= LOAD DOCUMENTS ================= */
+  const loadDocuments = async () => {
+    try {
+      setDocLoading(true);
+      const res = await VendorService.getVendorDocuments({
+        vendor_id: id as string,
+      });
+      setDocuments(res);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load documents");
+    } finally {
+      setDocLoading(false);
+    }
+  };
+
   React.useEffect(() => {
     if (!id) return;
-    const load = async () => {
-      try {
-        setLoading(true);
-        const res = await VendorService.getVendorById(id as string);
-        setVendor(res);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+
+    loadVendor();
+    loadDocuments();
   }, [id]);
 
+  /* ================= DELETE DOCUMENT ================= */
+  const handleDeleteDoc = async (docId: string) => {
+    if (!confirm("Delete this document?")) return;
+
+    try {
+      await VendorService.deleteVendorDocument(docId);
+      toast.success("Document deleted");
+      loadDocuments();
+    } catch {
+      toast.error("Failed to delete document");
+    }
+  };
+
+  /* ================= STATES ================= */
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen animate-pulse">
         Loading vendor...
       </div>
     );
+
   if (!vendor)
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -56,7 +105,7 @@ export default function VendorViewPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-background">
-      {/* TOP HEADER NAVIGATION */}
+      {/* ================= HEADER ================= */}
       <div className="border-b bg-background sticky top-0 z-10">
         <div className="max-w-7xl mx-auto p-4 md:px-8 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -68,11 +117,10 @@ export default function VendorViewPage() {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
+
             <div>
-              <h1 className="text-xl font-bold tracking-tight">
-                {vendor.name}
-              </h1>
-              <div className="flex items-center gap-2 mt-0.5">
+              <h1 className="text-xl font-bold">{vendor.name}</h1>
+              <div className="flex items-center gap-2 mt-1">
                 <VendorStatusBadge status={vendor.status?.status} />
                 <span className="text-xs text-muted-foreground font-mono">
                   ID: {vendor.vendor_id}
@@ -80,110 +128,83 @@ export default function VendorViewPage() {
               </div>
             </div>
           </div>
+
           <Button
             onClick={() => router.push(`/vendors/edit/${vendor.vendor_id}`)}
-            className="gap-2 shadow-sm"
           >
-            <Edit className="w-4 h-4" />
-            Edit Profile
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
           </Button>
         </div>
       </div>
 
+      {/* ================= MAIN ================= */}
       <main className="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT COLUMN: PRIMARY INFO & PICS */}
+          {/* LEFT */}
           <div className="lg:col-span-2 space-y-6">
-            {/* INFORMATION CARD */}
+            {/* INFO */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold">
-                  General Information
-                </CardTitle>
+                <CardTitle>General Information</CardTitle>
               </CardHeader>
+
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-y-6 gap-x-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <InfoItem
-                    icon={<Mail className="w-4 h-4" />}
+                    icon={<Mail />}
                     label="Email"
                     value={vendor.email}
                   />
                   <InfoItem
-                    icon={<Phone className="w-4 h-4" />}
+                    icon={<Phone />}
                     label="Phone"
                     value={vendor.phone_number}
                   />
                   <InfoItem
-                    icon={<MapPin className="w-4 h-4" />}
+                    icon={<MapPin />}
                     label="Address"
                     value={vendor.address}
-                    className="md:col-span-2"
+                    className="col-span-2"
                   />
                   <InfoItem
-                    icon={<Building2 className="w-4 h-4" />}
+                    icon={<Building2 />}
                     label="Company Type"
                     value={vendor.company_type}
                   />
                 </div>
+
                 {vendor.remark && (
                   <>
-                    <Separator className="my-6" />
-                    <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Remark
-                      </span>
-                      <p className="mt-2 text-sm text-foreground/80 leading-relaxed bg-muted/30 p-3 rounded-md border border-dashed">
-                        {vendor.remark}
-                      </p>
-                    </div>
+                    <Separator className="my-4" />
+                    <p className="text-sm">{vendor.remark}</p>
                   </>
                 )}
               </CardContent>
             </Card>
 
-            {/* PIC SECTION */}
-            <section className="space-y-4">
-              <h2 className="text-lg font-bold flex items-center gap-2 px-1">
-                <User className="w-5 h-5 text-primary" />
-                Contact Persons (PIC)
+            {/* PIC */}
+            <section>
+              <h2 className="font-bold mb-2 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                PICs
               </h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {vendor.pics?.length > 0 ? (
+
+              <div className="grid md:grid-cols-2 gap-3">
+                {vendor.pics?.length ? (
                   vendor.pics.map((p: any) => (
-                    <Card
-                      key={p.pic_id}
-                      className="bg-card/50 hover:bg-card transition-colors"
-                    >
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <p className="font-bold text-base">
-                            {p.firstName} {p.lastName}
-                          </p>
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] uppercase tracking-tighter"
-                          >
-                            {p.picType}
-                          </Badge>
-                        </div>
-                        <div className="text-sm space-y-1 text-muted-foreground">
-                          <p className="flex items-center gap-2">
-                            <Mail className="w-3 h-3" /> {p.email}
-                          </p>
-                          <p className="flex items-center gap-2">
-                            <Phone className="w-3 h-3" /> {p.phone_number}
-                          </p>
-                        </div>
-                        {p.remark && (
-                          <p className="text-[11px] italic pt-2 border-t mt-2">
-                            {p.remark}
-                          </p>
-                        )}
+                    <Card key={p.pic_id}>
+                      <CardContent className="p-3">
+                        <p className="font-semibold">
+                          {p.firstName} {p.lastName}
+                        </p>
+                        <p className="text-sm">{p.email}</p>
+                        <p className="text-sm">{p.phone_number}</p>
                       </CardContent>
                     </Card>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground italic col-span-2 text-center py-8 border rounded-lg border-dashed">
+                  <p className="text-sm text-muted-foreground">
                     No PICs available
                   </p>
                 )}
@@ -191,45 +212,32 @@ export default function VendorViewPage() {
             </section>
           </div>
 
-          {/* RIGHT COLUMN: CATEGORIES & APPROVAL */}
+          {/* RIGHT */}
           <div className="space-y-6">
-            {/* CATEGORIES CARD */}
+            {/* CATEGORY */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Service Categories</CardTitle>
+                <CardTitle>Categories</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {vendor.categories?.length > 0 ? (
-                    vendor.categories.map((c: any) => (
-                      <Badge
-                        key={c.cte_id}
-                        variant="secondary"
-                        className="px-3 py-1 rounded-md"
-                      >
-                        {c.cte_name}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-sm text-muted-foreground italic">
-                      No categories assigned
-                    </span>
-                  )}
-                </div>
+
+              <CardContent className="flex flex-wrap gap-2">
+                {vendor.categories?.map((c: any) => (
+                  <Badge key={c.cte_id}>{c.cte_name}</Badge>
+                ))}
               </CardContent>
             </Card>
 
-            {/* APPROVAL STATUS CARD */}
-            <Card className="border-l-4 border-l-primary">
+            {/* APPROVAL */}
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Internal Approval</CardTitle>
+                <CardTitle>Approval</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+
+              <CardContent>
                 <ApprovalRow
                   label="MD Approved"
                   status={vendor.status?.is_md_approved}
                 />
-                <Separator />
                 <ApprovalRow
                   label="Manager Approved"
                   status={vendor.status?.is_manager_approved}
@@ -238,35 +246,88 @@ export default function VendorViewPage() {
             </Card>
           </div>
         </div>
+
+        {/* ================= DOCUMENTS ================= */}
+        <section>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="font-bold flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Documents
+            </h2>
+
+            <Button size="sm" onClick={() => setDocModalOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Upload
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              {docLoading ? (
+                <p>Loading...</p>
+              ) : documents.length === 0 ? (
+                <p className="text-muted-foreground">No documents uploaded</p>
+              ) : (
+                documents.map((doc) => (
+                  <div
+                    key={doc.document_id}
+                    className="flex justify-between items-center border p-2 rounded"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{doc.document_type}</p>
+                      <p className="text-xs">
+                        Expiry:{" "}
+                        {new Date(
+                          doc.document_expiry_date,
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={() => handleDeleteDoc(doc.document_id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </section>
       </main>
+
+      {/* ================= MODAL ================= */}
+      <VendorDocumentModal
+        open={docModalOpen}
+        onClose={() => setDocModalOpen(false)}
+        vendorId={vendor.vendor_id}
+        onSuccess={loadDocuments}
+      />
     </div>
   );
 }
 
-/* HELPER COMPONENTS FOR CLEANER CODE */
+/* ================= HELPERS ================= */
 
 function InfoItem({ icon, label, value, className }: any) {
   return (
     <div className={className}>
-      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         {icon}
-        <span className="text-xs font-semibold uppercase tracking-wider">
-          {label}
-        </span>
+        {label}
       </div>
       <p className="text-sm font-medium">{value || "-"}</p>
     </div>
   );
 }
 
-function ApprovalRow({ label, status }: { label: string; status: boolean }) {
+function ApprovalRow({ label, status }: any) {
   return (
-    <div className="flex justify-between items-center text-sm">
-      <span className="text-muted-foreground font-medium">{label}</span>
-      <Badge
-        variant={status ? "default" : "destructive"}
-        className="rounded-sm"
-      >
+    <div className="flex justify-between text-sm">
+      <span>{label}</span>
+      <Badge variant={status ? "default" : "destructive"}>
         {status ? "Yes" : "No"}
       </Badge>
     </div>

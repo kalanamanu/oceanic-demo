@@ -129,3 +129,24 @@ export interface VendorActionResponse {
   message: string;
   vendor_id?: string;
 }
+
+export interface VendorDocument {
+  document_id: string;
+  vendor_id: string;
+  upload_doc_id: string;
+  document_type: string;
+  other_document_type?: string | null;
+  document_expiry_date: string;
+  remarks?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateVendorDocumentRequest {
+  vendor_id: string;
+  upload_doc_id: number;
+  document_type: string;
+  other_document_type?: string | null;
+  document_expiry_date: string;
+  remarks?: string;
+}
