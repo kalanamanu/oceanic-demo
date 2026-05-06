@@ -13,9 +13,11 @@ import { VendorStatusBadge } from "@/components/vendor/VendorStatusBadge";
 // Refactored Section Components
 import { VendorGeneralInfo } from "@/components/vendor/VendorGeneralInfo";
 import { VendorPICSection } from "@/components/vendor/VendorPICSection";
-import { VendorDocumentSection } from "@/components/vendor/VendorDocumentSection";
 import { VendorCategoryCard } from "@/components/vendor/VendorCategoryCard";
 import { VendorApprovalCard } from "@/components/vendor/VendorApprovalCard";
+
+// Using the View Only version of the document section
+import { VendorDocumentViewOnly } from "@/components/vendor/VendorDocumentViewOnly";
 
 export default function VendorViewPage() {
   const { id } = useParams();
@@ -97,15 +99,15 @@ export default function VendorViewPage() {
             <VendorPICSection pics={vendor.pics} />
           </div>
 
-          {/* RIGHT COLUMN: Metadata & Status (Previously Sidebar) */}
+          {/* RIGHT COLUMN: Metadata & Status */}
           <div className="space-y-6">
             <VendorCategoryCard categories={vendor.categories} />
             <VendorApprovalCard status={vendor.status} />
           </div>
         </div>
 
-        {/* BOTTOM SECTION: Documents */}
-        <VendorDocumentSection vendorId={vendor.vendor_id} />
+        {/* BOTTOM SECTION: Documents (View Only Mode) */}
+        <VendorDocumentViewOnly vendorId={vendor.vendor_id} />
       </main>
     </div>
   );
