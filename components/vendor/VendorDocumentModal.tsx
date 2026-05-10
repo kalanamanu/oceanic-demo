@@ -13,13 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/ui/date-picker";
-import apiClient from "@/lib/api-client";
 import { UploadService } from "@/services/upload.service";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   vendorId: string;
+
+  documentId?: string | null;
+  initialData?: any;
+
   onSuccess?: () => void;
 }
 
@@ -37,8 +40,12 @@ export function VendorDocumentModal({
   open,
   onClose,
   vendorId,
+  documentId,
+  initialData,
   onSuccess,
 }: Props) {
+  const isEditMode = !!documentId;
+
   const [loading, setLoading] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
 
@@ -49,6 +56,38 @@ export function VendorDocumentModal({
   const [otherDocType, setOtherDocType] = React.useState("");
   const [expiryDate, setExpiryDate] = React.useState<Date | undefined>();
   const [remarks, setRemarks] = React.useState("");
+
+  /* ================= LOAD EDIT DATA ================= */
+  React.useEffect(() => {
+    if (!initialData || !open) return;
+
+    setUploadDocId(
+      initialData.upload_doc_id ? Number(initialData.upload_doc_id) : null,
+    );
+
+    setDocumentType(initialData.document_type || "");
+
+    setOtherDocType(initialData.other_document_type || "");
+
+    setRemarks(initialData.remarks || "");
+
+    if (initialData.document_expiry_date) {
+      setExpiryDate(new Date(initialData.document_expiry_date));
+    }
+
+    // optional if backend returns original_name
+    setFileName(initialData.original_name || "");
+  }, [initialData, open]);
+
+  /* ================= RESET ================= */
+  const resetForm = () => {
+    setUploadDocId(null);
+    setFileName("");
+    setDocumentType("");
+    setOtherDocType("");
+    setExpiryDate(undefined);
+    setRemarks("");
+  };
 
   /* ================= FILE UPLOAD ================= */
   const handleFileUpload = async (file: File) => {
@@ -65,7 +104,8 @@ export function VendorDocumentModal({
 
       toast.success("File uploaded successfully");
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(err?.message || "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -93,40 +133,57 @@ export function VendorDocumentModal({
     try {
       setLoading(true);
 
-      await VendorService.createVendorDocument({
+      const payload = {
         vendor_id: vendorId,
         upload_doc_id: uploadDocId!,
         document_type: documentType,
         other_document_type: documentType === "other" ? otherDocType : null,
         document_expiry_date: expiryDate!.toISOString().split("T")[0],
         remarks,
-      });
+      };
 
-      toast.success("Document added");
+      if (isEditMode && documentId) {
+        await VendorService.updateVendorDocument(documentId, payload);
+
+        toast.success("Document updated successfully");
+      } else {
+        await VendorService.createVendorDocument(payload);
+
+        toast.success("Document created successfully");
+      }
 
       onSuccess?.();
-      onClose();
 
-      // reset
-      setUploadDocId(null);
-      setFileName("");
-      setDocumentType("");
-      setOtherDocType("");
-      setExpiryDate(undefined);
-      setRemarks("");
+      resetForm();
+
+      onClose();
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || "Failed to save document");
+
+      toast.error(err?.message || "Failed to save vendor document");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(state) => {
+        if (!state) {
+          onClose();
+
+          if (!isEditMode) {
+            resetForm();
+          }
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload Vendor Document</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Edit Vendor Document" : "Upload Vendor Document"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -140,8 +197,10 @@ export function VendorDocumentModal({
                 id="file-upload"
                 className="hidden"
                 onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    handleFileUpload(e.target.files[0]);
+                  const file = e.target.files?.[0];
+
+                  if (file) {
+                    handleFileUpload(file);
                   }
                 }}
               />
@@ -155,6 +214,7 @@ export function VendorDocumentModal({
                 ) : fileName ? (
                   <>
                     <span className="font-medium">{fileName}</span>
+
                     <span className="text-xs text-muted-foreground">
                       Click to replace file
                     </span>
@@ -162,22 +222,27 @@ export function VendorDocumentModal({
                 ) : (
                   <>
                     <span className="font-medium">Click to upload file</span>
+
                     <span className="text-xs text-muted-foreground">
-                      PDF, Image, etc.
+                      PDF, DOCX, Images, etc.
                     </span>
                   </>
                 )}
               </label>
             </div>
           </div>
+
+          {/* DOCUMENT TYPE */}
           <div>
             <Label>Document Type *</Label>
+
             <select
-              className="w-full border rounded p-2 bg-background"
+              className="w-full border rounded-md p-2 bg-background text-foreground"
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
             >
               <option value="">Select type</option>
+
               {DOCUMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {type.replaceAll("_", " ")}
@@ -190,25 +255,30 @@ export function VendorDocumentModal({
           {documentType === "other" && (
             <div>
               <Label>Specify Document Type *</Label>
+
               <Input
+                placeholder="Enter document type"
                 value={otherDocType}
                 onChange={(e) => setOtherDocType(e.target.value)}
               />
             </div>
           )}
 
-          {/* DATE PICKER */}
+          {/* EXPIRY DATE */}
           <div>
             <Label>Expiry Date *</Label>
+
             <DatePicker date={expiryDate} onDateChange={setExpiryDate} />
           </div>
 
           {/* REMARKS */}
           <div>
             <Label>Remarks</Label>
+
             <textarea
-              className="w-full border rounded p-2 bg-background"
               rows={3}
+              className="w-full border rounded-md p-2 bg-background"
+              placeholder="Enter remarks"
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
             />
@@ -220,8 +290,12 @@ export function VendorDocumentModal({
               Cancel
             </Button>
 
-            <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Saving..." : "Save Document"}
+            <Button onClick={handleSubmit} disabled={loading || uploading}>
+              {loading
+                ? "Saving..."
+                : isEditMode
+                  ? "Update Document"
+                  : "Save Document"}
             </Button>
           </div>
         </div>
