@@ -214,7 +214,7 @@ export function UserCreateDialog({
                       <SelectItem value="team_head">
                         Team Head Account
                       </SelectItem>
-                      <SelectItem value="user">User Account</SelectItem>
+                      <SelectItem value="staff">Staff Account</SelectItem>
                     </SelectContent>
                   </Select>
                 </motion.div>

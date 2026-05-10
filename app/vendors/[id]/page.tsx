@@ -75,7 +75,6 @@ export default function VendorViewPage() {
             <div>
               <h1 className="text-xl font-bold">{vendor.name}</h1>
               <div className="flex items-center gap-2 mt-1">
-                <VendorStatusBadge status={vendor.status?.status} />
                 <span className="text-xs text-muted-foreground font-mono">
                   ID: {vendor.vendor_id}
                 </span>
@@ -102,7 +101,12 @@ export default function VendorViewPage() {
           {/* RIGHT COLUMN: Metadata & Status */}
           <div className="space-y-6">
             <VendorCategoryCard categories={vendor.categories} />
-            <VendorApprovalCard status={vendor.status} />
+
+            <VendorApprovalCard
+              vendorId={vendor.vendor_id}
+              status={vendor.status}
+              onRefresh={loadVendor}
+            />
           </div>
         </div>
 
