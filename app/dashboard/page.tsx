@@ -77,12 +77,6 @@ export default function Dashboard() {
       color: "cyan" as const,
       icon: Building2,
     },
-    {
-      label: "Active Products",
-      value: 47,
-      color: "violet" as const,
-      icon: Package,
-    },
   ];
 
   const activities = [
