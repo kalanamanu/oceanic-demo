@@ -33,8 +33,7 @@ export default function EditVendorPage() {
   }, [id]);
 
   const handleSuccess = () => {
-    toast.success("Vendor updated successfully");
-    router.push(`/vendors/view/${id}`); // Redirect back to view page
+    router.push(`/vendors`);
   };
 
   if (loading) {
@@ -69,7 +68,11 @@ export default function EditVendorPage() {
         {/* 1. General Info Form */}
         <div className="border rounded-xl p-6 bg-card shadow-sm">
           <h2 className="text-lg font-semibold mb-4">General Details</h2>
-          <VendorForm initialData={vendor} onSuccess={handleSuccess} />
+          <VendorForm
+            mode="edit"
+            initialData={vendor}
+            onSuccess={handleSuccess}
+          />
         </div>
 
         {/* 2. Document Management Section (Upload, Edit, Delete, View) */}
