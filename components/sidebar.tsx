@@ -53,7 +53,7 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -84,7 +84,7 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -113,7 +113,7 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -130,7 +130,7 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
+    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
