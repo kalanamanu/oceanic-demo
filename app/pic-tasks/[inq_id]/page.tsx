@@ -44,6 +44,34 @@ export default function PicTodoPage() {
     }
   };
 
+  const formatDate = (date?: string) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString("en-GB"); // DD/MM/YYYY
+  };
+
+  const formatTime24 = (time?: string) => {
+    if (!time) return "-";
+
+    // supports "HH:mm:ss" or "HH:mm"
+    const [h, m] = time.split(":");
+    return `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
+  };
+
+  const formatDateTime = (date?: string) => {
+    if (!date) return "-";
+
+    const d = new Date(date);
+
+    const ddmmyyyy = d.toLocaleDateString("en-GB");
+    const hhmm = d.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${ddmmyyyy} ${hhmm}`;
+  };
+
   React.useEffect(() => {
     if (inq_id) loadData();
   }, [inq_id]);
@@ -124,12 +152,12 @@ export default function PicTodoPage() {
             <DetailItem
               icon={<CalendarDays className="h-4 w-4" />}
               label="ETA"
-              value={inquiry.eta}
-            />
+              value={formatDateTime(inquiry.eta)}
+            />{" "}
             <DetailItem
               icon={<Clock className="h-4 w-4" />}
               label="Received"
-              value={inquiry.received_date}
+              value={formatDateTime(inquiry.received_date)}
             />
           </div>
         </div>

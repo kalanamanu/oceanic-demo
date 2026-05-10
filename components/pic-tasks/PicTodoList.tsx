@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Pencil, Calendar, Clock, MessageSquare } from "lucide-react";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 type Todo = {
   todo_id: string;
@@ -45,10 +46,13 @@ export function PicTodoList({
 
   const openEdit = (todo: Todo) => {
     setEditTodo(todo);
+
+    const safeDate = todo.due_date?.split("T")[0] || "";
+
     setForm({
       todo_description: todo.todo_description,
-      due_date: todo.due_date,
-      due_time: todo.due_time,
+      due_date: safeDate,
+      due_time: todo.due_time || "",
       remarks: todo.remarks || "",
     });
   };
@@ -58,6 +62,21 @@ export function PicTodoList({
     await PicTodoService.updateTodo(editTodo.todo_id, form);
     setEditTodo(null);
     refresh();
+  };
+
+  const formatDate = (date: string) => {
+    if (!date) return "-";
+    const d = new Date(date);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  };
+
+  const formatTime24 = (time: string) => {
+    if (!time) return "-";
+    // assumes "HH:mm" or ISO time
+    return time.slice(0, 5);
   };
 
   return (
@@ -98,10 +117,9 @@ export function PicTodoList({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4">
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     <Calendar className="h-3 w-3" />
-                    <span>{todo.due_date}</span>
+                    <span>{formatDate(todo.due_date)}</span>
                     <span className="text-border">|</span>
-                    <Clock className="h-3 w-3" />
-                    <span>{todo.due_time}</span>
+                    <span>{formatTime24(todo.due_time)}</span>
                   </div>
 
                   {todo.remarks && (
@@ -180,31 +198,30 @@ export function PicTodoList({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold uppercase text-muted-foreground ml-1 text-nowrap">
-                      Due Date
-                    </label>
-                    <Input
-                      type="date"
-                      value={form.due_date}
-                      onChange={(e) =>
-                        setForm({ ...form, due_date: e.target.value })
-                      }
-                      className="bg-muted/30"
-                    />
-                  </div>
+                <div className="grid grid-cols-1 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold uppercase text-muted-foreground ml-1">
-                      Time
+                      Due Date & Time
                     </label>
-                    <Input
-                      type="time"
-                      value={form.due_time}
-                      onChange={(e) =>
-                        setForm({ ...form, due_time: e.target.value })
-                      }
-                      className="bg-muted/30"
+
+                    <DateTimePicker
+                      date={(() => {
+                        if (!form.due_date) return undefined;
+
+                        const raw = `${form.due_date}T${form.due_time || "00:00"}`;
+                        const d = new Date(raw);
+
+                        return isNaN(d.getTime()) ? undefined : d;
+                      })()}
+                      onDateChange={(date) => {
+                        if (!date || isNaN(date.getTime())) return;
+
+                        setForm({
+                          ...form,
+                          due_date: date.toISOString().split("T")[0],
+                          due_time: date.toTimeString().slice(0, 5),
+                        });
+                      }}
                     />
                   </div>
                 </div>
