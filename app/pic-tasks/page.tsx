@@ -1,115 +1,104 @@
 "use client";
 
 import * as React from "react";
-import { toast } from "sonner";
-
-import { PicTodoService } from "@/services/picTodo.service";
 import { InquiryService } from "@/services/inquiry.service";
+import { PicTodoService } from "@/services/picTodo.service";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-import { PicTodoModal } from "@/components/pic-tasks/PicTodoModal";
-import { PicTodoTable } from "@/components/pic-tasks/PicTodoTable";
-import { PicTodoSidePanel } from "@/components/pic-tasks/PicTodoSidePanel";
+import { InquirySelector } from "@/components/pic-tasks/InquirySelector";
+import { PicTodoList } from "@/components/pic-tasks/PicTodoList";
+import { PicTodoFormModal } from "@/components/pic-tasks/PicTodoFormModal";
 
 export default function PicTodoPage() {
-  const [todos, setTodos] = React.useState<any[]>([]);
   const [inquiries, setInquiries] = React.useState<any[]>([]);
+  const [selectedInquiry, setSelectedInquiry] = React.useState<string>("");
+
+  const [todos, setTodos] = React.useState<any[]>([]);
+  const [open, setOpen] = React.useState(false);
 
   const [loading, setLoading] = React.useState(false);
 
-  const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<any>(null);
+  /* ================= LOAD INQUIRIES ================= */
+  const loadInquiries = async () => {
+    try {
+      const res = await InquiryService.getAllInquiries({
+        page: 1,
+        pageSize: 50,
+      });
 
-  const [selectedTodo, setSelectedTodo] = React.useState<any>(null);
+      setInquiries(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  const [search, setSearch] = React.useState("");
+  /* ================= LOAD TODOS ================= */
+  const loadTodos = async (inqId: string) => {
+    if (!inqId) {
+      setTodos([]);
+      return;
+    }
 
-  /* ================= LOAD ================= */
-  const loadTodos = async () => {
     try {
       setLoading(true);
-      const res = await PicTodoService.getTodosByPic("all"); // adjust backend if needed
+
+      const res = await PicTodoService.getTodosByInquiry(inqId);
+
       setTodos(res);
-    } catch {
-      toast.error("Failed to load todos");
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadInquiries = async () => {
-    const res = await InquiryService.getAllInquiries({
-      page: 1,
-      pageSize: 100,
-    });
-
-    setInquiries(res.data);
-  };
-
+  /* ================= INIT ================= */
   React.useEffect(() => {
-    loadTodos();
     loadInquiries();
   }, []);
 
-  /* ================= FILTER ================= */
-  const filtered = React.useMemo(() => {
-    return todos.filter((t) =>
-      t.todo_description.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [todos, search]);
-
-  /* ================= ACTIONS ================= */
-  const handleEdit = (todo: any) => {
-    setSelected(todo);
-    setOpen(true);
-  };
-
-  const handleSuccess = () => {
-    setOpen(false);
-    setSelected(null);
-    loadTodos();
-  };
+  React.useEffect(() => {
+    loadTodos(selectedInquiry);
+  }, [selectedInquiry]);
 
   return (
-    <div className="p-6 space-y-4">
-      {/* HEADER */}
-      <div className="flex justify-between">
-        <h1 className="text-xl font-bold">PIC Todos</h1>
-
-        <Button onClick={() => setOpen(true)}>+ New Todo</Button>
+    <div className="space-y-4 p-6">
+      {/* ================= ACTION BAR ================= */}
+      <div className="flex justify-end">
+        <button
+          className="px-4 py-2 bg-primary text-white rounded disabled:opacity-50"
+          onClick={() => setOpen(true)}
+          disabled={!selectedInquiry}
+        >
+          + Create Todo
+        </button>
       </div>
 
-      {/* SEARCH */}
-      <Input
-        placeholder="Search todos..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+      {/* ================= INQUIRY SELECT ================= */}
+      <InquirySelector
+        inquiries={inquiries}
+        value={selectedInquiry}
+        onChange={setSelectedInquiry}
       />
 
-      {/* TABLE */}
-      <PicTodoTable
-        data={filtered}
-        loading={loading}
-        onEdit={handleEdit}
-        onSelect={setSelectedTodo}
-        onRefresh={loadTodos}
-      />
+      {/* ================= TODO LIST ================= */}
+      {loading ? (
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Loading todos...
+        </p>
+      ) : (
+        <PicTodoList todos={todos} refresh={() => loadTodos(selectedInquiry)} />
+      )}
 
-      {/* MODAL */}
-      <PicTodoModal
+      {/* ================= MODAL ================= */}
+      <PicTodoFormModal
         open={open}
         onClose={() => setOpen(false)}
-        initialData={selected}
-        inquiries={inquiries}
-        onSuccess={handleSuccess}
-      />
-
-      {/* SIDE PANEL */}
-      <PicTodoSidePanel
-        todo={selectedTodo}
-        onClose={() => setSelectedTodo(null)}
+        inquiryId={selectedInquiry}
+        inquiry={inquiries.find((i) => i.inq_id === selectedInquiry)}
+        onSuccess={() => {
+          setOpen(false);
+          loadTodos(selectedInquiry);
+        }}
       />
     </div>
   );

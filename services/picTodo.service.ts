@@ -1,99 +1,80 @@
+// services/pic-todo.service.ts
+
 import apiClient from "@/lib/api-client";
 import type {
   PicTodo,
-  PicTodoListResponse,
-  PicTodoSingleResponse,
-  PicTodoActionResponse,
   CreatePicTodoRequest,
   UpdatePicTodoRequest,
-  UpdatePicTodoStatusRequest,
+  UpdateTodoStatusRequest,
 } from "@/types/picTodo.types";
 
 export class PicTodoService {
-  /* ================= CREATE ================= */
+  /* =========================
+     CREATE TODO
+  ========================= */
   static async createTodo(
-    payload: CreatePicTodoRequest,
+    payload: CreatePicTodoRequest
   ): Promise<PicTodo> {
-    try {
-      const res = await apiClient.post<PicTodoActionResponse>(
-        "/api/picTodo",
-        payload,
-      );
-
-      return res.data.data;
-    } catch (err: any) {
-      throw new Error(
-        err?.response?.data?.message || "Failed to create todo",
-      );
-    }
+    const res = await apiClient.post("/api/pic-todo", payload);
+    return res.data.data;
   }
 
-  /* ================= GET BY PIC ================= */
-  static async getTodosByPic(pic_id: string): Promise<PicTodo[]> {
-    try {
-      const res = await apiClient.get<PicTodoListResponse>(
-        `/api/picTodo/pic/${pic_id}`,
-      );
-
-      return res.data.data;
-    } catch {
-      throw new Error("Failed to fetch PIC todos");
-    }
+  /* =========================
+     GET TODOS BY PIC
+  ========================= */
+  static async getTodosByPic(
+    pic_id: string
+  ): Promise<PicTodo[]> {
+    const res = await apiClient.get(
+      `/api/picTodo/pic/${pic_id}`
+    );
+    return res.data.data;
   }
 
-  /* ================= GET BY INQUIRY ================= */
-  static async getTodosByInquiry(inq_id: string): Promise<PicTodo[]> {
-    try {
-      const res = await apiClient.get<PicTodoListResponse>(
-        `/api/picTodo/inquiry/${inq_id}`,
-      );
-
-      return res.data.data;
-    } catch {
-      throw new Error("Failed to fetch inquiry todos");
-    }
+  /* =========================
+     GET TODOS BY INQUIRY
+  ========================= */
+  static async getTodosByInquiry(
+    inq_id: string
+  ): Promise<PicTodo[]> {
+    const res = await apiClient.get(
+      `/api/pic-todo/inquiry/${inq_id}`
+    );
+    return res.data.data;
   }
 
-  /* ================= UPDATE FULL TODO ================= */
+  /* =========================
+     UPDATE TODO (FULL)
+  ========================= */
   static async updateTodo(
     todo_id: string,
-    payload: UpdatePicTodoRequest,
+    payload: UpdatePicTodoRequest
   ): Promise<PicTodo> {
-    try {
-      const res = await apiClient.put<PicTodoActionResponse>(
-        `/api/picTodo/${todo_id}`,
-        payload,
-      );
-
-      return res.data.data;
-    } catch {
-      throw new Error("Failed to update todo");
-    }
+    const res = await apiClient.put(
+      `/api/pic-todo/${todo_id}`,
+      payload
+    );
+    return res.data.data;
   }
 
-  /* ================= UPDATE STATUS ================= */
+  /* =========================
+     UPDATE STATUS ONLY
+  ========================= */
   static async updateTodoStatus(
     todo_id: string,
-    payload: UpdatePicTodoStatusRequest,
+    payload: UpdateTodoStatusRequest
   ): Promise<PicTodo> {
-    try {
-      const res = await apiClient.patch<PicTodoActionResponse>(
-        `/api/picTodo/${todo_id}/status`,
-        payload,
-      );
-
-      return res.data.data;
-    } catch {
-      throw new Error("Failed to update todo status");
-    }
+    const res = await apiClient.patch(
+      `/api/pic-todo/${todo_id}/status`,
+      payload
+    );
+    return res.data.data;
   }
 
-  /* ================= DELETE ================= */
+  /* =========================
+     DELETE TODO
+  ========================= */
   static async deleteTodo(todo_id: string): Promise<void> {
-    try {
-      await apiClient.delete(`/api/picTodo/${todo_id}`);
-    } catch {
-      throw new Error("Failed to delete todo");
-    }
+    await apiClient.delete(`/api/pic-todo/${todo_id}`);
   }
 }
