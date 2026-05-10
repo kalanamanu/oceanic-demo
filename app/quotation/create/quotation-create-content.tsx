@@ -75,7 +75,7 @@ export function QuotationCreateContent() {
   React.useEffect(() => {
     const loadBasis = async () => {
       try {
-        const data = await BasisService.getBasis();
+        const data = await BasisService.getActiveBasis();
         const basisItem = Array.isArray(data) ? data[0] : data;
         setBasis(basisItem);
       } catch (err) {
