@@ -3,6 +3,9 @@
 import type { Remark } from "@/lib/types";
 import type { Inquiry, InquiryRemark } from "@/types/inquiry.types";
 
+import * as React from "react";
+import { useRouter } from "next/navigation";
+
 import {
   Dialog,
   DialogContent,
@@ -30,16 +33,12 @@ import {
   Briefcase,
 } from "lucide-react";
 
-import * as React from "react";
-
 import { EditInquiryDialog } from "@/components/inquiry/EditInquiryDialog";
 import { AddRemarkDialog } from "@/components/inquiry/AddRemarkDialog";
 import { EditRemarkDialog } from "@/components/inquiry/EditRemarkDialog";
 
 import { InquiryRemarkService } from "@/services/inquiry-remark.service";
 import { InquiryService } from "@/services/inquiry.service";
-
-import { useRouter } from "next/navigation";
 
 interface InquiryDetailDialogProps {
   inquiry: Inquiry | null;
@@ -56,9 +55,9 @@ export function InquiryDetailDialog({
   onClose,
   onEditInquiry,
 }: InquiryDetailDialogProps) {
-  const [dialogState, setDialogState] = React.useState<
-    0 | 1 | 2 | 3 | null
-  >(open ? 0 : null);
+  const [dialogState, setDialogState] = React.useState<0 | 1 | 2 | 3 | null>(
+    open ? 0 : null,
+  );
 
   const router = useRouter();
 
@@ -104,6 +103,7 @@ export function InquiryDetailDialog({
 
     try {
       const data = await InquiryRemarkService.getRemarksByInquiryId(inqId);
+
       setLiveRemarks(data);
     } catch (e) {
       console.error("Failed to fetch remarks", e);
@@ -129,10 +129,7 @@ export function InquiryDetailDialog({
     setDialogState(0);
   };
 
-  const handleEditRemarkSave = async (
-    remarkId: string,
-    remarkText: string,
-  ) => {
+  const handleEditRemarkSave = async (remarkId: string, remarkText: string) => {
     const idToUse = fullInquiry?.inq_id || fullInquiry?.id;
 
     if (!idToUse) return;
@@ -193,41 +190,62 @@ export function InquiryDetailDialog({
         open={dialogState === 0}
         onOpenChange={(val) => !val && onClose()}
       >
-        <DialogContent className="w-full max-w-screen-xl mx-auto rounded-xl shadow-lg p-0">
-          <DialogHeader className="px-10 pt-10 pb-4">
-            <DialogTitle className="text-2xl font-bold">
-              INQ-
-              {currentIdToUse
-                ?.replace("inq_", "")
-                .substring(0, 6)
-                .toUpperCase()}
-            </DialogTitle>
+        <DialogContent
+          className="
+    w-[70vw]
+    max-w-[1600px]
+    sm:max-w-[1600px]
+    h-[95vh]
+    p-0
+    overflow-hidden
+    rounded-3xl
+    border
+    shadow-2xl
+  "
+        >
+          {/* HEADER */}
+          <DialogHeader className="border-b bg-background px-8 py-6 shrink-0">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+              <div>
+                <DialogTitle className="text-3xl font-bold tracking-tight">
+                  INQ-
+                  {currentIdToUse
+                    ?.replace("inq_", "")
+                    .substring(0, 6)
+                    .toUpperCase()}
+                </DialogTitle>
 
-            <DialogDescription className="mt-1 text-base">
-              Vessel inquiry detail overview
-            </DialogDescription>
+                <DialogDescription className="mt-2 text-sm">
+                  Vessel inquiry detail overview
+                </DialogDescription>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant="outline"
+                  className="rounded-xl px-3 py-1 text-xs"
+                >
+                  {data.port || "No Port"}
+                </Badge>
+
+                <Badge className="rounded-xl px-3 py-1 text-xs">
+                  {data.key_pic?.name || "Unassigned"}
+                </Badge>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div
-            className="overflow-y-auto px-10 py-6"
-            style={{ maxHeight: "70vh" }}
-          >
-            {loadingInquiry ? (
-              <div className="py-20 text-center text-muted-foreground">
-                Loading inquiry details...
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {/* ================= Vessel Info ================= */}
-                <div>
-                  <div className="flex items-center gap-2 mb-5">
-                    <Ship className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold">
-                      Vessel Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* BODY */}
+          <div className="flex-1 overflow-y-auto bg-muted/20">
+            <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6 p-8 min-w-0">
+              {/* LEFT */}
+              <div className="space-y-6 min-w-0">
+                {/* Vessel */}
+                <SectionCard
+                  title="Vessel Information"
+                  icon={<Ship className="h-5 w-5" />}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
                     <DetailItem
                       icon={<Ship className="h-4 w-4" />}
                       label="Vessel Name"
@@ -267,9 +285,7 @@ export function InquiryDetailDialog({
                     <DetailItem
                       icon={<CalendarDays className="h-4 w-4" />}
                       label="Quotation Deadline"
-                      value={formatDate(
-                        data.qout_submission_deadline_date,
-                      )}
+                      value={formatDate(data.qout_submission_deadline_date)}
                     />
 
                     <DetailItem
@@ -284,20 +300,14 @@ export function InquiryDetailDialog({
                       value={formatDateTime(data.updatedAt)}
                     />
                   </div>
-                </div>
+                </SectionCard>
 
-                <Separator />
-
-                {/* ================= Customer Info ================= */}
-                <div>
-                  <div className="flex items-center gap-2 mb-5">
-                    <User className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold">
-                      Customer Information
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {/* Customer */}
+                <SectionCard
+                  title="Customer Information"
+                  icon={<User className="h-5 w-5" />}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <DetailItem
                       icon={<User className="h-4 w-4" />}
                       label="Customer"
@@ -322,29 +332,28 @@ export function InquiryDetailDialog({
                       value={data.commissionParty || "-"}
                     />
                   </div>
-                </div>
+                </SectionCard>
 
-                <Separator />
-
-                {/* ================= Assignment ================= */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">
-                    Assignment Details
-                  </h3>
-
-                  <div className="space-y-5">
+                {/* Assignment */}
+                <SectionCard
+                  title="Assignment Details"
+                  icon={<Briefcase className="h-5 w-5" />}
+                >
+                  <div className="space-y-6">
                     <div>
                       <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">
                         Key PIC
                       </p>
 
-                      <div className="inline-flex items-center rounded-lg border bg-muted/30 px-4 py-2">
+                      <div className="inline-flex items-center rounded-xl border bg-muted/20 px-4 py-2 text-sm font-medium">
                         {data.key_pic?.name || "Unassigned"}
                       </div>
                     </div>
 
+                    <Separator />
+
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
                         Other PICs
                       </p>
 
@@ -354,7 +363,7 @@ export function InquiryDetailDialog({
                             <Badge
                               key={pic.id}
                               variant="secondary"
-                              className="px-3 py-1"
+                              className="rounded-xl px-3 py-1"
                             >
                               {pic.name}
                             </Badge>
@@ -367,39 +376,37 @@ export function InquiryDetailDialog({
                       </div>
                     </div>
                   </div>
-                </div>
+                </SectionCard>
+              </div>
 
-                <Separator />
-
-                {/* ================= Remarks ================= */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <MessageSquare className="h-5 w-5 text-muted-foreground" />
-
-                    <h3 className="text-lg font-semibold">
-                      Remarks History
-                    </h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    {loadingRemarks ? (
-                      <p className="text-sm text-muted-foreground">
-                        Loading remarks...
-                      </p>
-                    ) : liveRemarks.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        No remarks yet
-                      </p>
-                    ) : (
-                      liveRemarks.map((r) => (
-                        <Card
+              {/* RIGHT */}
+              <div className="space-y-6 min-w-0">
+                {/* Remarks */}
+                <SectionCard
+                  title="Remarks History"
+                  icon={<MessageSquare className="h-5 w-5" />}
+                >
+                  {loadingRemarks ? (
+                    <p className="text-sm text-muted-foreground">
+                      Loading remarks...
+                    </p>
+                  ) : liveRemarks.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No remarks yet
+                    </p>
+                  ) : (
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                      {liveRemarks.map((r) => (
+                        <div
                           key={r.remark_id}
-                          className="p-4 group relative"
+                          className="relative pl-6 border-l border-border"
                         >
-                          <div className="space-y-2">
-                            <div className="flex items-start justify-between">
+                          <div className="absolute left-[-7px] top-1 h-3 w-3 rounded-full bg-primary" />
+
+                          <div className="rounded-2xl border bg-background p-4 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
                               <div>
-                                <p className="text-xs font-medium text-primary">
+                                <p className="text-sm font-semibold">
                                   {r.created_by || "Unknown User"}
                                 </p>
 
@@ -411,68 +418,70 @@ export function InquiryDetailDialog({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="h-8 w-8 rounded-xl"
                                 onClick={() => {
                                   setEditingRemark(r);
                                   setDialogState(3);
                                 }}
                               >
-                                <Edit2 className="h-3 w-3" />
+                                <Edit2 className="h-4 w-4" />
                               </Button>
                             </div>
 
-                            <p className="text-base text-foreground pr-4">
+                            <p className="mt-3 text-sm leading-relaxed whitespace-pre-wrap">
                               {r.remark}
                             </p>
                           </div>
-                        </Card>
-                      ))
-                    )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </SectionCard>
+
+                {/* Actions */}
+                <SectionCard
+                  title="Actions"
+                  icon={<Edit2 className="h-5 w-5" />}
+                >
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full justify-start h-11 rounded-xl"
+                      variant="outline"
+                      onClick={() => setDialogState(1)}
+                    >
+                      <Edit2 className="mr-2 h-4 w-4" />
+                      Edit Inquiry
+                    </Button>
+
+                    <Button
+                      className="w-full justify-start h-11 rounded-xl"
+                      variant="outline"
+                      onClick={() => setDialogState(2)}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Add Remark
+                    </Button>
+
+                    <Button
+                      className="w-full justify-start h-11 rounded-xl"
+                      onClick={() =>
+                        router.push(
+                          `/quotation/create?inquiryId=${currentIdToUse || ""}`,
+                        )
+                      }
+                    >
+                      <File className="mr-2 h-4 w-4" />
+                      Generate Quotation
+                    </Button>
                   </div>
-                </div>
-
-                <Separator />
-
-                {/* ================= Actions ================= */}
-                <div className="space-y-2 pt-2">
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={() => setDialogState(1)}
-                  >
-                    <Edit2 className="mr-2 h-4 w-4" />
-                    Edit Inquiry
-                  </Button>
-
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={() => setDialogState(2)}
-                  >
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Add Remark
-                  </Button>
-
-                  <Button
-                    className="w-full"
-                    variant="outline"
-                    onClick={() =>
-                      router.push(
-                        `/quotation/create?inquiryId=${currentIdToUse || ""}`,
-                      )
-                    }
-                  >
-                    <File className="mr-2 h-4 w-4" />
-                    Generate Quotation
-                  </Button>
-                </div>
+                </SectionCard>
               </div>
-            )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* ================= Edit Inquiry ================= */}
+      {/* Edit Inquiry */}
       {dialogState === 1 && data && (
         <EditInquiryDialog
           inquiry={data}
@@ -482,7 +491,7 @@ export function InquiryDetailDialog({
         />
       )}
 
-      {/* ================= Add Remark ================= */}
+      {/* Add Remark */}
       {dialogState === 2 && data && (
         <AddRemarkDialog
           inquiryId={currentIdToUse || ""}
@@ -492,7 +501,7 @@ export function InquiryDetailDialog({
         />
       )}
 
-      {/* ================= Edit Remark ================= */}
+      {/* Edit Remark */}
       {dialogState === 3 && editingRemark && (
         <EditRemarkDialog
           remark={editingRemark}
@@ -502,6 +511,30 @@ export function InquiryDetailDialog({
         />
       )}
     </>
+  );
+}
+
+function SectionCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="rounded-3xl border bg-background shadow-sm overflow-hidden">
+      <div className="border-b px-6 py-5 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+          {icon}
+        </div>
+
+        <h3 className="font-semibold text-base">{title}</h3>
+      </div>
+
+      <div className="p-6">{children}</div>
+    </Card>
   );
 }
 
@@ -515,18 +548,20 @@ function DetailItem({
   value?: string;
 }) {
   return (
-    <div className="space-y-1 rounded-xl border bg-muted/20 p-4">
+    <div className="min-h-[115px] rounded-2xl border bg-muted/20 p-4 transition-all duration-200 hover:bg-muted/40 hover:border-primary/20">
       <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
 
-        <p className="text-[11px] font-semibold uppercase tracking-wider">
+        <span className="text-[11px] font-semibold uppercase tracking-wider">
           {label}
-        </p>
+        </span>
       </div>
 
-      <p className="text-sm font-semibold text-foreground break-words">
-        {value || "-"}
-      </p>
+      <div className="mt-3">
+        <p className="text-sm font-semibold leading-relaxed break-words">
+          {value || "-"}
+        </p>
+      </div>
     </div>
   );
 }

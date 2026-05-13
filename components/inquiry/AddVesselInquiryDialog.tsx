@@ -32,6 +32,24 @@ interface VesselInquiryDialogProps {
   onInquiryCreated?: () => void;
 }
 
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-3xl border bg-background shadow-sm overflow-hidden">
+      <div className="border-b px-6 py-4">
+        <h3 className="font-semibold text-base">{title}</h3>
+      </div>
+
+      <div className="p-6">{children}</div>
+    </div>
+  );
+}
+
 export function VesselInquiryDialog({
   children,
   onInquiryCreated,
@@ -207,9 +225,18 @@ export function VesselInquiryDialog({
       <AnimatePresence>
         {open && (
           <DialogContent
-            className="max-w-2xl mx-auto p-0 rounded-xl shadow-lg overflow-hidden"
-            style={{ maxHeight: "90vh" }}
-            forceMount
+            className="
+                w-[70vw]
+                max-w-[1600px]
+                sm:max-w-[1600px]
+                h-[95vh]
+                p-0
+                overflow-hidden
+                rounded-3xl
+                border
+                shadow-2xl
+                forceMount
+              "
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -229,295 +256,271 @@ export function VesselInquiryDialog({
                 </DialogDescription>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-5 mt-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Vessel Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="vesselName"
-                    type="text"
-                    placeholder="Enter vessel name (e.g., MV Ocean Star)"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.vesselName}
-                    onChange={handleChange}
-                  />
-                </motion.div>
+              <form onSubmit={handleSubmit} className="mt-6">
+                <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6">
+                  {/* LEFT SIDE */}
+                  <div className="space-y-6">
+                    {/* Vessel Information */}
+                    <SectionCard title="Vessel Information">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Vessel Name */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Vessel Name <span className="text-red-500">*</span>
+                          </label>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Agent <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="agent"
-                    type="text"
-                    placeholder="Enter agent company name"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.agent}
-                    onChange={handleChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.16, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Customer <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="customer"
-                    type="text"
-                    placeholder="Enter customer name"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.customer}
-                    onChange={handleChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.17, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Customer Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="customerEmail"
-                    type="email"
-                    placeholder="Enter customer email"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.customerEmail}
-                    onChange={handleChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.18, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Customer Contact <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="customerContact"
-                    type="text"
-                    placeholder="Enter customer contact"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.customerContact}
-                    onChange={handleChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-2">
-                    ETA <span className="text-red-500">*</span>
-                  </label>
-                  <DateTimePicker
-                    date={fields.eta}
-                    onDateChange={(date) => handleDateChange("eta", date)}
-                    placeholder="DD.MM.YYYY HH:MM"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Port <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="port"
-                    type="text"
-                    placeholder="Enter port name (e.g., Colombo)"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.port}
-                    onChange={handleChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.28, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Commission Party <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    name="commissionParty"
-                    type="text"
-                    placeholder="Enter commission party"
-                    className="w-full border-2 border-input rounded px-3 py-2 bg-background text-foreground hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    required
-                    value={fields.commissionParty}
-                    onChange={handleChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-1">
-                    Categories <span className="text-red-500">*</span>
-                  </label>
-                  <CategorySelect
-                    selectedCategories={fields.categories}
-                    onChange={handleCategoryChange}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-2">
-                    Inquiry Received Date & Time{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <DateTimePicker
-                    date={fields.inquiryReceived}
-                    onDateChange={(date) =>
-                      handleDateChange("inquiryReceived", date)
-                    }
-                    placeholder="DD.MM.YYYY HH:MM"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-2">
-                    Quotation Submission Deadline
-                  </label>
-                  <DateTimePicker
-                    date={fields.quotationSubmission}
-                    onDateChange={(date) =>
-                      handleDateChange("quotationSubmission", date)
-                    }
-                    placeholder="DD.MM.YYYY HH:MM"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-2">
-                    Key PIC <span className="text-red-500">*</span>
-                  </label>
-                  <UserSelect
-                    value={fields.keyPicUserId}
-                    onValueChange={handleKeyPicChange}
-                    placeholder="Select Key Person in Charge"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium mb-2">
-                    Sub PICs
-                  </label>
-                  <AnimatePresence mode="popLayout">
-                    {fields.subPics.map((pic, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center gap-2 mb-2"
-                      >
-                        <div className="flex-1">
-                          <UserSelect
-                            value={pic.userId}
-                            onValueChange={(userId, userName) =>
-                              handleSubPicChange(idx, userId, userName)
-                            }
-                            placeholder={`Select Sub PIC #${idx + 1}`}
+                          <input
+                            name="vesselName"
+                            type="text"
+                            placeholder="Enter vessel name"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            required
+                            value={fields.vesselName}
+                            onChange={handleChange}
                           />
                         </div>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleRemoveSubPic(idx)}
-                          title="Remove Sub PIC"
-                          className="bg-red-600 text-white hover:bg-red-500 transition-colors cursor-pointer dark:bg-red-900 dark:hover:bg-red-800"
-                        >
-                          &times;
-                        </Button>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                  <Button
-                    className="text-foreground dark:text-white hover:bg-foreground/10 hover:text-foreground dark:hover:text-white cursor-pointer"
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddSubPic}
-                  >
-                    + Add Sub PIC
-                  </Button>
-                </motion.div>
 
-                <DialogFooter className="mt-6 flex gap-3">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="cursor-pointer"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      "Create Inquiry"
-                    )}
-                  </Button>
-                  <DialogClose asChild>
-                    <Button
-                      variant="outline"
-                      disabled={loading}
-                      className="text-foreground dark:text-white hover:bg-foreground/10 hover:text-foreground dark:hover:text-white cursor-pointer"
-                    >
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
+                        {/* Agent */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Agent <span className="text-red-500">*</span>
+                          </label>
+
+                          <input
+                            name="agent"
+                            type="text"
+                            placeholder="Enter agent"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            required
+                            value={fields.agent}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        {/* ETA */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            ETA <span className="text-red-500">*</span>
+                          </label>
+
+                          <DateTimePicker
+                            date={fields.eta}
+                            onDateChange={(date) =>
+                              handleDateChange("eta", date)
+                            }
+                            placeholder="DD.MM.YYYY HH:MM"
+                          />
+                        </div>
+
+                        {/* Port */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Port <span className="text-red-500">*</span>
+                          </label>
+
+                          <input
+                            name="port"
+                            type="text"
+                            placeholder="Enter port"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            required
+                            value={fields.port}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        {/* Inquiry Received */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Inquiry Received
+                          </label>
+
+                          <DateTimePicker
+                            date={fields.inquiryReceived}
+                            onDateChange={(date) =>
+                              handleDateChange("inquiryReceived", date)
+                            }
+                            placeholder="DD.MM.YYYY HH:MM"
+                          />
+                        </div>
+
+                        {/* Quotation Deadline */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Quotation Deadline
+                          </label>
+
+                          <DateTimePicker
+                            date={fields.quotationSubmission}
+                            onDateChange={(date) =>
+                              handleDateChange("quotationSubmission", date)
+                            }
+                            placeholder="DD.MM.YYYY HH:MM"
+                          />
+                        </div>
+                      </div>
+                    </SectionCard>
+
+                    {/* Customer Information */}
+                    <SectionCard title="Customer Information">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Customer
+                          </label>
+
+                          <input
+                            name="customer"
+                            type="text"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            value={fields.customer}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Customer Email
+                          </label>
+
+                          <input
+                            name="customerEmail"
+                            type="email"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            value={fields.customerEmail}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Customer Contact
+                          </label>
+
+                          <input
+                            name="customerContact"
+                            type="text"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            value={fields.customerContact}
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-1">
+                            Commission Party
+                          </label>
+
+                          <input
+                            name="commissionParty"
+                            type="text"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-background"
+                            value={fields.commissionParty}
+                            onChange={handleChange}
+                          />
+                        </div>
+                      </div>
+                    </SectionCard>
+                  </div>
+
+                  {/* RIGHT SIDE */}
+                  <div className="space-y-6">
+                    {/* Categories */}
+                    <SectionCard title="Categories">
+                      <CategorySelect
+                        selectedCategories={fields.categories}
+                        onChange={handleCategoryChange}
+                      />
+                    </SectionCard>
+
+                    {/* PIC Assignment */}
+                    <SectionCard title="PIC Assignment">
+                      <div className="space-y-5">
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Key PIC
+                          </label>
+
+                          <UserSelect
+                            value={fields.keyPicUserId}
+                            onValueChange={handleKeyPicChange}
+                            placeholder="Select Key PIC"
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <label className="block text-sm font-medium">
+                              Sub PICs
+                            </label>
+
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={handleAddSubPic}
+                            >
+                              + Add
+                            </Button>
+                          </div>
+
+                          <div className="space-y-3">
+                            {fields.subPics.map((pic, idx) => (
+                              <div key={idx} className="flex gap-2">
+                                <div className="flex-1">
+                                  <UserSelect
+                                    value={pic.userId}
+                                    onValueChange={(userId, userName) =>
+                                      handleSubPicChange(idx, userId, userName)
+                                    }
+                                    placeholder={`Sub PIC #${idx + 1}`}
+                                  />
+                                </div>
+
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => handleRemoveSubPic(idx)}
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </SectionCard>
+
+                    {/* Actions */}
+                    <SectionCard title="Actions">
+                      <div className="space-y-3">
+                        <Button
+                          type="submit"
+                          className="w-full h-11 rounded-xl"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Creating...
+                            </>
+                          ) : (
+                            "Create Inquiry"
+                          )}
+                        </Button>
+
+                        <DialogClose asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full h-11 rounded-xl"
+                          >
+                            Cancel
+                          </Button>
+                        </DialogClose>
+                      </div>
+                    </SectionCard>
+                  </div>
+                </div>
               </form>
             </motion.div>
           </DialogContent>

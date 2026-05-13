@@ -23,6 +23,7 @@ export default function InquiryPage() {
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Options for filters
   const statusOptions = Array.from(
     new Set(inquiries.map((i) => i.status || "Pending")),
   );
@@ -44,9 +45,9 @@ export default function InquiryPage() {
     ),
   );
 
+  // Client-side search filtering
   const filteredInquiries = inquiries.filter((inq) => {
     const q = searchQuery.toLowerCase();
-
     return (
       inq.vessel_name?.toLowerCase().includes(q) ||
       inq.agent?.toLowerCase().includes(q) ||
@@ -54,6 +55,7 @@ export default function InquiryPage() {
       inq.inq_id?.toLowerCase().includes(q)
     );
   });
+
   useEffect(() => {
     fetchInquiries(page);
   }, [page]);
@@ -78,7 +80,7 @@ export default function InquiryPage() {
     }
   };
 
-  // Calculate dashboard stats from inquiries in state
+  // Dashboard stats
   const stats = {
     totalInquiries: inquiries.length,
     pendingCount: inquiries.filter((i) => i.status === "Pending").length,
@@ -86,15 +88,13 @@ export default function InquiryPage() {
     confirmedCount: inquiries.filter((i) => i.status === "Confirmed").length,
     rejectedCount: inquiries.filter((i) => i.status === "Rejected").length,
   };
-  // Select an inquiry
+
   const handleSelectInquiry = (inquiry: Inquiry) => {
     setSelectedInquiry(inquiry);
     setDetailPanelOpen(true);
   };
 
-  // Update an inquiry after editing
   const handleEditInquiry = (updatedInquiry: Inquiry) => {
-    // Update the inquiry in state
     setInquiries((prev) =>
       prev.map((inq) => (inq.id === updatedInquiry.id ? updatedInquiry : inq)),
     );
@@ -112,13 +112,14 @@ export default function InquiryPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex flex-1">
-        <div className="flex-1 p-6 space-y-6">
-          {/* Stat Cards */}
+    /* flex-1 ensure the page takes full height without clipping content */
+    <div className="flex-1 flex flex-col min-h-0 bg-background">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+          {/* Dashboard Header/Stats */}
           <StatsCards stats={stats} />
 
-          {/* Filter and Table */}
+          {/* Action and Filter Bar */}
           <section className="space-y-4">
             <FilterBar
               onExport={handleExport}
@@ -130,50 +131,69 @@ export default function InquiryPage() {
             />
 
             {loading ? (
-              <div className="flex justify-center items-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/50" />
-                <span className="ml-3 text-sm text-muted-foreground font-medium">
+              <div className="flex flex-col justify-center items-center py-32 space-y-4">
+                <Loader2 className="h-10 w-10 animate-spin text-primary/60" />
+                <span className="text-sm text-muted-foreground font-medium animate-pulse">
                   Loading inquiries...
                 </span>
               </div>
             ) : (
-              <>
+              <div className="rounded-xl border bg-card shadow-sm">
                 <InquiryTable
                   inquiries={filteredInquiries}
                   onSelectInquiry={handleSelectInquiry}
                 />
 
                 {/* Pagination Controls */}
-                <div className="flex justify-end items-center space-x-2 mt-4 pt-4 border-t border-border">
-                  <span className="text-sm text-muted-foreground mr-4">
-                    Page {page} of {totalPages || 1}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setPage((p) => Math.min(totalPages || 1, p + 1))
-                    }
-                    disabled={page >= (totalPages || 1)}
-                  >
-                    Next
-                  </Button>
+                <div className="flex justify-between items-center px-6 py-4 border-t border-border bg-muted/5">
+                  <p className="text-xs text-muted-foreground">
+                    Showing{" "}
+                    <span className="font-medium text-foreground">
+                      {filteredInquiries.length}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-medium text-foreground">
+                      {inquiries.length}
+                    </span>{" "}
+                    results
+                  </p>
+
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-muted-foreground mr-2">
+                      Page {page} of {totalPages || 1}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages || 1, p + 1))
+                      }
+                      disabled={page >= (totalPages || 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </section>
         </div>
       </main>
 
-      {/* Inquiry Detail Dialog with Edit support */}
+      {/* 
+          Inquiry Detail Dialog
+          Rendered via React Portal (Radix Dialog) 
+      */}
       {detailPanelOpen && selectedInquiry && (
         <InquiryDetailDialog
           inquiry={selectedInquiry}
