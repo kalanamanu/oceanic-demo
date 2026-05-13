@@ -52,6 +52,7 @@ export function VesselInquiryDialog({
     inquiryReceived: undefined as Date | undefined,
     quotationSubmission: undefined as Date | undefined,
     keyPicUserId: "",
+    keyPicUserName: "",
     subPics: [] as SubPIC[],
   });
 
@@ -71,7 +72,11 @@ export function VesselInquiryDialog({
   };
 
   const handleKeyPicChange = (userId: string, userName: string) => {
-    setFields((prev) => ({ ...prev, keyPicUserId: userId }));
+    setFields((prev) => ({
+      ...prev,
+      keyPicUserId: userId,
+      keyPicUserName: userName,
+    }));
   };
 
   const handleSubPicChange = (
@@ -107,8 +112,14 @@ export function VesselInquiryDialog({
 
     try {
       // Validate required fields
-      if (!fields.eta || !fields.inquiryReceived || fields.categories.length === 0) {
-        toast.error("Please fill all required fields, including at least one category");
+      if (
+        !fields.eta ||
+        !fields.inquiryReceived ||
+        fields.categories.length === 0
+      ) {
+        toast.error(
+          "Please fill all required fields, including at least one category",
+        );
         return;
       }
 
@@ -120,22 +131,44 @@ export function VesselInquiryDialog({
         customerEmail: fields.customerEmail,
         customerContact: fields.customerContact,
         commissionParty: fields.commissionParty,
+
         eta: format(fields.eta, "yyyy-MM-dd"),
+
         port: fields.port,
+
         categories: fields.categories,
+
         received_date: format(fields.inquiryReceived, "yyyy-MM-dd"),
+
         received_time: format(fields.inquiryReceived, "HH:mm"),
-        // Type definition expects 'qout_' instead of 'quote_'
+
         qout_submission_deadline_date: fields.quotationSubmission
           ? format(fields.quotationSubmission, "yyyy-MM-dd")
           : undefined,
+
         key_pic_usr_id: fields.keyPicUserId,
-        pics: fields.subPics
-          .filter((pic) => pic.userId) // Only include PICs with selected users
-          .map((pic) => ({
-            pic_usr_id: pic.userId,
-            pic_name: pic.userName,
-          })),
+
+        pics: [
+          // KEY PIC
+          ...(fields.keyPicUserId
+            ? [
+                {
+                  pic_usr_id: fields.keyPicUserId,
+                  pic_name: fields.keyPicUserName,
+                  is_key_pic: true,
+                },
+              ]
+            : []),
+
+          // SUB PICS
+          ...fields.subPics
+            .filter((pic) => pic.userId)
+            .map((pic) => ({
+              pic_usr_id: pic.userId,
+              pic_name: pic.userName,
+              is_key_pic: false,
+            })),
+        ],
       };
 
       await InquiryService.createInquiry(inquiryData);
@@ -155,6 +188,7 @@ export function VesselInquiryDialog({
         inquiryReceived: undefined,
         quotationSubmission: undefined,
         keyPicUserId: "",
+        keyPicUserName: "",
         subPics: [],
       });
 
