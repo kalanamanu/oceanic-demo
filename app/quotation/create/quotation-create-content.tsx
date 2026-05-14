@@ -421,8 +421,6 @@ export function QuotationCreateContent() {
             uploading={uploading}
             handleFileUpload={handleFileUpload}
             items={items}
-            expandedIndex={expandedIndex}
-            setExpandedIndex={setExpandedIndex}
             updateItem={updateItem}
             removeItem={removeItem}
             vendors={vendors}

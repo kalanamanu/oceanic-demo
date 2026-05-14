@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
+
 import { UploadCloud, FileSpreadsheet } from "lucide-react";
 
-import { QuotationItemCard } from "./quotation-item-card";
+import QuotationItemsTable from "./quotation-items-table";
 
 import type { QuotationItem } from "@/types/quotation.types";
 
@@ -13,10 +14,6 @@ interface Props {
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   items: QuotationItem[];
-
-  expandedIndex: number | null;
-
-  setExpandedIndex: (index: number | null) => void;
 
   updateItem: (index: number, field: string, value: string) => void;
 
@@ -33,8 +30,6 @@ export function QuotationUploadSection({
   uploading,
   handleFileUpload,
   items,
-  expandedIndex,
-  setExpandedIndex,
   updateItem,
   removeItem,
   vendors,
@@ -47,8 +42,6 @@ export function QuotationUploadSection({
 
   const [selectedFile, setSelectedFile] = React.useState<string>("");
 
-  /* ================= HANDLE FILE ================= */
-
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
@@ -58,8 +51,6 @@ export function QuotationUploadSection({
 
     handleFileUpload(e);
   };
-
-  /* ================= DRAG EVENTS ================= */
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -93,7 +84,7 @@ export function QuotationUploadSection({
 
   return (
     <div className="space-y-8">
-      {/* ================= UPLOAD BOX ================= */}
+      {/* UPLOAD BOX */}
 
       <div
         onDragOver={handleDragOver}
@@ -119,7 +110,6 @@ export function QuotationUploadSection({
           }
         `}
       >
-        {/* Hidden Input */}
         <input
           ref={inputRef}
           type="file"
@@ -128,7 +118,6 @@ export function QuotationUploadSection({
           onChange={onFileSelect}
         />
 
-        {/* Upload Content */}
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <UploadCloud className="w-8 h-8 text-primary" />
@@ -138,7 +127,7 @@ export function QuotationUploadSection({
             <h3 className="text-lg font-semibold">Upload Excel File</h3>
 
             <p className="text-sm text-muted-foreground">
-              Drag & drop your quotation Excel file here or click to browse
+              Drag & drop your quotation file or click to browse
             </p>
 
             <p className="text-xs text-muted-foreground">
@@ -165,33 +154,17 @@ export function QuotationUploadSection({
         </div>
       </div>
 
-      {/* ================= ITEMS ================= */}
+      {/* TABLE */}
 
       {items.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Uploaded Items</h2>
-
-            <div className="text-sm text-muted-foreground">
-              {items.length} item(s) found
-            </div>
-          </div>
-
-          {items.map((item, index) => (
-            <QuotationItemCard
-              key={index}
-              item={item}
-              index={index}
-              expandedIndex={expandedIndex}
-              setExpandedIndex={setExpandedIndex}
-              updateItem={updateItem}
-              removeItem={removeItem}
-              vendors={vendors}
-              setActiveItemIndex={setActiveItemIndex}
-              setTempVendorOpen={setTempVendorOpen}
-            />
-          ))}
-        </div>
+        <QuotationItemsTable
+          items={items}
+          updateItem={updateItem}
+          removeItem={removeItem}
+          vendors={vendors}
+          setActiveItemIndex={setActiveItemIndex}
+          setTempVendorOpen={setTempVendorOpen}
+        />
       )}
     </div>
   );
