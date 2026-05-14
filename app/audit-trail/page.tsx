@@ -23,9 +23,7 @@ export default function ActivityPage() {
     try {
       setLoading(true);
 
-      const data = selectedUser
-        ? await ActivityService.getActivitiesByUser(selectedUser)
-        : await ActivityService.getAllActivities();
+      const data = await ActivityService.getAllActivities();
 
       setActivities(data);
     } finally {
@@ -35,7 +33,17 @@ export default function ActivityPage() {
 
   React.useEffect(() => {
     loadData();
-  }, [selectedUser]);
+  }, []);
+
+  // LOCAL FILTERING
+  const filteredActivities = activities.filter((activity) => {
+    const search = selectedUser.toLowerCase();
+
+    return (
+      activity.user_id?.toLowerCase().includes(search) ||
+      activity.username?.toLowerCase().includes(search)
+    );
+  });
 
   return (
     <div className="p-6 space-y-6 relative">
@@ -55,7 +63,7 @@ export default function ActivityPage() {
 
       {/* FEED */}
       <ActivityFeed
-        data={activities}
+        data={filteredActivities}
         loading={loading}
         onSelect={setSelectedActivity}
       />
