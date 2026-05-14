@@ -34,7 +34,7 @@ const sidebarConfig = {
       path: "/audit-trail",
     },
     { value: "users", label: "Users", icon: Users, path: "/users" },
-    { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
+    // { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
     { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
     // {
     //   value: "categories",
@@ -73,12 +73,12 @@ const sidebarConfig = {
     { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
     // { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
     { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
-    {
-      value: "categories",
-      label: "Categories",
-      icon: Tags,
-      path: "/categories",
-    },
+    // {
+    //   value: "categories",
+    //   label: "Categories",
+    //   icon: Tags,
+    //   path: "/categories",
+    // },
     {
       value: "picTasks",
       label: "PIC Tasks",
@@ -97,6 +97,12 @@ const sidebarConfig = {
       label: "Pre Cost",
       icon: FilePenLine,
       path: "/quotation",
+    },
+    {
+      value: "system-configuration",
+      label: "Configurations",
+      icon: Settings2,
+      path: "/system-configuration",
     },
   ],
 
