@@ -334,6 +334,30 @@ export function InquiryDetailDialog({
                   </div>
                 </SectionCard>
 
+                {/* Categories */}
+                <SectionCard
+                  title="Inquiry Categories"
+                  icon={<Briefcase className="h-5 w-5" />}
+                >
+                  <div className="flex flex-wrap gap-3">
+                    {data.categories && data.categories.length > 0 ? (
+                      data.categories.map((category: any) => (
+                        <Badge
+                          key={category.cte_id}
+                          variant="secondary"
+                          className="rounded-xl px-4 py-2 text-sm"
+                        >
+                          {category.cte_name}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No categories assigned
+                      </p>
+                    )}
+                  </div>
+                </SectionCard>
+
                 {/* Assignment */}
                 <SectionCard
                   title="Assignment Details"
