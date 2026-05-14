@@ -2,34 +2,42 @@ import { DocumentService } from "./document.service";
 import { DocumentJobStatusResponse } from "@/types/document.types";
 
 interface WaitOptions {
-  interval?: number; // ms
-  timeout?: number; // ms
+  interval?: number; // default 2000ms
+  maxAttempts?: number; // default 3
 }
 
 export async function waitForDocumentJob(
   jobId: string,
   options: WaitOptions = {},
 ): Promise<DocumentJobStatusResponse> {
-  const interval = options.interval ?? 1000;
-  const timeout = options.timeout ?? 300000;
+  const interval = options.interval ?? 2000;
+  const maxAttempts = options.maxAttempts ?? 5;
 
-  const startTime = Date.now();
+  let attempts = 0;
 
-  while (true) {
+  while (attempts < maxAttempts) {
+    attempts++;
+
     const status = await DocumentService.getJobStatus(jobId);
 
+    // success
     if (status.state === "completed") {
       return status;
     }
 
+    // backend failure
     if (status.state === "failed") {
       throw new Error(status.error || "Document generation failed");
     }
 
-    if (Date.now() - startTime > timeout) {
-      throw new Error("Document generation timeout");
+    // still processing
+    if (attempts < maxAttempts) {
+      await new Promise((r) => setTimeout(r, interval));
     }
-
-    await new Promise((resolve) => setTimeout(resolve, interval));
   }
+
+  // timeout after 3 attempts
+  throw new Error(
+    "Document generation is taking too long. Please try again."
+  );
 }
