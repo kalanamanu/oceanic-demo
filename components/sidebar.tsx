@@ -36,12 +36,12 @@ const sidebarConfig = {
     { value: "users", label: "Users", icon: Users, path: "/users" },
     { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
     { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
-    {
-      value: "categories",
-      label: "Categories",
-      icon: Tags,
-      path: "/categories",
-    },
+    // {
+    //   value: "categories",
+    //   label: "Categories",
+    //   icon: Tags,
+    //   path: "/categories",
+    // },
     {
       value: "picTasks",
       label: "PIC Tasks",
@@ -71,7 +71,7 @@ const sidebarConfig = {
 
   management: [
     { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
-    { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
+    // { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
     { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
     {
       value: "categories",
