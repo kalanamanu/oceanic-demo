@@ -162,25 +162,6 @@ export default function WelcomeCard({
                   {name}!
                 </motion.span>
               </h1>
-
-              <motion.span
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  duration: 0.5,
-                  delay: 0.6,
-                  type: "spring",
-                  stiffness: 300,
-                }}
-                whileHover={{
-                  rotate: [0, 14, -8, 14, -4, 10, 0],
-                  transition: { duration: 0.6, ease: "easeInOut" },
-                }}
-                className="text-3xl cursor-pointer inline-block"
-                aria-hidden="true"
-              >
-                👋
-              </motion.span>
             </motion.div>
 
             <motion.div
