@@ -1,18 +1,27 @@
 "use client";
 
 import * as React from "react";
+
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+
+import { CategorySelect } from "./category-select";
+
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { TimePicker } from "@/components/ui/time-picker";
+
+import { parseISO, format } from "date-fns";
 
 import {
   Ship,
@@ -27,9 +36,9 @@ import {
   Edit2,
 } from "lucide-react";
 
-import type { Inquiry, InquiryCategory } from "@/types/inquiry.types";
+import type { Inquiry, InquiryPIC } from "@/types/inquiry.types";
 
-const STATUS_OPTIONS = ["Pending", "Active", "Confirmed", "Rejected"];
+const STATUS_OPTIONS = ["Pending", "Active", "Confirmed", "Rejected"] as const;
 
 interface EditInquiryDialogProps {
   inquiry: Inquiry;
@@ -56,6 +65,26 @@ export function EditInquiryDialog({
     });
   }, [inquiry, open]);
 
+  const parseDate = (value?: string) => {
+    if (!value) return undefined;
+
+    try {
+      return parseISO(value);
+    } catch {
+      return undefined;
+    }
+  };
+
+  const formatDate = (date?: Date) => {
+    if (!date) return "";
+    return format(date, "yyyy-MM-dd");
+  };
+
+  const formatDateTime = (date?: Date) => {
+    if (!date) return "";
+    return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -64,6 +93,16 @@ export function EditInquiryDialog({
     setFields((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleDateChange = (
+    field: keyof Inquiry,
+    value: string | undefined,
+  ) => {
+    setFields((prev) => ({
+      ...prev,
+      [field]: value || "",
     }));
   };
 
@@ -85,9 +124,14 @@ export function EditInquiryDialog({
   };
 
   const handleAddSubPic = () => {
+    const newPic: InquiryPIC = {
+      id: "",
+      name: "",
+    };
+
     setFields((prev) => ({
       ...prev,
-      other_pics: [...(prev.other_pics || []), { id: "", name: "" }],
+      other_pics: [...(prev.other_pics || []), newPic],
     }));
   };
 
@@ -99,25 +143,17 @@ export function EditInquiryDialog({
   };
 
   const handleKeyPicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
     setFields((prev) => ({
       ...prev,
-      key_pic_usr_id: e.target.value,
+      key_pic_usr_id: value,
+      key_pic: {
+        ...(prev.key_pic || { id: "" }),
+        name: value,
+      },
     }));
   };
-
-  const handleCategoriesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFields({
-      ...fields,
-      categories: e.target.value
-        .split(/\s*,\s*/)
-        .filter(Boolean)
-        .map((name) => ({ name, id: "" }) as InquiryCategory),
-    });
-  };
-
-  const categoriesText = (fields.categories || [])
-    .map((c) => c.name)
-    .join(", ");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,20 +167,19 @@ export function EditInquiryDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         className="
-                      w-[70vw]
-                      max-w-[1600px]
-                      sm:max-w-[1600px]
-                      h-[95vh]
-                      p-0
-                      overflow-hidden
-                      rounded-3xl
-                      border
-                      shadow-2xl
-                      forceMount
-                    "
+          h-[95vh]
+          w-[70vw]
+          max-w-[1600px]
+          overflow-hidden
+          rounded-3xl
+          border
+          p-0
+          shadow-2xl
+          sm:max-w-[1600px]
+        "
       >
         {/* HEADER */}
-        <DialogHeader className="border-b bg-background px-8 py-6 shrink-0">
+        <DialogHeader className="shrink-0 border-b bg-background px-8 py-6">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div>
               <DialogTitle className="text-3xl font-bold tracking-tight">
@@ -171,7 +206,7 @@ export function EditInquiryDialog({
         {/* BODY */}
         <div className="flex-1 overflow-y-auto bg-muted/20">
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6 p-8">
+            <div className="grid grid-cols-1 gap-6 p-8 xl:grid-cols-[2fr_1fr]">
               {/* LEFT SIDE */}
               <div className="space-y-6">
                 {/* Vessel Information */}
@@ -179,7 +214,7 @@ export function EditInquiryDialog({
                   title="Vessel Information"
                   icon={<Ship className="h-5 w-5" />}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
                     <DetailField
                       icon={<Ship className="h-4 w-4" />}
                       label="Vessel Name"
@@ -216,27 +251,35 @@ export function EditInquiryDialog({
                       />
                     </DetailField>
 
+                    {/* CUSTOM DATETIME PICKER */}
                     <DetailField
                       icon={<CalendarDays className="h-4 w-4" />}
                       label="ETA"
                     >
-                      <Input
-                        name="eta"
-                        type="datetime-local"
-                        value={fields.eta || ""}
-                        onChange={handleChange}
+                      <DateTimePicker
+                        date={parseDate(fields.eta)}
+                        onDateChange={(date) =>
+                          setFields((prev) => ({
+                            ...prev,
+                            eta: formatDateTime(date),
+                          }))
+                        }
                       />
                     </DetailField>
 
+                    {/* CUSTOM DATE PICKER */}
                     <DetailField
                       icon={<CalendarDays className="h-4 w-4" />}
                       label="Received Date"
                     >
-                      <Input
-                        name="received_date"
-                        type="date"
-                        value={fields.received_date || ""}
-                        onChange={handleChange}
+                      <DatePicker
+                        date={parseDate(fields.received_date)}
+                        onDateChange={(date) =>
+                          setFields((prev) => ({
+                            ...prev,
+                            received_date: formatDate(date),
+                          }))
+                        }
                       />
                     </DetailField>
 
@@ -244,11 +287,14 @@ export function EditInquiryDialog({
                       icon={<Clock className="h-4 w-4" />}
                       label="Received Time"
                     >
-                      <Input
-                        name="received_time"
-                        type="time"
-                        value={fields.received_time || ""}
-                        onChange={handleChange}
+                      <TimePicker
+                        time={fields.received_time}
+                        onTimeChange={(value) =>
+                          setFields((prev) => ({
+                            ...prev,
+                            received_time: value || "",
+                          }))
+                        }
                       />
                     </DetailField>
 
@@ -277,11 +323,14 @@ export function EditInquiryDialog({
                       icon={<Layers3 className="h-4 w-4" />}
                       label="Categories"
                     >
-                      <Input
-                        name="categories"
-                        value={categoriesText}
-                        onChange={handleCategoriesChange}
-                        placeholder="Bonded, Deck, Engine"
+                      <CategorySelect
+                        selectedCategories={fields.categories || []}
+                        onChange={(selectedCategories) =>
+                          setFields((prev) => ({
+                            ...prev,
+                            categories: selectedCategories,
+                          }))
+                        }
                       />
                     </DetailField>
                   </div>
@@ -292,7 +341,7 @@ export function EditInquiryDialog({
                   title="Customer Information"
                   icon={<User className="h-5 w-5" />}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <DetailField
                       icon={<User className="h-4 w-4" />}
                       label="Customer"
@@ -351,16 +400,16 @@ export function EditInquiryDialog({
                   <div className="space-y-6">
                     {/* Key PIC */}
                     <div>
-                      <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                        Key PIC User ID
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Key PIC
                       </label>
 
                       <Input
                         className="mt-2"
                         name="key_pic_usr_id"
-                        value={fields.key_pic_usr_id || ""}
+                        value={fields.key_pic?.name || ""}
                         onChange={handleKeyPicChange}
-                        placeholder="Key PIC User ID"
+                        placeholder="Key PIC"
                       />
                     </div>
 
@@ -368,8 +417,8 @@ export function EditInquiryDialog({
 
                     {/* Sub PICs */}
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                      <div className="mb-3 flex items-center justify-between">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           Sub PICs
                         </p>
 
@@ -421,14 +470,14 @@ export function EditInquiryDialog({
                   icon={<Edit2 className="h-5 w-5" />}
                 >
                   <div className="space-y-3">
-                    <Button type="submit" className="w-full h-11 rounded-xl">
+                    <Button type="submit" className="h-11 w-full rounded-xl">
                       Save Changes
                     </Button>
 
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full h-11 rounded-xl"
+                      className="h-11 w-full rounded-xl"
                       onClick={onClose}
                     >
                       Cancel
@@ -454,13 +503,13 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-3xl border bg-background shadow-sm overflow-hidden">
-      <div className="border-b px-6 py-5 flex items-center gap-3">
+    <div className="overflow-hidden rounded-3xl border bg-background shadow-sm">
+      <div className="flex items-center gap-3 border-b px-6 py-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
           {icon}
         </div>
 
-        <h3 className="font-semibold text-base">{title}</h3>
+        <h3 className="text-base font-semibold">{title}</h3>
       </div>
 
       <div className="p-6">{children}</div>
@@ -479,7 +528,7 @@ function DetailField({
 }) {
   return (
     <div className="rounded-2xl border bg-muted/20 p-4">
-      <div className="flex items-center gap-2 text-muted-foreground mb-3">
+      <div className="mb-3 flex items-center gap-2 text-muted-foreground">
         {icon}
 
         <span className="text-[11px] font-semibold uppercase tracking-wider">

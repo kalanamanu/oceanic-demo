@@ -1,9 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, Loader2, Search, X } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import apiClient from "@/lib/api-client";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandEmpty,
@@ -17,8 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import apiClient from "@/lib/api-client";
+
 import { InquiryCategory } from "@/types/inquiry.types";
 
 interface CategoryApiResponse {
@@ -50,8 +52,9 @@ export function CategorySelect({
   const fetchCategories = async () => {
     try {
       const response = await apiClient.get("/api/category");
-      if (response.data && response.data.success) {
-        setCategories(response.data.data);
+
+      if (response.data?.success) {
+        setCategories(response.data.data || []);
       }
     } catch (error) {
       console.error("Failed to fetch categories:", error);
@@ -62,28 +65,34 @@ export function CategorySelect({
 
   const handleSelect = (category: CategoryApiResponse) => {
     const isAlreadySelected = selectedCategories.some(
-      (c) => c.id === category.cte_id,
+      (c) => c.cte_id === category.cte_id,
     );
 
     if (isAlreadySelected) {
-      onChange(selectedCategories.filter((c) => c.id !== category.cte_id));
+      onChange(selectedCategories.filter((c) => c.cte_id !== category.cte_id));
     } else {
       onChange([
         ...selectedCategories,
-        { id: category.cte_id, name: category.cte_name },
+        {
+          id: Number(category.cte_id),
+          cte_id: category.cte_id,
+          cte_name: category.cte_name,
+        },
       ]);
     }
   };
 
-  const removeCategory = (idToRemove: string, e: React.MouseEvent) => {
+  const removeCategory = (cteIdToRemove: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange(selectedCategories.filter((c) => c.id !== idToRemove));
+
+    onChange(selectedCategories.filter((c) => c.cte_id !== cteIdToRemove));
   };
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 border-2 border-input rounded px-3 py-2 bg-background">
+      <div className="flex items-center gap-2 rounded border-2 border-input bg-background px-3 py-2">
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+
         <span className="text-sm text-muted-foreground">
           Loading categories...
         </span>
@@ -98,56 +107,66 @@ export function CategorySelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "min-h-[44px] w-full flex flex-wrap items-center justify-between gap-2 border-2 border-input rounded px-3 py-2 bg-background hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all cursor-pointer",
-            disabled && "opacity-50 cursor-not-allowed",
+            "min-h-[44px] w-full cursor-pointer rounded border-2 border-input bg-background px-3 py-2 transition-all hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20",
+            "flex flex-wrap items-center justify-between gap-2",
+            disabled && "cursor-not-allowed opacity-50",
           )}
           onClick={() => !disabled && setOpen(true)}
         >
-          <div className="flex flex-wrap gap-1 flex-1 items-center">
+          <div className="flex flex-1 flex-wrap items-center gap-1">
             {selectedCategories.length === 0 && (
-              <span className="text-muted-foreground text-sm">
+              <span className="text-sm text-muted-foreground">
                 Select categories...
               </span>
             )}
+
             {selectedCategories.map((cat) => (
               <Badge
-                key={cat.id}
+                key={cat.cte_id}
                 variant="secondary"
-                className="flex items-center gap-1 group/badge py-1 px-2.5 rounded-full"
+                className="group/badge flex items-center gap-1 rounded-full px-2.5 py-1"
               >
-                {cat.name}
+                {cat.cte_name}
+
                 <div
                   role="button"
                   tabIndex={0}
-                  className="rounded-full bg-background/50 p-0.5 hover:bg-destructive hover:text-destructive-foreground transition-colors cursor-pointer"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") removeCategory(cat.id, e as any);
-                  }}
+                  className="cursor-pointer rounded-full bg-background/50 p-0.5 transition-colors hover:bg-destructive hover:text-destructive-foreground"
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                   }}
-                  onClick={(e) => removeCategory(cat.id, e)}
+                  onClick={(e) => removeCategory(cat.cte_id, e)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      removeCategory(cat.cte_id, e as any);
+                    }
+                  }}
                 >
                   <X className="h-3 w-3" />
-                  <span className="sr-only">Remove {cat.name}</span>
+                  <span className="sr-only">Remove {cat.cte_name}</span>
                 </div>
               </Badge>
             ))}
           </div>
+
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </div>
       </PopoverTrigger>
+
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
           <CommandInput placeholder="Search categories..." />
+
           <CommandList>
             <CommandEmpty>No category found.</CommandEmpty>
+
             <CommandGroup className="max-h-64 overflow-auto">
               {categories.map((category) => {
                 const isSelected = selectedCategories.some(
-                  (c) => c.id === category.cte_id,
+                  (c) => c.cte_id === category.cte_id,
                 );
+
                 return (
                   <CommandItem
                     key={category.cte_id}
@@ -161,11 +180,15 @@ export function CategorySelect({
                         isSelected ? "opacity-100" : "opacity-0",
                       )}
                     />
+
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: category.color }}
+                        className="h-3 w-3 rounded-full"
+                        style={{
+                          backgroundColor: category.color,
+                        }}
                       />
+
                       <span>{category.cte_name}</span>
                     </div>
                   </CommandItem>

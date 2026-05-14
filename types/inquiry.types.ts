@@ -6,10 +6,10 @@ export interface InquiryPIC {
 }
 
 export interface InquiryCategory {
-  id: string;
-  name: string;
+  id: number;
+  cte_id: string;
+  cte_name: string;
 }
-
 export interface Inquiry {
   id?: string;
   inq_id?: string;
