@@ -5,11 +5,8 @@ import { VendorService } from "@/services/vendor.service";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Category {
-  id: string;
-  name: string;
-}
+import { CategorySelect } from "@/components/inquiry/category-select";
+import { InquiryCategory } from "@/types/inquiry.types";
 
 interface PIC {
   firstName: string;
@@ -38,9 +35,7 @@ export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
   const [loading, setLoading] = React.useState(false);
 
   /* ================= CATEGORY ================= */
-  const [categories, setCategories] = React.useState<Category[]>([
-    { id: "", name: "" },
-  ]);
+  const [categories, setCategories] = React.useState<InquiryCategory[]>([]);
 
   /* ================= PIC ================= */
   const [pics, setPics] = React.useState<PIC[]>([
@@ -71,7 +66,7 @@ export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
             id: c.cte_id,
             name: c.cte_name,
           }))
-        : [{ id: "", name: "" }],
+        : [],
     );
 
     setPics(
@@ -96,26 +91,6 @@ export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
           ],
     );
   }, [initialData]);
-
-  /* ================= CATEGORY ================= */
-  const addCategory = () =>
-    setCategories((prev) => [...prev, { id: "", name: "" }]);
-
-  const updateCategory = (
-    index: number,
-    field: keyof Category,
-    value: string,
-  ) => {
-    setCategories((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
-      return copy;
-    });
-  };
-
-  const removeCategory = (index: number) => {
-    setCategories((prev) => prev.filter((_, i) => i !== index));
-  };
 
   /* ================= PIC ================= */
   const addPic = () => {
@@ -167,7 +142,7 @@ export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
         address,
         company_type: companyType,
         remark,
-        categories: categories.filter((c) => c.id && c.name),
+        categories,
         pic: pics.filter((p) => p.firstName && p.email && p.phone_number),
       };
 
@@ -237,39 +212,19 @@ export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
       />
 
       {/* CATEGORY */}
-      <div>
-        <div className="flex justify-between mb-2">
-          <h3 className="font-semibold">Categories</h3>
-          <Button size="sm" onClick={addCategory}>
-            + Add
-          </Button>
+      <div className="space-y-2">
+        <div>
+          <h3 className="font-semibold text-sm">Categories</h3>
+
+          <p className="text-xs text-muted-foreground">
+            Select vendor service categories
+          </p>
         </div>
 
-        {categories.map((cat, i) => (
-          <div key={i} className="flex gap-2 mb-2">
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Category ID"
-              value={cat.id}
-              onChange={(e) => updateCategory(i, "id", e.target.value)}
-            />
-
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Category Name"
-              value={cat.name}
-              onChange={(e) => updateCategory(i, "name", e.target.value)}
-            />
-
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => removeCategory(i)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        ))}
+        <CategorySelect
+          selectedCategories={categories}
+          onChange={setCategories}
+        />
       </div>
 
       {/* PIC */}

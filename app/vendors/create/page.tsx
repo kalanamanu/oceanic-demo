@@ -8,8 +8,6 @@ export default function CreateVendorPage() {
   const router = useRouter();
 
   const handleSuccess = () => {
-    toast.success("Vendor created successfully");
-
     // small delay for UX
     setTimeout(() => {
       router.push("/vendors");
