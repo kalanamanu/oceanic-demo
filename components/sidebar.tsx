@@ -17,6 +17,7 @@ import {
   ListTodo,
   ClipboardList,
   FilePenLine,
+  Settings2,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
@@ -59,6 +60,12 @@ const sidebarConfig = {
       label: "Pre Cost",
       icon: FilePenLine,
       path: "/quotation",
+    },
+    {
+      value: "system-configuration",
+      label: "Configurations",
+      icon: Settings2,
+      path: "/system-configuration",
     },
   ],
 
