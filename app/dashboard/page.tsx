@@ -10,29 +10,52 @@ import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog
 import { FileText, Clock, CheckCircle, Building2, Package } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 import type { UserData } from "@/types/auth.types";
+import { DashboardService } from "@/services/dashboard.service";
 
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [dashboardCards, setDashboardCards] = useState({
+    totalInquiries: 0,
+    activeVendors: 0,
+    pendingInquiries: 0,
+    confirmedInquiries: 0,
+  });
+
+  const [recentInquiries, setRecentInquiries] = useState<any[]>([]);
+
   useEffect(() => {
-    // Check authentication
-    if (!AuthService.isAuthenticated()) {
-      router.push("/login");
-      return;
-    }
+    const loadDashboard = async () => {
+      try {
+        // Check authentication
+        if (!AuthService.isAuthenticated()) {
+          router.push("/login");
+          return;
+        }
 
-    // Get user data
-    const userData = AuthService.getCurrentUser();
-    if (userData) {
-      setUser(userData);
-    } else {
-      // User data missing, redirect to login
-      //router.push("/login");
-    }
+        // Get user data
+        const userData = AuthService.getCurrentUser();
 
-    setIsLoading(false);
+        if (userData) {
+          setUser(userData);
+        }
+
+        // Load dashboard API
+        const dashboard = await DashboardService.getDashboard();
+
+        setDashboardCards(dashboard.cards);
+
+        setRecentInquiries(dashboard.recentInquiries);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDashboard();
   }, [router]);
 
   // Show loading state
@@ -55,25 +78,25 @@ export default function Dashboard() {
   const stats = [
     {
       label: "Total Inquiries",
-      value: 120,
+      value: dashboardCards.totalInquiries,
       color: "blue" as const,
       icon: FileText,
     },
     {
       label: "Pending Inquiries",
-      value: 24,
+      value: dashboardCards.pendingInquiries,
       color: "orange" as const,
       icon: Clock,
     },
     {
       label: "Confirmed Inquiries",
-      value: 52,
+      value: dashboardCards.confirmedInquiries,
       color: "green" as const,
       icon: CheckCircle,
     },
     {
       label: "Active Vendors",
-      value: 12,
+      value: dashboardCards.activeVendors,
       color: "cyan" as const,
       icon: Building2,
     },
@@ -141,7 +164,7 @@ export default function Dashboard() {
         </section>
 
         <section className="pt-4">
-          <DashboardTable activities={activities} />
+          <DashboardTable activities={recentInquiries} />
         </section>
 
         <div className="h-8" />
