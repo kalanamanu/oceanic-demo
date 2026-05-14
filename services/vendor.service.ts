@@ -128,7 +128,7 @@ export class VendorService {
   }
 
   /* ==============================
-     📄 DOCUMENTS (NEW)
+     DOCUMENTS (NEW)
   ============================== */
 
   // Get all documents (optionally filter)

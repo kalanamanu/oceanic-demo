@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Loader2,
   UserCheck,
+  XCircle,
 } from "lucide-react";
 
 import { VendorService } from "@/services/vendor.service";
@@ -83,7 +84,7 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
     } catch (err: any) {
       console.error(err);
 
-      toast.error(err?.message || "Failed to update approval");
+      toast.error(err?.message || "Failed to update vendor status");
     } finally {
       setLoading(false);
     }
@@ -122,25 +123,42 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
           approved={status?.is_manager_approved}
         >
           {!status?.is_manager_approved && canManagerApprove && (
-            <Button
-              size="sm"
-              className="w-full"
-              disabled={loading}
-              onClick={() =>
-                updateApproval(
-                  true,
-                  status?.is_md_approved || false,
-                  "Vendor approved by Manager",
-                )
-              }
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : (
-                <UserCheck className="w-4 h-4 mr-2" />
-              )}
-              Approve as Manager
-            </Button>
+            <div className="flex gap-2">
+              {/* APPROVE */}
+              <Button
+                size="sm"
+                className="flex-1"
+                disabled={loading}
+                onClick={() =>
+                  updateApproval(
+                    true,
+                    status?.is_md_approved || false,
+                    "Vendor approved by Manager",
+                  )
+                }
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <UserCheck className="w-4 h-4 mr-2" />
+                )}
+                Approve
+              </Button>
+
+              {/* REJECT */}
+              <Button
+                size="sm"
+                variant="destructive"
+                className="flex-1"
+                disabled={loading}
+                onClick={() =>
+                  updateApproval(false, false, "Vendor rejected by Manager")
+                }
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Reject
+              </Button>
+            </div>
           )}
         </ApprovalSection>
 
@@ -156,21 +174,38 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
           {status?.is_manager_approved &&
             !status?.is_md_approved &&
             canMDApprove && (
-              <Button
-                size="sm"
-                className="w-full"
-                disabled={loading}
-                onClick={() =>
-                  updateApproval(true, true, "Vendor approved by MD")
-                }
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : (
-                  <ShieldCheck className="w-4 h-4 mr-2" />
-                )}
-                Approve as MD
-              </Button>
+              <div className="flex gap-2">
+                {/* APPROVE */}
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  disabled={loading}
+                  onClick={() =>
+                    updateApproval(true, true, "Vendor approved by MD")
+                  }
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <ShieldCheck className="w-4 h-4 mr-2" />
+                  )}
+                  Approve
+                </Button>
+
+                {/* REJECT */}
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="flex-1"
+                  disabled={loading}
+                  onClick={() =>
+                    updateApproval(false, false, "Vendor rejected by MD")
+                  }
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Reject
+                </Button>
+              </div>
             )}
         </ApprovalSection>
 
