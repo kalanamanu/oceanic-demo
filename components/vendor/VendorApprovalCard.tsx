@@ -94,7 +94,58 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
 
   const fullyApproved = status?.is_manager_approved && status?.is_md_approved;
 
-  const currentStatus = status?.status || "Pending Approval";
+  const statusConfig: Record<
+    string,
+    {
+      label: string;
+      variant: "default" | "secondary" | "destructive" | "outline";
+      icon: React.ReactNode;
+    }
+  > = {
+    "Pending Approval": {
+      label: "Pending Approval",
+      variant: "secondary",
+      icon: <Clock3 className="w-3 h-3" />,
+    },
+
+    "Manager Approved": {
+      label: "Manager Approved",
+      variant: "outline",
+      icon: <CheckCircle2 className="w-3 h-3" />,
+    },
+
+    "Manager Rejected": {
+      label: "Manager Rejected",
+      variant: "destructive",
+      icon: <XCircle className="w-3 h-3" />,
+    },
+
+    "MD Approved": {
+      label: "MD Approved",
+      variant: "outline",
+      icon: <ShieldCheck className="w-3 h-3" />,
+    },
+
+    "MD Rejected": {
+      label: "MD Rejected",
+      variant: "destructive",
+      icon: <XCircle className="w-3 h-3" />,
+    },
+
+    Approved: {
+      label: "Approved",
+      variant: "default",
+      icon: <CheckCircle2 className="w-3 h-3" />,
+    },
+
+    Rejected: {
+      label: "Rejected",
+      variant: "destructive",
+      icon: <XCircle className="w-3 h-3" />,
+    },
+  };
+
+  const currentStatus = statusConfig[status?.status || "Pending Approval"];
 
   return (
     <Card className="border-l-4 border-l-primary shadow-sm">
@@ -105,11 +156,9 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
             Approval Workflow
           </CardTitle>
 
-          <Badge
-            variant={fullyApproved ? "default" : "secondary"}
-            className="capitalize"
-          >
-            {currentStatus}
+          <Badge variant={currentStatus.variant} className="capitalize gap-1">
+            {currentStatus.icon}
+            {currentStatus.label}
           </Badge>
         </div>
       </CardHeader>
