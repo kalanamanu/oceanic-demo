@@ -22,6 +22,7 @@ import { QuotationAdditionalCharges } from "@/components/quatation/quotation-add
 import { QuotationDiscountSection } from "@/components/quatation/quotation-discount-section";
 import { QuotationAdditionalDetails } from "@/components/quatation/quotation-additional-details";
 import { QuotationTotalSection } from "@/components/quatation/quotation-total-section";
+import { QuotationSummaryCard } from "@/components/quatation/QuotationSummaryCard";
 import { QuotationFooterActions } from "@/components/quatation/quotation-footer-actions";
 
 import { QuotationPreviewDialog } from "@/components/quatation/quotation-preview-dialog";
@@ -310,9 +311,7 @@ export function QuotationCreateContent() {
         inquiryID: inquiry?.inq_id,
 
         items: items.map((item) => {
-          const vendor = vendors.find(
-            (v) => v.vendor_id === item.supplier_name,
-          );
+          const vendor = vendors.find((v) => v.vendor_id === item.supplier_id);
 
           return {
             item_name: item.description,
@@ -429,32 +428,48 @@ export function QuotationCreateContent() {
           />
         )}
 
-        {/* ADDITIONAL CHARGES */}
-        <QuotationAdditionalCharges
+        <QuotationSummaryCard
           additionalCharges={additionalCharges}
           addCharge={addCharge}
           updateCharge={updateCharge}
           removeCharge={removeCharge}
-        />
-
-        {/* DISCOUNT */}
-        <QuotationDiscountSection
           discountLKR={discountLKR}
           setDiscountLKR={setDiscountLKR}
-        />
-
-        {/* ADDITIONAL DETAILS */}
-        <QuotationAdditionalDetails
           dateArrived={dateArrived}
           setDateArrived={setDateArrived}
           dateSailed={dateSailed}
           setDateSailed={setDateSailed}
           remark={remark}
           setRemark={setRemark}
+          totalLKR={totalLKR}
+          totalUSD={totalUSD}
         />
+        {/* ADDITIONAL CHARGES */}
+        {/* <QuotationAdditionalCharges
+          additionalCharges={additionalCharges}
+          addCharge={addCharge}
+          updateCharge={updateCharge}
+          removeCharge={removeCharge}
+        /> */}
+
+        {/* DISCOUNT */}
+        {/* <QuotationDiscountSection
+          discountLKR={discountLKR}
+          setDiscountLKR={setDiscountLKR}
+        /> */}
+
+        {/* ADDITIONAL DETAILS */}
+        {/* <QuotationAdditionalDetails
+          dateArrived={dateArrived}
+          setDateArrived={setDateArrived}
+          dateSailed={dateSailed}
+          setDateSailed={setDateSailed}
+          remark={remark}
+          setRemark={setRemark}
+        /> */}
 
         {/* TOTALS */}
-        <QuotationTotalSection totalLKR={totalLKR} totalUSD={totalUSD} />
+        {/* <QuotationTotalSection totalLKR={totalLKR} totalUSD={totalUSD} /> */}
 
         {/* FOOTER ACTIONS */}
         <QuotationFooterActions onSave={() => setPreviewOpen(true)} />
