@@ -58,13 +58,8 @@ export default function QuotationItemsTable({
   };
   const [applyAllAdditional, setApplyAllAdditional] = useState(false);
 
-  const toggleAdditionalCharge = () => {
-    const newValue = !applyAllAdditional;
-    setApplyAllAdditional(newValue);
-
-    items.forEach((_, index) => {
-      updateItem(index, "additional_charges", newValue ? "100" : "");
-    });
+  const toggleRowAdditional = (index: number, checked: boolean) => {
+    updateItem(index, "additional_charges", checked ? "100" : "");
   };
 
   return (
@@ -72,7 +67,7 @@ export default function QuotationItemsTable({
       {/* HEADER ACTIONS */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Quotation Items</h2>
+          <h2 className="text-xl font-semibold">Pre Cost Items</h2>
 
           <p className="text-sm text-muted-foreground">
             Total Items: {items.length}
@@ -83,14 +78,6 @@ export default function QuotationItemsTable({
           <Expand className="w-4 h-4 mr-2" />
           Full Screen View
         </Button> */}
-        <Button
-          type="button"
-          variant={applyAllAdditional ? "default" : "outline"}
-          className="h-8"
-          onClick={toggleAdditionalCharge}
-        >
-          {applyAllAdditional ? "✔ Additional 100 Applied" : "Apply 100 to All"}
-        </Button>
       </div>
 
       {/* TABLE */}
@@ -226,15 +213,42 @@ export default function QuotationItemsTable({
 
                   {/* ADDITIONAL */}
                   <td className="border-r p-1">
-                    <input
-                      className="w-[100px] border rounded px-2 py-1 text-sm"
-                      value={item.additional_charges || ""}
-                      onChange={(e) =>
-                        updateItem(index, "additional_charges", e.target.value)
-                      }
-                    />
-                  </td>
+                    <div className="flex items-center gap-2">
+                      {/* Tick Button */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateItem(
+                            index,
+                            "additional_charges",
+                            item.additional_charges === "100" ? "" : "100",
+                          )
+                        }
+                        className={`w-5 h-5 rounded border flex items-center justify-center text-xs
+        ${
+          item.additional_charges === "100"
+            ? "bg-green-500 text-white border-green-500"
+            : "bg-background"
+        }`}
+                      >
+                        {item.additional_charges === "100" ? "✓" : ""}
+                      </button>
 
+                      {/* Input (editable always) */}
+                      <input
+                        className="w-[90px] border rounded px-2 py-1 text-sm"
+                        value={item.additional_charges || ""}
+                        onChange={(e) =>
+                          updateItem(
+                            index,
+                            "additional_charges",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="0"
+                      />
+                    </div>
+                  </td>
                   {/* TOTAL RS */}
                   <td className="border-r p-1">
                     <input

@@ -7,17 +7,17 @@ export class QuotationCalculator {
   */
   static calculate(item: QuotationItem, basis: Basis): QuotationItem {
   const qty = Number(item.quantity || 0);
-  const unitRate = Number(item.price || 0);
+  const unitRate_LKR = Number(item.price || 0);
   const additional = Number(item.additional_charges || 0);
 
   const usdRate = Number(basis?.USDRate || 0);
   const basisValue = Number(basis?.basis || 0);
 
-  const unit_rate_usd = usdRate ? unitRate / usdRate : 0;
+  const conva_basis = unitRate_LKR * basisValue;
 
-  const conva_basis = unitRate * basisValue;
+  const unitRate_USD = conva_basis * unitRate_LKR;
 
-  const total_unit_rate_rs = unitRate + additional;
+  const total_unit_rate_rs = unitRate_LKR + additional;
 
   const total_unit_rate_usd = usdRate
     ? total_unit_rate_rs / usdRate
@@ -29,7 +29,7 @@ export class QuotationCalculator {
 
   return {
     ...item,
-    unit_rate_usd: unit_rate_usd.toFixed(2), 
+    unit_rate_usd: unitRate_USD.toFixed(2), 
     total_unit_rate_usd: total_unit_rate_usd.toFixed(2), 
     conva_basis: conva_basis.toFixed(2),
     total_unit_rate_rs: total_unit_rate_rs.toFixed(2),
