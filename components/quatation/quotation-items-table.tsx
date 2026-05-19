@@ -13,6 +13,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
+import { useState } from "react";
+
 interface Props {
   items: QuotationItem[];
 
@@ -54,6 +56,16 @@ export default function QuotationItemsTable({
       };
     }
   };
+  const [applyAllAdditional, setApplyAllAdditional] = useState(false);
+
+  const toggleAdditionalCharge = () => {
+    const newValue = !applyAllAdditional;
+    setApplyAllAdditional(newValue);
+
+    items.forEach((_, index) => {
+      updateItem(index, "additional_charges", newValue ? "100" : "");
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -67,9 +79,17 @@ export default function QuotationItemsTable({
           </p>
         </div>
 
-        <Button type="button" variant="outline" onClick={openPopupWindow}>
+        {/* <Button type="button" variant="outline" onClick={openPopupWindow}>
           <Expand className="w-4 h-4 mr-2" />
           Full Screen View
+        </Button> */}
+        <Button
+          type="button"
+          variant={applyAllAdditional ? "default" : "outline"}
+          className="h-8"
+          onClick={toggleAdditionalCharge}
+        >
+          {applyAllAdditional ? "✔ Additional 100 Applied" : "Apply 100 to All"}
         </Button>
       </div>
 
