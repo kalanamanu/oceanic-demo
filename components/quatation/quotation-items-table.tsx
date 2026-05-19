@@ -83,23 +83,24 @@ export default function QuotationItemsTable({
       {/* TABLE */}
       <div className="w-full overflow-auto rounded-xl border">
         <table className="min-w-[2200px] w-full border-collapse">
+          {/* ================= HEADER ================= */}
           <thead className="sticky top-0 bg-muted z-10">
             <tr className="border-b">
               {[
                 "Item No",
                 "Description",
-                "Customer Remark",
                 "Qty",
                 "Unit",
                 "IMPA",
-                "Unit Price",
-                "Unit USD",
-                "Additional",
-                "Total RS",
-                "Total USD",
-                "Basis",
-                "OMS Remark",
                 "Supplier",
+                "Unit Rate LKR",
+                "Additional Charges",
+                "Total RS",
+                "CONVA Basis",
+                "Unit Rate USD",
+                "Total USD",
+                "OMS Remarks",
+                "Customer Remarks",
                 "Actions",
               ].map((head) => (
                 <th
@@ -112,6 +113,7 @@ export default function QuotationItemsTable({
             </tr>
           </thead>
 
+          {/* ================= BODY ================= */}
           <tbody>
             {(items || []).length === 0 ? (
               <tr>
@@ -147,18 +149,7 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* CUSTOMER REMARK */}
-                  <td className="border-r p-1">
-                    <input
-                      className="w-[180px] border rounded px-2 py-1 text-sm"
-                      value={item.customer_remark || ""}
-                      onChange={(e) =>
-                        updateItem(index, "customer_remark", e.target.value)
-                      }
-                    />
-                  </td>
-
-                  {/* QUANTITY */}
+                  {/* QTY */}
                   <td className="border-r p-1">
                     <input
                       className="w-[70px] border rounded px-2 py-1 text-sm"
@@ -191,7 +182,29 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* PRICE */}
+                  {/* SUPPLIER */}
+                  <td className="border-r p-1">
+                    <Select
+                      value={item.supplier_id || ""}
+                      onValueChange={(value) =>
+                        updateItem(index, "supplier_id", value)
+                      }
+                    >
+                      <SelectTrigger className="w-[150px] h-8 text-sm">
+                        <SelectValue placeholder="Supplier" />
+                      </SelectTrigger>
+
+                      <SelectContent className="z-[9999]">
+                        {vendors.map((v: any) => (
+                          <SelectItem key={v.vendor_id} value={v.vendor_id}>
+                            {v.vendor_name || v.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+
+                  {/* UNIT PRICE */}
                   <td className="border-r p-1">
                     <input
                       className="w-[100px] border rounded px-2 py-1 text-sm"
@@ -202,19 +215,9 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* UNIT USD */}
-                  <td className="border-r p-1">
-                    <input
-                      readOnly
-                      className="w-[100px] border rounded px-2 py-1 bg-muted text-sm"
-                      value={item.unit_rate_usd || ""}
-                    />
-                  </td>
-
-                  {/* ADDITIONAL */}
+                  {/* ADDITIONAL (tick + input) */}
                   <td className="border-r p-1">
                     <div className="flex items-center gap-2">
-                      {/* Tick Button */}
                       <button
                         type="button"
                         onClick={() =>
@@ -225,16 +228,15 @@ export default function QuotationItemsTable({
                           )
                         }
                         className={`w-5 h-5 rounded border flex items-center justify-center text-xs
-                        ${
-                          item.additional_charges === "100"
-                            ? "bg-green-500 text-white border-green-500"
-                            : "bg-background"
-                        }`}
+                    ${
+                      item.additional_charges === "100"
+                        ? "bg-green-500 text-white border-green-500"
+                        : "bg-background"
+                    }`}
                       >
                         {item.additional_charges === "100" ? "✓" : ""}
                       </button>
 
-                      {/* Input (editable always) */}
                       <input
                         className="w-[90px] border rounded px-2 py-1 text-sm"
                         value={item.additional_charges || ""}
@@ -245,25 +247,16 @@ export default function QuotationItemsTable({
                             e.target.value,
                           )
                         }
-                        placeholder="0"
                       />
                     </div>
                   </td>
+
                   {/* TOTAL RS */}
                   <td className="border-r p-1">
                     <input
                       readOnly
                       className="w-[120px] border rounded px-2 py-1 bg-muted text-sm"
                       value={item.total_rs || ""}
-                    />
-                  </td>
-
-                  {/* TOTAL USD */}
-                  <td className="border-r p-1">
-                    <input
-                      readOnly
-                      className="w-[120px] border rounded px-2 py-1 bg-muted text-sm"
-                      value={item.total_usd || ""}
                     />
                   </td>
 
@@ -276,7 +269,25 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* OMS */}
+                  {/* UNIT USD */}
+                  <td className="border-r p-1">
+                    <input
+                      readOnly
+                      className="w-[100px] border rounded px-2 py-1 bg-muted text-sm"
+                      value={item.unit_rate_usd || ""}
+                    />
+                  </td>
+
+                  {/* TOTAL USD */}
+                  <td className="border-r p-1">
+                    <input
+                      readOnly
+                      className="w-[120px] border rounded px-2 py-1 bg-muted text-sm"
+                      value={item.total_usd || ""}
+                    />
+                  </td>
+
+                  {/* OMS REMARKS */}
                   <td className="border-r p-1">
                     <input
                       className="w-[160px] border rounded px-2 py-1 text-sm"
@@ -287,40 +298,15 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* SUPPLIER */}
+                  {/* CUSTOMER REMARKS */}
                   <td className="border-r p-1">
-                    <div className="flex gap-1">
-                      <Select
-                        value={item.supplier_id || ""}
-                        onValueChange={(value) =>
-                          updateItem(index, "supplier_id", value)
-                        }
-                      >
-                        <SelectTrigger className="w-[150px] h-8 text-sm">
-                          <SelectValue placeholder="Supplier" />
-                        </SelectTrigger>
-
-                        <SelectContent className="z-[9999]">
-                          {vendors.map((v: any) => (
-                            <SelectItem key={v.vendor_id} value={v.vendor_id}>
-                              {v.vendor_name || v.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          setActiveItemIndex(index);
-                          setTempVendorOpen(true);
-                        }}
-                      >
-                        <Plus className="w-3 h-3" />
-                      </Button>
-                    </div>
+                    <input
+                      className="w-[180px] border rounded px-2 py-1 text-sm"
+                      value={item.customer_remark || ""}
+                      onChange={(e) =>
+                        updateItem(index, "customer_remark", e.target.value)
+                      }
+                    />
                   </td>
 
                   {/* ACTIONS */}
