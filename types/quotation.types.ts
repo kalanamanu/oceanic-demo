@@ -8,6 +8,8 @@ export interface ExcelValidationItem {
   description: string;
   impa_code: string;
   customer_remark: string;
+
+  supplier_id?: string;
 }
 
 export interface ExcelValidationResponse {
@@ -17,7 +19,6 @@ export interface ExcelValidationResponse {
 
 // ===== Frontend Quotation Item (Main UI Model) =====
 export interface QuotationItem {
-  // ===== From Backend =====
   item_no: string;
   description: string;
   customer_remark: string;
@@ -27,8 +28,8 @@ export interface QuotationItem {
   impa_code: string;
   osc_remark: string;
 
-  // ===== Added in Frontend =====
-  supplier_name: string;
+  supplier_id: string;
+
   additional_charges: string;
   unit_rate_usd: string;
   total_unit_rate_rs: string;
@@ -42,6 +43,7 @@ export interface QuotationItem {
 export interface QuotationItemNumeric {
   item_no: string;
   description: string;
+
   customer_remark?: string;
 
   quantity: number;
@@ -51,9 +53,19 @@ export interface QuotationItemNumeric {
   impa_code?: string;
   osc_remark?: string;
 
+  // ===== Supplier =====
+  supplier_id?: string;
+
   supplier_name?: string;
+
+  // ===== Calculations =====
   additional_charges?: number;
+
+  unit_rate_usd?: number;
+
   total_unit_rate_rs?: number;
+  total_unit_rate_usd?: number;
+
   total_rs?: number;
   conva_basis?: number;
   total_usd?: number;
@@ -71,4 +83,3 @@ export interface CreateQuotationResponse {
   message: string;
   data?: any;
 }
-

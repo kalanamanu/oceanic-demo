@@ -28,47 +28,55 @@ export class QuotationService {
   /**
    * Validate Uploaded Excel File
    */
-  static async validateExcel(file: File): Promise<QuotationItem[]> {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+static async validateExcel(file: File): Promise<QuotationItem[]> {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-      const response = await apiClient.post<ExcelValidationResponse>(
-        "/api/customer-excel/validate",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    const response = await apiClient.post(
+      "/api/customer-excel/validate",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-      // Map backend → frontend model
-      const mapped: QuotationItem[] = response.data.data.map((item) => ({
-        // ===== backend fields =====
-        item_no: item.item_no,
-        description: item.description,
-        customer_remark: item.customer_remark,
-        quantity: item.quantity,
-        unit: item.unit,
-        price: item.price,
-        impa_code: item.impa_code,
-        osc_remark: item.osc_remark,
+    console.log("RAW RESPONSE:", response.data);
 
-        // ===== frontend fields =====
-        supplier_name: "",
-        additional_charges: "",
-        total_unit_rate_rs: "",
-        total_rs: "",
-        conva_basis: "",
-        total_usd: "",
-      }));
+    // ✅ FIX: backend uses validData
+    const rows = response.data?.validData || [];
 
-      return mapped;
-    } catch (error: any) {
-      throw this.handleError(error);
-    }
+    const mapped: QuotationItem[] = rows.map((item: any) => ({
+      item_no: item.item_no || "",
+      description: item.description || "",
+      customer_remark: item.customer_remark || "",
+      quantity: item.quantity || "",
+      unit: item.unit || "",
+      price: item.price || "",
+      impa_code: item.impa_code || "",
+      osc_remark: item.osc_remark || "",
+
+      // IMPORTANT
+      supplier_id: item.supplier_id || "",
+
+      additional_charges: "",
+      unit_rate_usd: "",
+      total_unit_rate_rs: "",
+      total_unit_rate_usd: "",
+      total_rs: "",
+      conva_basis: "",
+      total_usd: "",
+    }));
+
+    console.log("MAPPED:", mapped);
+
+    return mapped;
+  } catch (error: any) {
+    throw this.handleError(error);
   }
+}
 
   /**
    * Submit Final Quotation (Future Use)
