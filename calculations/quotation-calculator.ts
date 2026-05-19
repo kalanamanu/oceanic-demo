@@ -10,7 +10,7 @@ export class QuotationCalculator {
   const unitRate_LKR = Number(item.price || 0);
   const additional = Number(item.additional_charges || 0);
 
-  const usdRate = Number(basis?.USDRate || 0);
+  const lkrPerUsdRate = Number(basis?.USDRate || 0);
   const basisValue = Number(basis?.basis || 0);
 
   const conva_basis = unitRate_LKR * basisValue;
@@ -19,9 +19,11 @@ export class QuotationCalculator {
 
   const total_unit_rate_rs = unitRate_LKR + additional;
 
-  const total_unit_rate_usd = usdRate
-    ? total_unit_rate_rs / usdRate
-    : 0;
+  const total_unit_rate_usd = unitRate_USD + (additional / lkrPerUsdRate)
+
+  // const total_unit_rate_usd = lkrPerUsdRate
+  //   ? total_unit_rate_rs / lkrPerUsdRate
+  //   : 0;
 
   const total_rs = total_unit_rate_rs * qty;
 
