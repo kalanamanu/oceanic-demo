@@ -94,7 +94,7 @@ export default function QuotationItemsTable({
                 "IMPA",
                 "Supplier",
                 "Unit Rate LKR",
-                "Additional Charges",
+                "Additional Charges (LKR)",
                 "Total RS",
                 "CONVA Basis",
                 "Unit Rate USD",
