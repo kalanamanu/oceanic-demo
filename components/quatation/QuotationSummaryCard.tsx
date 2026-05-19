@@ -55,8 +55,8 @@ export function QuotationSummaryCard({
       </div>
 
       {/* ================= GRID ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6">
-        {/* ========== LEFT SIDE ========== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6 items-start">
+        {/* ========== LEFT SIDE (Inputs & Details) ========== */}
         <div className="space-y-6">
           {/* ADDITIONAL CHARGES */}
           <div className="space-y-3">
@@ -137,10 +137,7 @@ export function QuotationSummaryCard({
               </Button>
             </div>
           </div>
-        </div>
 
-        {/* ========== RIGHT SIDE ========== */}
-        <div className="space-y-6">
           {/* DATES */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -169,23 +166,26 @@ export function QuotationSummaryCard({
               onChange={(e) => setRemark(e.target.value)}
             />
           </div>
+        </div>
 
+        {/* ========== RIGHT SIDE (Totals Only) ========== */}
+        <div className="space-y-6">
           {/* TOTALS */}
-          <div className="border rounded-xl p-4 bg-muted space-y-3.5">
+          <div className="border rounded-xl p-5 bg-muted space-y-4">
             <h3 className="text-sm font-medium">Total Summary</h3>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center border-b border-border/50 pb-3">
               <span className="text-sm text-muted-foreground">LKR</span>
-              <span className="text-base font-bold tracking-tight">
+              <span className="text-lg font-bold tracking-tight">
                 {totalLKR.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center pt-1">
               <span className="text-sm text-muted-foreground">USD</span>
-              <span className="text-base font-bold tracking-tight">
+              <span className="text-lg font-bold tracking-tight">
                 {totalUSD.toLocaleString(undefined, {
                   minimumFractionDigits: 3,
                 })}
