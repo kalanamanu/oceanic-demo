@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PreCostService } from "@/services/precost.service";
@@ -9,7 +8,6 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Trash2, Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
-// Define a basic interface for better type safety
 interface PreCost {
   pre_cost_id: string;
   vessel_name: string;
@@ -31,6 +29,17 @@ export default function QuotationPage() {
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [deleting, setDeleting] = React.useState(false);
+
+  // ================= PAGINATION =================
+  const [page, setPage] = React.useState(1);
+  const pageSize = 10;
+
+  const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
+
+  const paginatedData = React.useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return data.slice(start, start + pageSize);
+  }, [data, page]);
 
   /* ================= FETCH ================= */
   const loadData = async () => {
@@ -58,7 +67,7 @@ export default function QuotationPage() {
       setDeleting(true);
       await PreCostService.deletePreCost(deleteId);
 
-      toast.error("PreCost deleted successfully");
+      toast.success("PreCost deleted successfully");
       setOpenDelete(false);
       setDeleteId(null);
       loadData();
@@ -89,7 +98,6 @@ export default function QuotationPage() {
     }
   };
 
-  /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
@@ -112,97 +120,123 @@ export default function QuotationPage() {
               No PreCosts found
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="p-3 text-left">Vessel</th>
-                  <th className="p-3 text-left">Arrival</th>
-                  <th className="p-3 text-left">Sailed</th>
-                  <th className="p-3 text-left">Total (LKR)</th>
-                  <th className="p-3 text-left">Total (USD)</th>
-                  <th className="p-3 text-left">Status</th>
-                  <th className="p-3 text-right">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {data.map((item) => (
-                  <tr key={item.pre_cost_id} className="border-t">
-                    <td className="p-3">{item.vessel_name}</td>
-
-                    <td className="p-3">
-                      {item.date_arrived
-                        ? new Date(item.date_arrived).toLocaleDateString()
-                        : "-"}
-                    </td>
-
-                    <td className="p-3">
-                      {item.date_saild
-                        ? new Date(item.date_saild).toLocaleDateString()
-                        : "-"}
-                    </td>
-
-                    <td className="p-3 font-medium">
-                      {Number(item.total_cost || 0).toLocaleString()}
-                    </td>
-
-                    <td className="p-3 font-medium">
-                      {Number(item.total_cost_usd || 0).toLocaleString()}
-                    </td>
-
-                    <td className="p-3">
-                      <select
-                        className="px-2 py-1 text-xs rounded border bg-background"
-                        value={item.status}
-                        disabled={statusLoading}
-                        onChange={(e) =>
-                          handleStatusChange(item.pre_cost_id, e.target.value)
-                        }
-                      >
-                        <option value="PENDING">PENDING</option>
-                        <option value="COMPLETED">COMPLETED</option>
-                      </select>
-                    </td>
-
-                    <td className="p-3 text-right space-x-2">
-                      {/* VIEW */}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          router.push(`/quotation/view/${item.pre_cost_id}`)
-                        }
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-
-                      {/* EDIT */}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          router.push(`/quotation/edit/${item.pre_cost_id}`)
-                        }
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-
-                      {/* DELETE */}
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setDeleteId(item.pre_cost_id);
-                          setOpenDelete(true);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </td>
+            <>
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="p-3 text-left">Vessel</th>
+                    <th className="p-3 text-left">Arrival</th>
+                    <th className="p-3 text-left">Sailed</th>
+                    <th className="p-3 text-left">Total (LKR)</th>
+                    <th className="p-3 text-left">Total (USD)</th>
+                    <th className="p-3 text-left">Status</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {paginatedData.map((item) => (
+                    <tr key={item.pre_cost_id} className="border-t">
+                      <td className="p-3">{item.vessel_name}</td>
+
+                      <td className="p-3">
+                        {item.date_arrived
+                          ? new Date(item.date_arrived).toLocaleDateString()
+                          : "-"}
+                      </td>
+
+                      <td className="p-3">
+                        {item.date_saild
+                          ? new Date(item.date_saild).toLocaleDateString()
+                          : "-"}
+                      </td>
+
+                      <td className="p-3 font-medium">
+                        {Number(item.total_cost || 0).toLocaleString()}
+                      </td>
+
+                      <td className="p-3 font-medium">
+                        {Number(item.total_cost_usd || 0).toLocaleString()}
+                      </td>
+
+                      <td className="p-3">
+                        <select
+                          className="px-2 py-1 text-xs rounded border bg-background"
+                          value={item.status}
+                          disabled={statusLoading}
+                          onChange={(e) =>
+                            handleStatusChange(item.pre_cost_id, e.target.value)
+                          }
+                        >
+                          <option value="PENDING">PENDING</option>
+                          <option value="COMPLETED">COMPLETED</option>
+                        </select>
+                      </td>
+
+                      <td className="p-3 text-right space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            router.push(`/quotation/view/${item.pre_cost_id}`)
+                          }
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            router.push(`/quotation/edit/${item.pre_cost_id}`)
+                          }
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setDeleteId(item.pre_cost_id);
+                            setOpenDelete(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* ================= PAGINATION ================= */}
+              <div className="flex items-center justify-between p-3 border-t bg-muted">
+                <p className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </p>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
