@@ -16,6 +16,8 @@ interface PreCost {
   total_cost: number;
   total_cost_usd: number;
   status: "PENDING" | "COMPLETED";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function QuotationPage() {
@@ -23,7 +25,6 @@ export default function QuotationPage() {
 
   const [data, setData] = React.useState<PreCost[]>([]);
   const [loading, setLoading] = React.useState(true);
-
   const [statusLoading, setStatusLoading] = React.useState(false);
 
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
@@ -41,7 +42,23 @@ export default function QuotationPage() {
     return data.slice(start, start + pageSize);
   }, [data, page]);
 
-  /* ================= FETCH ================= */
+  // ================= DATE FORMATTER =================
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return "-";
+
+    const date = new Date(dateString);
+
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+
+    return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+  };
+
+  // ================= FETCH =================
   const loadData = async () => {
     try {
       setLoading(true);
@@ -59,7 +76,7 @@ export default function QuotationPage() {
     loadData();
   }, []);
 
-  /* ================= DELETE ================= */
+  // ================= DELETE =================
   const handleConfirmDelete = async () => {
     if (!deleteId) return;
 
@@ -79,7 +96,7 @@ export default function QuotationPage() {
     }
   };
 
-  /* ================= STATUS UPDATE ================= */
+  // ================= STATUS UPDATE =================
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
       setStatusLoading(true);
@@ -100,126 +117,191 @@ export default function QuotationPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+      <main className="max-w-7xl mx-auto px-6 py-10 space-y-6">
         {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">PreCosts</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage and view all Pre-Cost records
-            </p>
-          </div>
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">PreCosts</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage and view all Pre-Cost records
+          </p>
         </div>
 
-        {/* TABLE */}
-        <div className="rounded-xl border bg-card overflow-hidden">
+        {/* TABLE CONTAINER */}
+        <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
           {loading ? (
-            <div className="p-10 text-center">Loading...</div>
+            <div className="p-12 text-center text-sm text-muted-foreground">
+              Loading records...
+            </div>
           ) : data.length === 0 ? (
-            <div className="p-10 text-center text-muted-foreground">
+            <div className="p-12 text-center text-sm text-muted-foreground">
               No PreCosts found
             </div>
           ) : (
             <>
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="p-3 text-left">Vessel</th>
-                    <th className="p-3 text-left">Arrival</th>
-                    <th className="p-3 text-left">Sailed</th>
-                    <th className="p-3 text-left">Total (LKR)</th>
-                    <th className="p-3 text-left">Total (USD)</th>
-                    <th className="p-3 text-left">Status</th>
-                    <th className="p-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {paginatedData.map((item) => (
-                    <tr key={item.pre_cost_id} className="border-t">
-                      <td className="p-3">{item.vessel_name}</td>
-
-                      <td className="p-3">
-                        {item.date_arrived
-                          ? new Date(item.date_arrived).toLocaleDateString()
-                          : "-"}
-                      </td>
-
-                      <td className="p-3">
-                        {item.date_saild
-                          ? new Date(item.date_saild).toLocaleDateString()
-                          : "-"}
-                      </td>
-
-                      <td className="p-3 font-medium">
-                        {Number(item.total_cost || 0).toLocaleString()}
-                      </td>
-
-                      <td className="p-3 font-medium">
-                        {Number(item.total_cost_usd || 0).toLocaleString()}
-                      </td>
-
-                      <td className="p-3">
-                        <select
-                          className="px-2 py-1 text-xs rounded border bg-background"
-                          value={item.status}
-                          disabled={statusLoading}
-                          onChange={(e) =>
-                            handleStatusChange(item.pre_cost_id, e.target.value)
-                          }
-                        >
-                          <option value="PENDING">PENDING</option>
-                          <option value="COMPLETED">COMPLETED</option>
-                        </select>
-                      </td>
-
-                      <td className="p-3 text-right space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            router.push(`/quotation/view/${item.pre_cost_id}`)
-                          }
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            router.push(`/quotation/edit/${item.pre_cost_id}`)
-                          }
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            setDeleteId(item.pre_cost_id);
-                            setOpenDelete(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </td>
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead className="bg-muted/60 border-b border-border/60">
+                    <tr>
+                      <th className="px-4 py-3.5 text-left font-medium text-muted-foreground">
+                        Vessel
+                      </th>
+                      <th className="px-4 py-3.5 text-left font-medium text-muted-foreground">
+                        Arrival
+                      </th>
+                      <th className="px-4 py-3.5 text-left font-medium text-muted-foreground">
+                        Sailed
+                      </th>
+                      <th className="px-4 py-3.5 text-right font-medium text-muted-foreground">
+                        Total (LKR)
+                      </th>
+                      <th className="px-4 py-3.5 text-right font-medium text-muted-foreground">
+                        Total (USD)
+                      </th>
+                      <th className="px-4 py-3.5 text-left font-medium text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="px-4 py-3.5 text-left font-medium text-muted-foreground">
+                        Created
+                      </th>
+                      <th className="px-4 py-3.5 text-left font-medium text-muted-foreground">
+                        Updated
+                      </th>
+                      <th className="px-4 py-3.5 text-right font-medium text-muted-foreground w-[160px]">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
 
-              {/* ================= PAGINATION ================= */}
-              <div className="flex items-center justify-between p-3 border-t bg-muted">
-                <p className="text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
+                  <tbody className="divide-y divide-border/40">
+                    {paginatedData.map((item) => (
+                      <tr
+                        key={item.pre_cost_id}
+                        className="hover:bg-muted/40 transition-colors"
+                      >
+                        <td className="px-4 py-3.5 font-medium max-w-[180px] truncate">
+                          {item.vessel_name}
+                        </td>
+
+                        <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">
+                          {item.date_arrived
+                            ? new Date(item.date_arrived).toLocaleDateString()
+                            : "-"}
+                        </td>
+
+                        <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">
+                          {item.date_saild
+                            ? new Date(item.date_saild).toLocaleDateString()
+                            : "-"}
+                        </td>
+
+                        <td className="px-4 py-3.5 text-right font-mono tracking-tight font-medium">
+                          {Number(item.total_cost || 0).toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                            },
+                          )}
+                        </td>
+
+                        <td className="px-4 py-3.5 text-right font-mono tracking-tight font-medium">
+                          {Number(item.total_cost_usd || 0).toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 3,
+                            },
+                          )}
+                        </td>
+
+                        <td className="px-4 py-3.5">
+                          <select
+                            className="px-2.5 py-1 text-xs font-medium rounded-md border bg-background hover:bg-muted/50 transition-colors focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer h-7"
+                            value={item.status}
+                            disabled={statusLoading}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                item.pre_cost_id,
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="PENDING">PENDING</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                          </select>
+                        </td>
+
+                        {/* CREATED */}
+                        <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">
+                          {formatDateTime(item.createdAt)}
+                        </td>
+
+                        {/* UPDATED */}
+                        <td className="px-4 py-3.5 text-muted-foreground whitespace-nowrap">
+                          {formatDateTime(item.updatedAt)}
+                        </td>
+
+                        {/* ACTIONS */}
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={() =>
+                                router.push(
+                                  `/quotation/view/${item.pre_cost_id}`,
+                                )
+                              }
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={() =>
+                                router.push(
+                                  `/quotation/edit/${item.pre_cost_id}`,
+                                )
+                              }
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setDeleteId(item.pre_cost_id);
+                                setOpenDelete(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* PAGINATION FOOTER */}
+              <div className="flex items-center justify-between px-4 py-3.5 border-t bg-muted/30">
+                <p className="text-xs text-muted-foreground">
+                  Showing page{" "}
+                  <span className="font-medium text-foreground">{page}</span> of{" "}
+                  <span className="font-medium text-foreground">
+                    {totalPages}
+                  </span>
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <Button
                     size="sm"
                     variant="outline"
+                    className="h-8 px-3 text-xs"
                     disabled={page === 1}
                     onClick={() => setPage((p) => p - 1)}
                   >
@@ -229,6 +311,7 @@ export default function QuotationPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="h-8 px-3 text-xs"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => p + 1)}
                   >
@@ -240,7 +323,7 @@ export default function QuotationPage() {
           )}
         </div>
 
-        {/* Delete Dialog */}
+        {/* DELETE DIALOG */}
         <ConfirmDeleteDialog
           open={openDelete}
           onClose={() => setOpenDelete(false)}
