@@ -225,11 +225,11 @@ export default function QuotationItemsTable({
                           )
                         }
                         className={`w-5 h-5 rounded border flex items-center justify-center text-xs
-        ${
-          item.additional_charges === "100"
-            ? "bg-green-500 text-white border-green-500"
-            : "bg-background"
-        }`}
+                        ${
+                          item.additional_charges === "100"
+                            ? "bg-green-500 text-white border-green-500"
+                            : "bg-background"
+                        }`}
                       >
                         {item.additional_charges === "100" ? "✓" : ""}
                       </button>
