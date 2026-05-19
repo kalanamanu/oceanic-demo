@@ -67,7 +67,7 @@ export default function QuotationItemsTable({
       {/* HEADER ACTIONS */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Pre Cost Items</h2>
+          <h2 className="text-xl font-semibold">PRE COST SHEET</h2>
 
           <p className="text-sm text-muted-foreground">
             Total Items: {items.length}
