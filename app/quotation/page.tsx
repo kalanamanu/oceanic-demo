@@ -120,7 +120,7 @@ export default function QuotationPage() {
       <main className="max-w-7xl mx-auto px-6 py-10 space-y-6">
         {/* HEADER */}
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">PreCosts</h1>
+          <h1 className="text-2xl font-bold tracking-tight">PRE COSTS</h1>
           <p className="text-sm text-muted-foreground">
             Manage and view all Pre-Cost records
           </p>
