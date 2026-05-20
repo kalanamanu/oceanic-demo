@@ -142,7 +142,12 @@ export function VendorForm({ onSuccess, initialData, mode = "create" }: Props) {
         address,
         company_type: companyType,
         remark,
-        categories,
+        categories: categories
+          .filter((c) => c.id)
+          .map((c) => ({
+            id: c.id,
+            name: c.name,
+          })),
         pic: pics.filter((p) => p.firstName && p.email && p.phone_number),
       };
 
