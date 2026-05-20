@@ -73,9 +73,7 @@ export default function PreCostViewPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.back()}>
-              Back to List
-            </Button>
+            <Button variant="outline">Confirm Order</Button>
             <Button
               onClick={() => router.push(`/quotation/edit/${data.pre_cost_id}`)}
               className="gap-2"

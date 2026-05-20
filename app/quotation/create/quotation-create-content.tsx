@@ -18,10 +18,6 @@ import type { QuotationItem } from "@/types/quotation.types";
 import { QuotationHeader } from "@/components/quatation/quotation-header";
 import { QuotationStepSelector } from "@/components/quatation/quotation-step-selector";
 import { QuotationUploadSection } from "@/components/quatation/quotation-upload-section";
-import { QuotationAdditionalCharges } from "@/components/quatation/quotation-additional-charges";
-import { QuotationDiscountSection } from "@/components/quatation/quotation-discount-section";
-import { QuotationAdditionalDetails } from "@/components/quatation/quotation-additional-details";
-import { QuotationTotalSection } from "@/components/quatation/quotation-total-section";
 import { QuotationSummaryCard } from "@/components/quatation/QuotationSummaryCard";
 import { QuotationFooterActions } from "@/components/quatation/quotation-footer-actions";
 
@@ -39,8 +35,6 @@ export function QuotationCreateContent() {
   const [step, setStep] = React.useState<null | "excel">(null);
 
   const [items, setItems] = React.useState<QuotationItem[]>([]);
-
-  const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
 
   const [downloading, setDownloading] = React.useState(false);
 

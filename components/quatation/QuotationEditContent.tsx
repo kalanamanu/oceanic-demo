@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Trash2 } from "lucide-react";
@@ -301,9 +300,7 @@ export function QuotationEditContent() {
         remark,
 
         items: items.map((item) => {
-          const vendor = vendors.find(
-            (v) => v.vendor_id === item.supplier_name,
-          );
+          const vendor = vendors.find((v) => v.vendor_id === item.supplier_id);
 
           return {
             item_name: item.description,
@@ -351,7 +348,7 @@ export function QuotationEditContent() {
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-10">
         {/* HEADER */}
         <div className="space-y-4">
-          <h1 className="text-2xl font-bold">Generate Quotation</h1>
+          <h1 className="text-2xl font-bold">Edit Quotation</h1>
 
           {inquiry && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border p-4 rounded text-sm">
