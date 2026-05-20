@@ -438,32 +438,6 @@ export function QuotationCreateContent() {
           totalLKR={totalLKR}
           totalUSD={totalUSD}
         />
-        {/* ADDITIONAL CHARGES */}
-        {/* <QuotationAdditionalCharges
-          additionalCharges={additionalCharges}
-          addCharge={addCharge}
-          updateCharge={updateCharge}
-          removeCharge={removeCharge}
-        /> */}
-
-        {/* DISCOUNT */}
-        {/* <QuotationDiscountSection
-          discountLKR={discountLKR}
-          setDiscountLKR={setDiscountLKR}
-        /> */}
-
-        {/* ADDITIONAL DETAILS */}
-        {/* <QuotationAdditionalDetails
-          dateArrived={dateArrived}
-          setDateArrived={setDateArrived}
-          dateSailed={dateSailed}
-          setDateSailed={setDateSailed}
-          remark={remark}
-          setRemark={setRemark}
-        /> */}
-
-        {/* TOTALS */}
-        {/* <QuotationTotalSection totalLKR={totalLKR} totalUSD={totalUSD} /> */}
 
         {/* FOOTER ACTIONS */}
         <QuotationFooterActions onSave={() => setPreviewOpen(true)} />
