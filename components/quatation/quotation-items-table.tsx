@@ -56,11 +56,6 @@ export default function QuotationItemsTable({
       };
     }
   };
-  const [applyAllAdditional, setApplyAllAdditional] = useState(false);
-
-  const toggleRowAdditional = (index: number, checked: boolean) => {
-    updateItem(index, "additional_charges", checked ? "100" : "");
-  };
 
   return (
     <div className="space-y-4">
