@@ -184,24 +184,57 @@ export default function QuotationItemsTable({
 
                   {/* SUPPLIER */}
                   <td className="border-r p-1">
-                    <Select
-                      value={item.supplier_id || ""}
-                      onValueChange={(value) =>
-                        updateItem(index, "supplier_id", value)
-                      }
-                    >
-                      <SelectTrigger className="w-[150px] h-8 text-sm">
-                        <SelectValue placeholder="Supplier" />
-                      </SelectTrigger>
+                    <div className="flex items-center gap-1">
+                      <Select
+                        value={item.supplier_id || ""}
+                        onValueChange={(value) =>
+                          updateItem(index, "supplier_id", value)
+                        }
+                      >
+                        <SelectTrigger className="w-[220px] h-8 text-sm">
+                          <SelectValue placeholder="Select Supplier" />
+                        </SelectTrigger>
 
-                      <SelectContent className="z-[9999]">
-                        {vendors.map((v: any) => (
-                          <SelectItem key={v.vendor_id} value={v.vendor_id}>
-                            {v.vendor_name || v.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent className="z-[9999]">
+                          {vendors
+                            .filter(
+                              (v: any) =>
+                                // Approved vendors
+                                v?.status?.status === "Approved" ||
+                                // Temporary vendors
+                                v?.is_temporary === true,
+                            )
+                            .map((v: any) => (
+                              <SelectItem key={v.vendor_id} value={v.vendor_id}>
+                                <div className="flex items-center gap-2">
+                                  <span>{v.vendor_name || v.name}</span>
+
+                                  {v?.is_temporary && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700">
+                                      TEMP
+                                    </span>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* TEMPORARY VENDOR BUTTON */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 shrink-0"
+                        onClick={() => {
+                          setActiveItemIndex(index);
+                          setTempVendorOpen(true);
+                        }}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Temporary Vendor
+                      </Button>
+                    </div>
                   </td>
 
                   {/* UNIT PRICE */}
