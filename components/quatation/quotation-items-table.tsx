@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Expand } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 
 import type { QuotationItem } from "@/types/quotation.types";
 
@@ -12,8 +12,6 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
-import { useState } from "react";
 
 interface Props {
   items: QuotationItem[];
@@ -37,29 +35,42 @@ export default function QuotationItemsTable({
   setActiveItemIndex,
   setTempVendorOpen,
 }: Props) {
-  const openPopupWindow = () => {
-    const popup = window.open(
-      "/quotation/fullscreen-table",
-      "_blank",
-      "width=1600,height=900",
-    );
+  /* =========================================================
+     NORMALIZE + FILTER VENDORS
+  ========================================================= */
 
-    if (popup) {
-      popup.onload = () => {
-        popup.postMessage(
-          {
-            type: "INIT_QUOTATION_ITEMS",
-            payload: items,
-          },
-          "*",
-        );
-      };
-    }
-  };
+  const supplierOptions = (vendors || [])
+    .map((v: any) => ({
+      ...v,
+
+      // normalize ids
+      vendor_id: v.vendor_id || v.id || v.temp_vendor_id,
+
+      // normalize names
+      display_name: v.vendor_name || v.name || "Unnamed Vendor",
+
+      // detect temp vendors
+      is_temporary:
+        v.is_temporary === true ||
+        v.temp_vendor_id ||
+        v.is_approved !== undefined,
+
+      // detect approved
+      is_approved_vendor: v?.status?.status === "Approved",
+    }))
+    .filter(
+      (v: any) =>
+        // approved permanent vendors
+        v.is_approved_vendor ||
+        // temporary vendors
+        v.is_temporary,
+    );
 
   return (
     <div className="space-y-4">
-      {/* HEADER ACTIONS */}
+      {/* =========================================================
+          HEADER
+      ========================================================= */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">PRE COST SHEET</h2>
@@ -68,17 +79,16 @@ export default function QuotationItemsTable({
             Total Items: {items.length}
           </p>
         </div>
-
-        {/* <Button type="button" variant="outline" onClick={openPopupWindow}>
-          <Expand className="w-4 h-4 mr-2" />
-          Full Screen View
-        </Button> */}
       </div>
 
-      {/* TABLE */}
+      {/* =========================================================
+          TABLE
+      ========================================================= */}
       <div className="w-full overflow-auto rounded-xl border">
         <table className="min-w-[2200px] w-full border-collapse">
-          {/* ================= HEADER ================= */}
+          {/* =====================================================
+              HEADER
+          ===================================================== */}
           <thead className="sticky top-0 bg-muted z-10">
             <tr className="border-b">
               {[
@@ -108,7 +118,9 @@ export default function QuotationItemsTable({
             </tr>
           </thead>
 
-          {/* ================= BODY ================= */}
+          {/* =====================================================
+              BODY
+          ===================================================== */}
           <tbody>
             {(items || []).length === 0 ? (
               <tr>
@@ -177,45 +189,42 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* SUPPLIER */}
+                  {/* =================================================
+                      SUPPLIER
+                  ================================================= */}
                   <td className="border-r p-1">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       <Select
                         value={item.supplier_id || ""}
                         onValueChange={(value) =>
                           updateItem(index, "supplier_id", value)
                         }
                       >
-                        <SelectTrigger className="w-[220px] h-8 text-sm">
+                        <SelectTrigger className="w-[240px] h-8 text-sm">
                           <SelectValue placeholder="Select Supplier" />
                         </SelectTrigger>
 
                         <SelectContent className="z-[9999]">
-                          {vendors
-                            .filter(
-                              (v: any) =>
-                                // Approved vendors
-                                v?.status?.status === "Approved" ||
-                                // Temporary vendors
-                                v?.is_temporary === true,
-                            )
-                            .map((v: any) => (
-                              <SelectItem key={v.vendor_id} value={v.vendor_id}>
-                                <div className="flex items-center gap-2">
-                                  <span>{v.vendor_name || v.name}</span>
+                          {supplierOptions.map((vendor: any) => (
+                            <SelectItem
+                              key={vendor.vendor_id}
+                              value={vendor.vendor_id}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{vendor.display_name}</span>
 
-                                  {v?.is_temporary && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700">
-                                      TEMP
-                                    </span>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            ))}
+                                {vendor.is_temporary && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 font-medium">
+                                    TEMP
+                                  </span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
 
-                      {/* TEMPORARY VENDOR BUTTON */}
+                      {/* TEMP VENDOR BUTTON */}
                       <Button
                         type="button"
                         variant="outline"
@@ -243,7 +252,7 @@ export default function QuotationItemsTable({
                     />
                   </td>
 
-                  {/* ADDITIONAL (tick + input) */}
+                  {/* ADDITIONAL */}
                   <td className="border-r p-1">
                     <div className="flex items-center gap-2">
                       <button
@@ -255,12 +264,11 @@ export default function QuotationItemsTable({
                             item.additional_charges === "100" ? "" : "100",
                           )
                         }
-                        className={`w-5 h-5 rounded border flex items-center justify-center text-xs
-                    ${
-                      item.additional_charges === "100"
-                        ? "bg-green-500 text-white border-green-500"
-                        : "bg-background"
-                    }`}
+                        className={`w-5 h-5 rounded border flex items-center justify-center text-xs ${
+                          item.additional_charges === "100"
+                            ? "bg-green-500 text-white border-green-500"
+                            : "bg-background"
+                        }`}
                       >
                         {item.additional_charges === "100" ? "✓" : ""}
                       </button>
