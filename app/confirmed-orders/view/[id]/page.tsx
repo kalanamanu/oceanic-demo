@@ -188,22 +188,32 @@ export default function ConfirmedOrderDetailPage() {
 
         {/* SUMMARY */}
         <div className="grid md:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <p className="text-sm text-muted-foreground">Original LKR</p>
+          {/* ORIGINAL */}
+          <Card className="p-4 space-y-1">
+            <p className="text-sm text-muted-foreground">Original Total</p>
             <p className="text-lg font-bold">
-              {Number(data.original_total_lkr).toLocaleString()}
+              LKR {Number(data.original_total_lkr).toLocaleString()}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              USD {Number(data.original_total_usd).toLocaleString()}
             </p>
           </Card>
 
-          <Card className="p-4">
-            <p className="text-sm text-muted-foreground">Confirmed LKR</p>
+          {/* CONFIRMED */}
+          <Card className="p-4 space-y-1">
+            <p className="text-sm text-muted-foreground">Confirmed Total</p>
             <p className="text-lg font-bold text-green-600">
-              {Number(data.confirmed_total_lkr).toLocaleString()}
+              LKR {Number(data.confirmed_total_lkr).toLocaleString()}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              USD {Number(data.confirmed_total_usd).toLocaleString()}
             </p>
           </Card>
 
-          <Card className="p-4">
-            <p className="text-sm text-muted-foreground">Variance LKR</p>
+          {/* VARIANCE */}
+          <Card className="p-4 space-y-1">
+            <p className="text-sm text-muted-foreground">Variance</p>
+
             <p
               className={`text-lg font-bold ${
                 Number(data.variance_lkr) < 0
@@ -211,13 +221,29 @@ export default function ConfirmedOrderDetailPage() {
                   : "text-green-600"
               }`}
             >
-              {Number(data.variance_lkr).toLocaleString()}
+              LKR {Number(data.variance_lkr).toLocaleString()}
+            </p>
+
+            <p
+              className={`text-sm ${
+                Number(data.variance_usd) < 0
+                  ? "text-red-600"
+                  : "text-green-600"
+              }`}
+            >
+              USD {Number(data.variance_usd).toLocaleString()}
             </p>
           </Card>
 
-          <Card className="p-4">
+          {/* STATUS */}
+          <Card className="p-4 space-y-1">
             <p className="text-sm text-muted-foreground">Status</p>
+
             <p className="text-lg font-bold capitalize">{data.gm_status}</p>
+
+            <p className="text-sm text-muted-foreground capitalize">
+              Document: {data.document_status}
+            </p>
           </Card>
         </div>
 
