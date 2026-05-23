@@ -72,7 +72,7 @@ static async checkAuth(): Promise<any> {
       return null;
     }
 
-    // 🔥 IMPORTANT: network/server error → KEEP USER
+    // IMPORTANT: network/server error → KEEP USER
     return UserStorage.getUser();
   }
 }

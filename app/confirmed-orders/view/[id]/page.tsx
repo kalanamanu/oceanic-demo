@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useParams } from "next/navigation";
-import { ConfirmedOrderService } from "@/services/confirmed-order.service";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+
+import { ConfirmedOrderService } from "@/services/confirmed-order.service";
+import { AuthService } from "@/services/auth.service";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -12,29 +13,46 @@ import { Card } from "@/components/ui/card";
 
 import { CheckCircle, FileText, Users, ArrowLeft } from "lucide-react";
 
-/* ================= MOCK AUTH HOOK ================= */
-/* Replace with your real auth */
-const useAuth = () => {
-  return {
-    user: {
-      role: "System Developer",
-    },
-  };
-};
+/* ================= PAGE ================= */
 
 export default function ConfirmedOrderDetailPage() {
   const router = useRouter();
-
   const { id } = useParams();
-  const { user } = useAuth();
 
   const [loading, setLoading] = React.useState(true);
+  const [authLoading, setAuthLoading] = React.useState(true);
+
+  const [user, setUser] = React.useState<any>(null);
+
   const [data, setData] = React.useState<any>(null);
   const [approving, setApproving] = React.useState(false);
 
-  /* ================= LOAD ================= */
+  /* ================= AUTH ================= */
+
+  React.useEffect(() => {
+    const loadAuth = async () => {
+      try {
+        setAuthLoading(true);
+
+        const u = await AuthService.checkAuth();
+        setUser(u);
+      } catch (err) {
+        console.error(err);
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    loadAuth();
+  }, []);
+
+  /* ================= LOAD DATA ================= */
+
   React.useEffect(() => {
     const load = async () => {
+      if (!id) return;
+
       try {
         setLoading(true);
 
@@ -51,10 +69,11 @@ export default function ConfirmedOrderDetailPage() {
       }
     };
 
-    if (id) load();
+    load();
   }, [id]);
 
   /* ================= APPROVE ================= */
+
   const handleApprove = async () => {
     if (!data?.confirmed_pre_cost_id) return;
 
@@ -81,7 +100,9 @@ export default function ConfirmedOrderDetailPage() {
     }
   };
 
-  if (loading) {
+  /* ================= LOADING ================= */
+
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         Loading...
@@ -97,7 +118,10 @@ export default function ConfirmedOrderDetailPage() {
     );
   }
 
-  const isAllowed = user.role === "Manager" || user.role === "System Developer";
+  /* ================= ROLE CHECK ================= */
+
+  const isAllowed =
+    user?.role === "Manager" || user?.role === "System Developer";
 
   const isPending = data.gm_status === "pending";
 
@@ -162,7 +186,7 @@ export default function ConfirmedOrderDetailPage() {
 
         <Separator />
 
-        {/* SUMMARY CARDS */}
+        {/* SUMMARY */}
         <div className="grid md:grid-cols-4 gap-4">
           <Card className="p-4">
             <p className="text-sm text-muted-foreground">Original LKR</p>
@@ -197,7 +221,7 @@ export default function ConfirmedOrderDetailPage() {
           </Card>
         </div>
 
-        {/* CONFIRMED ITEMS */}
+        {/* ITEMS */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Confirmed Items</h2>
 
