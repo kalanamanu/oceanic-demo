@@ -212,7 +212,7 @@ export default function LoginOtpPage() {
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <img
-              src="/oceanic-logo.png"
+              src="/Oceanic-Titan-Logo.jpg"
               alt="Oceanic Maritime Services Logo"
               className="w-30 h-auto object-contain"
               draggable="false"
