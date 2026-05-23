@@ -154,10 +154,12 @@ export function VesselInquiryDialog({
 
         port: fields.port,
 
-        categories: fields.categories.map((cat) => ({
-          id: cat.id,
-          name: cat.name,
-        })),
+        categories: fields.categories
+          .filter((cat) => cat?.cte_id)
+          .map((cat) => ({
+            id: cat.cte_id,
+            name: cat.cte_name,
+          })),
 
         received_date: format(fields.inquiryReceived, "yyyy-MM-dd"),
 
