@@ -320,7 +320,8 @@ export function QuotationCreateContent() {
 
             vendor_id: vendor?.vendor_id || null,
 
-            is_verified_vendor: vendor?.is_verified ?? false,
+            // ✅ FIX
+            is_verified_vendor: vendor?.is_temporary ? false : true,
 
             unit_price: Number(item.price || 0),
 
