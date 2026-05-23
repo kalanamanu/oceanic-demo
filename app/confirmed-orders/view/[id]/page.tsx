@@ -127,14 +127,14 @@ export default function ConfirmedOrderDetailPage() {
               onClick={() => router.back()}
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to History
+              Back
             </Button>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">
-                Confirmed Order Audit
+                Confirmed Order List
               </h1>
               <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                PreCost Log: {data.pre_cost_id}
+                PreCost ID: {data.pre_cost_id}
               </p>
             </div>
           </div>
