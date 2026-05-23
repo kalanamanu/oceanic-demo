@@ -34,7 +34,7 @@ export function DashboardHeader() {
 
   // App Meta Information Parameters
   const appVersionInfo = {
-    buildVersion: "v2.4.1-stable",
+    buildVersion: "v1.3.3 - Pre Alpha",
     environment: "Production",
     lastSynced: "Just now",
   };
