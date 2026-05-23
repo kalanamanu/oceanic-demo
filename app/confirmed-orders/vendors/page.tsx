@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { PreCostVendorService } from "@/services/precost-vendor.service";
@@ -19,12 +19,14 @@ import {
   User,
   Tag,
   RefreshCcw,
+  ArrowRight,
 } from "lucide-react";
 
 import type { PreCostVendor } from "@/types/precost-vendor.types";
 
 export default function ConfirmedVendorsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const preCostId = searchParams.get("id");
 
@@ -208,6 +210,22 @@ export default function ConfirmedVendorsPage() {
                   "{vendor.remark}"
                 </div>
               )}
+
+              {/* ACTION BUTTON */}
+              <div className="pt-2">
+                <Button
+                  className="w-full gap-2"
+                  variant="default"
+                  onClick={() =>
+                    router.push(
+                      `/confirmed-orders/vendors/${preCostId}/vendor/${vendor.vendor_id}/items`,
+                    )
+                  }
+                >
+                  View Vendor Items
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
             </Card>
           ))}
         </div>
