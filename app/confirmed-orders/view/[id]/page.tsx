@@ -4,6 +4,7 @@ import * as React from "react";
 import { useParams } from "next/navigation";
 import { ConfirmedOrderService } from "@/services/confirmed-order.service";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +23,8 @@ const useAuth = () => {
 };
 
 export default function ConfirmedOrderDetailPage() {
+  const router = useRouter();
+
   const { id } = useParams();
   const { user } = useAuth();
 
@@ -125,7 +128,14 @@ export default function ConfirmedOrderDetailPage() {
             )}
 
             {/* VENDORS */}
-            <Button variant="outline" disabled={isPending} className="gap-2">
+            <Button
+              variant="outline"
+              disabled={isPending}
+              className="gap-2"
+              onClick={() =>
+                router.push(`/confirmed-orders/vendors?id=${data.pre_cost_id}`)
+              }
+            >
               <Users className="w-4 h-4" />
               Vendors
             </Button>
