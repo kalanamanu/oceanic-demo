@@ -61,7 +61,7 @@ export function DashboardHeader() {
 
   return (
     <div className="border-b border-border bg-card sticky top-0 z-30 shadow-sm">
-      <div className="flex items-center justify-between px-6 py-3">
+      <div className="flex items-center justify-between px-6 py-5">
         {/* LOGO SECTION */}
         <div className="flex items-center gap-4">
           <img
