@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ChevronLeft, Edit, Package, DollarSign, Ship } from "lucide-react";
 import { PreCostDownloadDialog } from "@/components/quatation/PreCostDownloadDialog";
+import { ProcessOrderDialog } from "@/components/quatation/ProcessOrderDialog";
 
 export default function PreCostViewPage() {
   const { id } = useParams();
@@ -15,6 +16,7 @@ export default function PreCostViewPage() {
   const [data, setData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [downloadOpen, setDownloadOpen] = React.useState(false);
+  const [processDialogOpen, setProcessDialogOpen] = React.useState(false);
 
   /* ================= FETCH ================= */
   React.useEffect(() => {
@@ -73,7 +75,12 @@ export default function PreCostViewPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline">Process Order</Button>
+            <Button
+              variant="outline"
+              onClick={() => setProcessDialogOpen(true)}
+            >
+              Process Order
+            </Button>
             <Button
               onClick={() => router.push(`/quotation/edit/${data.pre_cost_id}`)}
               className="gap-2"
@@ -318,6 +325,11 @@ export default function PreCostViewPage() {
           open={downloadOpen}
           onOpenChange={setDownloadOpen}
           precostData={data}
+        />
+        <ProcessOrderDialog
+          open={processDialogOpen}
+          onOpenChange={setProcessDialogOpen}
+          preCostId={data.pre_cost_id}
         />
       </main>
     </div>
