@@ -244,7 +244,7 @@ export default function ConfirmedOrdersPage() {
                               variant="outline"
                               onClick={() =>
                                 router.push(
-                                  `/confirmed-orders/${item.confirmed_pre_cost_id}`,
+                                  `/confirmed-orders/view/${item.confirmed_pre_cost_id}`,
                                 )
                               }
                               className="h-8 gap-1.5"
