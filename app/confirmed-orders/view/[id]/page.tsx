@@ -53,28 +53,31 @@ export default function ConfirmedOrderDetailPage() {
 
   /* ================= APPROVE ================= */
   const handleApprove = async () => {
+    if (!data?.confirmed_pre_cost_id) return;
+
     try {
       setApproving(true);
 
       await ConfirmedOrderService.updateStatus(data.confirmed_pre_cost_id, {
         gm_status: "approved",
-        document_status: "pending",
+        document_status: "approved",
       });
 
-      toast.success("Approved successfully");
+      toast.success("Order approved successfully");
 
+      // update UI instantly (no reload needed)
       setData((prev: any) => ({
         ...prev,
         gm_status: "approved",
+        document_status: "approved",
       }));
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Approval failed");
+      toast.error(err.message || "Approval failed");
     } finally {
       setApproving(false);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -103,7 +106,7 @@ export default function ConfirmedOrderDetailPage() {
           <div>
             <h1 className="text-2xl font-bold">Confirmed Order Details</h1>
             <p className="text-sm text-muted-foreground">
-              ID: {data.confirmed_pre_cost_id}
+              ID: {data.pre_cost_id}
             </p>
           </div>
 
@@ -117,7 +120,7 @@ export default function ConfirmedOrderDetailPage() {
                 className="gap-2"
               >
                 <CheckCircle className="w-4 h-4" />
-                {approving ? "Approving..." : "Approve"}
+                {approving ? "Approving..." : "Approve Order"}
               </Button>
             )}
 
