@@ -66,7 +66,7 @@ const sidebarConfig = {
       value: "ConfirmedOrders",
       label: "Confirmed Orders",
       icon: Box,
-      path: "/Confirmed-Orders",
+      path: "/confirmed-orders",
     },
     {
       value: "system-configuration",
