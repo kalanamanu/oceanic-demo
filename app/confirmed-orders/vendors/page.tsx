@@ -20,6 +20,7 @@ import {
   Tag,
   RefreshCcw,
   ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
 
 import type { PreCostVendor } from "@/types/precost-vendor.types";
@@ -90,12 +91,24 @@ export default function ConfirmedVendorsPage() {
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         {/* HEADER */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Confirmed Pre-Cost Vendors</h1>
+          <div className="space-y-2">
+            {/* BACK BUTTON */}
+            <Button
+              variant="ghost"
+              className="gap-2 px-0"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
 
-            <p className="text-sm text-muted-foreground">
-              PreCost ID: {preCostId}
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold">Confirmed Pre-Cost Vendors</h1>
+
+              <p className="text-sm text-muted-foreground">
+                PreCost ID: {preCostId}
+              </p>
+            </div>
           </div>
 
           <Button variant="outline" onClick={loadVendors}>

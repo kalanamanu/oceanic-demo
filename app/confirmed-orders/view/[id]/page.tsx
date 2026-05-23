@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 
-import { CheckCircle, FileText, Users } from "lucide-react";
+import { CheckCircle, FileText, Users, ArrowLeft } from "lucide-react";
 
 /* ================= MOCK AUTH HOOK ================= */
 /* Replace with your real auth */
@@ -68,7 +68,6 @@ export default function ConfirmedOrderDetailPage() {
 
       toast.success("Order approved successfully");
 
-      // update UI instantly (no reload needed)
       setData((prev: any) => ({
         ...prev,
         gm_status: "approved",
@@ -81,6 +80,7 @@ export default function ConfirmedOrderDetailPage() {
       setApproving(false);
     }
   };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -106,11 +106,23 @@ export default function ConfirmedOrderDetailPage() {
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         {/* HEADER */}
         <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">Confirmed Order Details</h1>
-            <p className="text-sm text-muted-foreground">
-              ID: {data.pre_cost_id}
-            </p>
+          <div className="space-y-2">
+            {/* BACK BUTTON */}
+            <Button
+              variant="ghost"
+              className="gap-2 px-0"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+
+            <div>
+              <h1 className="text-2xl font-bold">Confirmed Order Details</h1>
+              <p className="text-sm text-muted-foreground">
+                ID: {data.pre_cost_id}
+              </p>
+            </div>
           </div>
 
           {/* ACTION BUTTONS */}
