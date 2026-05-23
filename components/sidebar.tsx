@@ -18,6 +18,7 @@ import {
   ClipboardList,
   FilePenLine,
   Settings2,
+  Box,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
@@ -60,6 +61,12 @@ const sidebarConfig = {
       label: "Pre Cost",
       icon: FilePenLine,
       path: "/quotation",
+    },
+    {
+      value: "ConfirmedOrders",
+      label: "Confirmed Orders",
+      icon: Box,
+      path: "/Confirmed-Orders",
     },
     {
       value: "system-configuration",
