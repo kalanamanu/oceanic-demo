@@ -102,9 +102,6 @@ export default function ConfirmedOrdersPage() {
               <Table>
                 <TableHeader className="bg-muted/40">
                   <TableRow>
-                    <TableHead className="w-[120px] py-4 font-medium">
-                      Confirmed ID
-                    </TableHead>
                     <TableHead className="w-[120px] font-medium">
                       PreCost ID
                     </TableHead>
@@ -131,10 +128,7 @@ export default function ConfirmedOrdersPage() {
                     </TableHead>
 
                     <TableHead className="font-medium text-center">
-                      GM Status
-                    </TableHead>
-                    <TableHead className="font-medium text-center">
-                      Doc Status
+                      Status
                     </TableHead>
 
                     <TableHead className="font-medium">Date</TableHead>
@@ -165,10 +159,6 @@ export default function ConfirmedOrdersPage() {
                           key={item.confirmed_pre_cost_id}
                           className="hover:bg-muted/30 transition-colors"
                         >
-                          <TableCell className="font-mono text-xs font-medium">
-                            {item.confirmed_pre_cost_id}
-                          </TableCell>
-
                           <TableCell className="font-mono text-xs text-muted-foreground">
                             {item.pre_cost_id}
                           </TableCell>
@@ -213,11 +203,6 @@ export default function ConfirmedOrdersPage() {
                           </TableCell>
 
                           {/* STATUS */}
-                          <TableCell className="text-center">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-foreground capitalize">
-                              {item.gm_status}
-                            </span>
-                          </TableCell>
 
                           <TableCell className="text-center">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-foreground capitalize">
