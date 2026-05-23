@@ -66,7 +66,7 @@ export function VesselInquiryDialog({
     commissionParty: "",
     eta: undefined as Date | undefined,
     port: "",
-    categories: [] as InquiryCategory[],
+    categories: [] as any[],
     inquiryReceived: undefined as Date | undefined,
     quotationSubmission: undefined as Date | undefined,
     keyPicUserId: "",

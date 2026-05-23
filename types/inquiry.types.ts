@@ -6,8 +6,8 @@ export interface InquiryPIC {
 }
 
 export interface InquiryCategory {
-  id: string;
-  name: string;
+  cte_id: string;
+  cte_name: string;
 }
 export interface Inquiry {
   id?: string;
@@ -47,7 +47,10 @@ export interface CreateInquiryRequest {
   agent: string;
   eta: string; // "YYYY-MM-DD"
   port: string;
-  categories: InquiryCategory[];
+  categories: {
+  id: string;
+  name: string;
+}[];
   received_date: string; // "YYYY-MM-DD"
   received_time: string; // "HH:MM"
   qout_submission_deadline_date?: string; // "YYYY-MM-DD"
