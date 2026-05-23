@@ -10,10 +10,10 @@ import { AuthService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 import { CheckCircle, FileText, Users, ArrowLeft } from "lucide-react";
-
-/* ================= PAGE ================= */
+import { ConfirmedItemsTable } from "@/components/confirmed-orders/confirmed-items-table";
 
 export default function ConfirmedOrderDetailPage() {
   const router = useRouter();
@@ -23,17 +23,14 @@ export default function ConfirmedOrderDetailPage() {
   const [authLoading, setAuthLoading] = React.useState(true);
 
   const [user, setUser] = React.useState<any>(null);
-
   const [data, setData] = React.useState<any>(null);
   const [approving, setApproving] = React.useState(false);
 
   /* ================= AUTH ================= */
-
   React.useEffect(() => {
     const loadAuth = async () => {
       try {
         setAuthLoading(true);
-
         const u = await AuthService.checkAuth();
         setUser(u);
       } catch (err) {
@@ -43,23 +40,18 @@ export default function ConfirmedOrderDetailPage() {
         setAuthLoading(false);
       }
     };
-
     loadAuth();
   }, []);
 
   /* ================= LOAD DATA ================= */
-
   React.useEffect(() => {
     const load = async () => {
       if (!id) return;
-
       try {
         setLoading(true);
-
         const res = await ConfirmedOrderService.getConfirmedOrderById(
           id as string,
         );
-
         setData(res);
       } catch (err) {
         console.error(err);
@@ -68,25 +60,21 @@ export default function ConfirmedOrderDetailPage() {
         setLoading(false);
       }
     };
-
     load();
   }, [id]);
 
   /* ================= APPROVE ================= */
-
   const handleApprove = async () => {
     if (!data?.confirmed_pre_cost_id) return;
 
     try {
       setApproving(true);
-
       await ConfirmedOrderService.updateStatus(data.confirmed_pre_cost_id, {
         gm_status: "approved",
         document_status: "approved",
       });
 
       toast.success("Order approved successfully");
-
       setData((prev: any) => ({
         ...prev,
         gm_status: "approved",
@@ -100,12 +88,13 @@ export default function ConfirmedOrderDetailPage() {
     }
   };
 
-  /* ================= LOADING ================= */
-
+  /* ================= LOADING & FALLBACKS ================= */
   if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Loading order profile...
+        </p>
       </div>
     );
   }
@@ -113,60 +102,61 @@ export default function ConfirmedOrderDetailPage() {
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        No data found
+        <p className="text-sm text-muted-foreground">
+          No confirmed order data discovered.
+        </p>
       </div>
     );
   }
 
-  /* ================= ROLE CHECK ================= */
-
   const isAllowed =
     user?.role === "Manager" || user?.role === "System Developer";
-
   const isPending = data.gm_status === "pending";
+  const isLkrNegative = Number(data.variance_lkr) < 0;
+  const isUsdNegative = Number(data.variance_usd) < 0;
 
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
-        {/* HEADER */}
-        <div className="flex justify-between items-start">
-          <div className="space-y-2">
-            {/* BACK BUTTON */}
+        {/* TOP INTERACTION HEADER */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="space-y-1">
             <Button
               variant="ghost"
-              className="gap-2 px-0"
+              className="gap-1.5 px-0 text-muted-foreground hover:text-foreground h-auto py-1 mb-1 text-sm"
               onClick={() => router.back()}
             >
               <ArrowLeft className="w-4 h-4" />
-              Back
+              Back to History
             </Button>
-
             <div>
-              <h1 className="text-2xl font-bold">Confirmed Order Details</h1>
-              <p className="text-sm text-muted-foreground">
-                ID: {data.pre_cost_id}
+              <h1 className="text-2xl font-bold tracking-tight">
+                Confirmed Order Audit
+              </h1>
+              <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                PreCost Log: {data.pre_cost_id}
               </p>
             </div>
           </div>
 
-          {/* ACTION BUTTONS */}
-          <div className="flex gap-2">
-            {/* APPROVE */}
+          {/* ACTION SUB-GROUP */}
+          <div className="flex items-center gap-2">
             {isAllowed && data.gm_status !== "approved" && (
               <Button
                 onClick={handleApprove}
                 disabled={approving}
-                className="gap-2"
+                className="gap-2 shadow-sm"
+                size="sm"
               >
                 <CheckCircle className="w-4 h-4" />
                 {approving ? "Approving..." : "Approve Order"}
               </Button>
             )}
 
-            {/* VENDORS */}
             <Button
               variant="outline"
               disabled={isPending}
+              size="sm"
               className="gap-2"
               onClick={() =>
                 router.push(`/confirmed-orders/vendors?id=${data.pre_cost_id}`)
@@ -176,8 +166,12 @@ export default function ConfirmedOrderDetailPage() {
               Vendors
             </Button>
 
-            {/* INVOICE */}
-            <Button variant="outline" disabled={isPending} className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              className="gap-2"
+            >
               <FileText className="w-4 h-4" />
               Invoice
             </Button>
@@ -186,109 +180,100 @@ export default function ConfirmedOrderDetailPage() {
 
         <Separator />
 
-        {/* SUMMARY */}
-        <div className="grid md:grid-cols-4 gap-4">
+        {/* METRICS SUMMARY GRID */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* ORIGINAL */}
-          <Card className="p-4 space-y-1">
-            <p className="text-sm text-muted-foreground">Original Total</p>
-            <p className="text-lg font-bold">
-              LKR {Number(data.original_total_lkr).toLocaleString()}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              USD {Number(data.original_total_usd).toLocaleString()}
-            </p>
+          <Card className="p-4 bg-card shadow-sm flex flex-col justify-between">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Original Base
+            </span>
+            <div className="mt-3 space-y-0.5">
+              <p className="text-lg font-bold font-mono tracking-tight">
+                {Number(data.original_total_lkr).toLocaleString()}{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  LKR
+                </span>
+              </p>
+              <p className="text-sm text-muted-foreground font-mono">
+                ${Number(data.original_total_usd).toLocaleString()}{" "}
+                <span className="text-[10px]">USD</span>
+              </p>
+            </div>
           </Card>
 
           {/* CONFIRMED */}
-          <Card className="p-4 space-y-1">
-            <p className="text-sm text-muted-foreground">Confirmed Total</p>
-            <p className="text-lg font-bold text-green-600">
-              LKR {Number(data.confirmed_total_lkr).toLocaleString()}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              USD {Number(data.confirmed_total_usd).toLocaleString()}
-            </p>
+          <Card className="p-4 bg-card shadow-sm flex flex-col justify-between border-l-2 border-l-green-500">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Confirmed Settled
+            </span>
+            <div className="mt-3 space-y-0.5">
+              <p className="text-lg font-bold text-green-600 font-mono tracking-tight">
+                {Number(data.confirmed_total_lkr).toLocaleString()}{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  LKR
+                </span>
+              </p>
+              <p className="text-sm text-green-600/80 font-mono">
+                ${Number(data.confirmed_total_usd).toLocaleString()}{" "}
+                <span className="text-[10px]">USD</span>
+              </p>
+            </div>
           </Card>
 
           {/* VARIANCE */}
-          <Card className="p-4 space-y-1">
-            <p className="text-sm text-muted-foreground">Variance</p>
-
-            <p
-              className={`text-lg font-bold ${
-                Number(data.variance_lkr) < 0
-                  ? "text-red-600"
-                  : "text-green-600"
-              }`}
-            >
-              LKR {Number(data.variance_lkr).toLocaleString()}
-            </p>
-
-            <p
-              className={`text-sm ${
-                Number(data.variance_usd) < 0
-                  ? "text-red-600"
-                  : "text-green-600"
-              }`}
-            >
-              USD {Number(data.variance_usd).toLocaleString()}
-            </p>
+          <Card
+            className={`p-4 bg-card shadow-sm flex flex-col justify-between border-l-2 ${isLkrNegative ? "border-l-red-500" : "border-l-green-500"}`}
+          >
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Variance Span
+            </span>
+            <div className="mt-3 space-y-0.5">
+              <p
+                className={`text-lg font-bold font-mono tracking-tight ${isLkrNegative ? "text-red-600" : "text-green-600"}`}
+              >
+                {isLkrNegative ? "" : "+"}
+                {Number(data.variance_lkr).toLocaleString()}{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  LKR
+                </span>
+              </p>
+              <p
+                className={`text-sm font-mono ${isUsdNegative ? "text-red-600/80" : "text-green-600/80"}`}
+              >
+                {isUsdNegative ? "-$" : "+$"}
+                {Math.abs(Number(data.variance_usd)).toLocaleString()}{" "}
+                <span className="text-[10px]">USD</span>
+              </p>
+            </div>
           </Card>
 
-          {/* STATUS */}
-          <Card className="p-4 space-y-1">
-            <p className="text-sm text-muted-foreground">Status</p>
-
-            <p className="text-lg font-bold capitalize">{data.gm_status}</p>
-
-            <p className="text-sm text-muted-foreground capitalize">
-              Document: {data.document_status}
-            </p>
+          {/* DOCUMENTATION STATUS */}
+          <Card className="p-4 bg-card shadow-sm flex flex-col justify-between">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Workflow State
+            </span>
+            <div className="mt-3 flex flex-col gap-1.5 items-start">
+              <Badge
+                variant={
+                  data.gm_status === "approved" ? "default" : "secondary"
+                }
+                className="capitalize text-xs font-semibold py-0.5 px-2.5"
+              >
+                GM: {data.gm_status}
+              </Badge>
+              <span className="text-xs text-muted-foreground font-medium capitalize pl-0.5">
+                Doc Workflow:{" "}
+                <span className="text-foreground">{data.document_status}</span>
+              </span>
+            </div>
           </Card>
         </div>
 
-        {/* ITEMS */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Confirmed Items</h2>
-
-          {data.confirmedItems?.map((item: any, i: number) => (
-            <Card key={i} className="p-4 space-y-2">
-              <div className="flex justify-between">
-                <b>{item.item_name}</b>
-                <span className="text-sm text-muted-foreground">
-                  {item.unit}
-                </span>
-              </div>
-
-              <div className="text-sm grid grid-cols-3 gap-2">
-                <span>
-                  Qty: {item.original_quantity} → {item.quantity}
-                </span>
-                <span>LKR: {item.total_price}</span>
-                <span>USD: {item.total_price_usd}</span>
-              </div>
-
-              {item.is_qty_changed && (
-                <p className="text-xs text-orange-500">Quantity changed</p>
-              )}
-            </Card>
-          ))}
-        </div>
-
-        {/* REMOVED ITEMS */}
-        {data.confirmedRemovedItems?.length > 0 && (
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-red-600">
-              Removed Items
-            </h2>
-
-            {data.confirmedRemovedItems.map((item: any, i: number) => (
-              <Card key={i} className="p-3 text-sm text-red-600">
-                {item.data_id}
-              </Card>
-            ))}
-          </div>
-        )}
+        {/* ITEMS SEPARATE COMPONENT */}
+        <ConfirmedItemsTable
+          items={data.confirmedItems}
+          removedItems={data.confirmedRemovedItems}
+        />
       </main>
     </div>
   );
