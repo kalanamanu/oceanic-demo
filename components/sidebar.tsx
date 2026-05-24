@@ -119,6 +119,12 @@ const sidebarConfig = {
       path: "/confirmed-orders",
     },
     {
+      value: "Documents",
+      label: "Documents",
+      icon: File,
+      path: "/documents",
+    },
+    {
       value: "system-configuration",
       label: "Configurations",
       icon: Settings2,
@@ -154,6 +160,12 @@ const sidebarConfig = {
       path: "/quotation",
     },
     {
+      value: "Documents",
+      label: "Documents",
+      icon: File,
+      path: "/documents",
+    },
+    {
       value: "ConfirmedOrders",
       label: "Confirmed Orders",
       icon: Box,
@@ -175,6 +187,12 @@ const sidebarConfig = {
       label: "Pre Cost",
       icon: FilePenLine,
       path: "/quotation",
+    },
+    {
+      value: "Documents",
+      label: "Documents",
+      icon: File,
+      path: "/documents",
     },
     {
       value: "ConfirmedOrders",
