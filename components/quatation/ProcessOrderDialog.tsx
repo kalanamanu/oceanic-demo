@@ -18,6 +18,8 @@ import { toast } from "sonner";
 
 import { ConfirmedOrderService } from "@/services/confirmed-order.service";
 
+import { useRouter } from "next/navigation";
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,6 +34,31 @@ export function ProcessOrderDialog({ open, onOpenChange, preCostId }: Props) {
   const [file, setFile] = React.useState<File | null>(null);
 
   const [result, setResult] = React.useState<any>(null);
+
+  const router = useRouter();
+
+  const redirectTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    if (result) {
+      redirectTimerRef.current = setTimeout(() => {
+        router.push("/confirmed-orders");
+      }, 10000);
+    }
+
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, [result, router]);
+
+  const handleRedirect = () => {
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current);
+    }
+    router.push("/confirmed-orders");
+  };
 
   /* ================= DOWNLOAD TEMPLATE ================= */
 
@@ -155,15 +182,27 @@ export function ProcessOrderDialog({ open, onOpenChange, preCostId }: Props) {
                 />
               </label>
 
-              <Button
-                onClick={handleProcessOrder}
-                disabled={!file || uploading}
-                className="w-full gap-2"
-              >
-                <Upload className="w-4 h-4" />
+              {!result ? (
+                <Button
+                  onClick={handleProcessOrder}
+                  disabled={!file || uploading}
+                  className="w-full gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploading ? "Processing Order..." : "Upload & Process Order"}
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Button onClick={handleRedirect} className="w-full gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    OK - Go to Confirmed Orders
+                  </Button>
 
-                {uploading ? "Processing Order..." : "Upload & Process Order"}
-              </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Redirecting in 10 seconds...
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* SUCCESS RESULT */}
@@ -219,7 +258,7 @@ export function ProcessOrderDialog({ open, onOpenChange, preCostId }: Props) {
                 </div>
 
                 {/* CONFIRMED ITEMS */}
-                {result.confirmed_items?.length > 0 && (
+                {/* {result.confirmed_items?.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-sm">Confirmed Items</h4>
 
@@ -236,7 +275,7 @@ export function ProcessOrderDialog({ open, onOpenChange, preCostId }: Props) {
                       )}
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* CHANGED ITEMS */}
                 {result.quantity_changed_items?.length > 0 && (
