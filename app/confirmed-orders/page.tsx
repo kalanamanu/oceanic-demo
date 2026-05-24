@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
-import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 // Optional: Define a clean interface for your order item type
@@ -43,6 +43,9 @@ export default function ConfirmedOrdersPage() {
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
 
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
+
   /* ================= FETCH ================= */
   React.useEffect(() => {
     const load = async () => {
@@ -67,6 +70,28 @@ export default function ConfirmedOrdersPage() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleDeleteConfirmed = async () => {
+    if (!deleteId) return;
+
+    try {
+      setDeleteLoading(true);
+
+      await ConfirmedOrderService.deleteConfirmedOrder(deleteId);
+
+      setData((prev) =>
+        prev.filter((item) => item.confirmed_pre_cost_id !== deleteId),
+      );
+
+      toast.success("Confirmed order deleted successfully");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to delete order");
+    } finally {
+      setDeleteLoading(false);
+      setDeleteId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -224,19 +249,33 @@ export default function ConfirmedOrdersPage() {
 
                           {/* ACTION */}
                           <TableCell className="text-right pr-6">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                router.push(
-                                  `/confirmed-orders/view/${item.confirmed_pre_cost_id}`,
-                                )
-                              }
-                              className="h-8 gap-1.5"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              View
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              {/* VIEW */}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  router.push(
+                                    `/confirmed-orders/view/${item.confirmed_pre_cost_id}`,
+                                  )
+                                }
+                                className="h-8 gap-1.5"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </Button>
+
+                              {/* DELETE */}
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() =>
+                                  setDeleteId(item.confirmed_pre_cost_id)
+                                }
+                                className="h-8 gap-1.5"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -293,6 +332,36 @@ export default function ConfirmedOrdersPage() {
             </div>
           )}
         </div>
+        {deleteId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-background rounded-lg p-6 w-[400px] space-y-4 shadow-lg">
+              <h2 className="text-lg font-semibold">Confirm Delete</h2>
+
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete this confirmed order? This
+                action cannot be undone.
+              </p>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteId(null)}
+                  disabled={deleteLoading}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteConfirmed}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
