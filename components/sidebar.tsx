@@ -19,6 +19,7 @@ import {
   FilePenLine,
   Settings2,
   Box,
+  File,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
@@ -67,6 +68,12 @@ const sidebarConfig = {
       label: "Confirmed Orders",
       icon: Box,
       path: "/confirmed-orders",
+    },
+    {
+      value: "Documents",
+      label: "Documents",
+      icon: File,
+      path: "/documents",
     },
     {
       value: "system-configuration",
