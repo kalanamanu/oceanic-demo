@@ -72,7 +72,7 @@ export class InquiryService {
     try {
       const { id, ...updateData } = data;
       
-      const response = await apiClient.patch<InquiryResponse>(
+      const response = await apiClient.put<InquiryResponse>(
         `/api/inquiry/${id}`,
         updateData
       );

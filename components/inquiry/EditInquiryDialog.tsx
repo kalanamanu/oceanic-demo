@@ -25,6 +25,8 @@ import { parseISO, format } from "date-fns";
 
 import { UserSelect } from "@/components/inquiry/user-select";
 
+import { InquiryService } from "@/services/inquiry.service";
+
 import {
   Ship,
   MapPin,
@@ -40,6 +42,8 @@ import {
 } from "lucide-react";
 
 import type { Inquiry, InquiryPIC } from "@/types/inquiry.types";
+
+import { toast } from "sonner";
 
 const STATUS_OPTIONS = [
   "Pending",
@@ -122,10 +126,50 @@ export function EditInquiryDialog({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(fields);
-    onClose();
+
+    try {
+      await InquiryService.updateInquiry({
+        id: inquiry.inq_id!, // or inquiry.id depending on your model
+
+        vessel_name: fields.vessel_name,
+        agent: fields.agent,
+        eta: fields.eta,
+        port: fields.port,
+        received_date: fields.received_date,
+        received_time: fields.received_time,
+        qout_submission_deadline_date: fields.qout_submission_deadline_date,
+
+        key_pic_usr_id: fields.key_pic_usr_id,
+
+        // IMPORTANT: ensure backend format
+        categories: (fields.categories || []).map((c: any) => ({
+          id: c.cte_id ?? c.id,
+          name: c.cte_name ?? c.name,
+        })),
+
+        pics: (fields.other_pics || []).map((p) => ({
+          pic_usr_id: p.id,
+          pic_name: p.name,
+        })),
+
+        customer: fields.customer,
+        customerContact: fields.customerContact,
+        customerEmail: fields.customerEmail,
+        commissionParty: fields.commissionParty,
+
+        status: fields.status ?? "Pending",
+      });
+
+      toast.success("Inquiry updated successfully");
+
+      onSave(fields);
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to update inquiry");
+    }
   };
 
   return (
