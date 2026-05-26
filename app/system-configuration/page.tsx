@@ -10,7 +10,13 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-import { Layers3, FolderKanban, ChevronRight } from "lucide-react";
+import {
+  Layers3,
+  FolderKanban,
+  ChevronRight,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 const configItems = [
   {
@@ -19,11 +25,26 @@ const configItems = [
     href: "/system-configuration/basis",
     icon: Layers3,
   },
+
   {
     title: "Categories",
     description: "Manage inquiry and quotation categories",
     href: "/system-configuration/categories",
     icon: FolderKanban,
+  },
+
+  {
+    title: "Permissions",
+    description: "Manage permissions, roles and user access control",
+    href: "/system-configuration/permissions",
+    icon: ShieldCheck,
+  },
+
+  {
+    title: "Roles",
+    description: "Manage system roles and role permissions",
+    href: "/system-configuration/roles",
+    icon: Users,
   },
 ];
 
