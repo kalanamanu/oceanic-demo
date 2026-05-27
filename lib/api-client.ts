@@ -7,17 +7,33 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, //=CRITICAL: Send cookies with requests
+  withCredentials: true, 
 });
 
 // Request interceptor
-apiClient.interceptors.request.use(
-  (config) => {
-    // Token is in HttpOnly cookie, browser sends it automatically
-    // No need to manually add Authorization header
-    return config;
-  },
-  (error) => {
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      console.warn("401 Unauthorized");
+
+      // optionally:
+      // only logout if auth endpoint fails
+
+      const requestUrl = error.config?.url || "";
+
+      if (requestUrl.includes("/auth/me")) {
+        localStorage.removeItem("user_data");
+
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.href = "/login";
+        }
+      }
+    }
+
     return Promise.reject(error);
   }
 );

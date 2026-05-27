@@ -60,19 +60,24 @@ static async checkAuth(): Promise<any> {
       return response.data.user;
     }
 
-    // DO NOT clear user here
     return UserStorage.getUser();
   } catch (error: any) {
-    // ONLY clear user on real auth failure (401)
-
     const status = error?.response?.status;
 
+    // retry once
     if (status === 401) {
+      try {
+        const retry = await apiClient.get('/api/auth/me');
+
+        if (retry.data?.user) {
+          return retry.data.user;
+        }
+      } catch {}
+
       UserStorage.clearUser();
       return null;
     }
 
-    // IMPORTANT: network/server error → KEEP USER
     return UserStorage.getUser();
   }
 }
