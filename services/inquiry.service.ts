@@ -29,7 +29,7 @@ export class InquiryService {
   }
 
   /**
-   * Get all inquiries with pagination
+   * Get all inquiries with pagination.
    */
   static async getAllInquiries(
     params?: PaginationParams
