@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Shield, KeyRound, Lock } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -128,12 +129,12 @@ export default function LoginPage() {
                     Password
                   </Label>
 
-                  <a
-                    href="#"
+                  <Link
+                    href="/forgot-password"
                     className="text-xs font-medium text-primary hover:underline underline-offset-4"
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="relative">

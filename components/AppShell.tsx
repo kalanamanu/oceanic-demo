@@ -1,5 +1,7 @@
 "use client";
+
 import React from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Analytics } from "@vercel/analytics/next";
@@ -13,14 +15,33 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+
+  const publicRoutes = [
+    "/login",
+    "/login-otp",
+    "/forgot-password",
+    "/reset-password",
+  ];
+
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname?.startsWith(route),
+  );
+
   const [collapsed, setCollapsed] = React.useState(false);
+
   const sidebarWidth = collapsed
     ? SIDEBAR_COLLAPSED_WIDTH
     : SIDEBAR_EXPANDED_WIDTH;
 
+  // 🚨 IMPORTANT: Do NOT render shell for public pages
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
+
   return (
     <>
-      {/* HEADER: fixed at top, full width */}
+      {/* HEADER */}
       <div
         className="fixed top-0 left-0 right-0 z-40 bg-card"
         style={{ height: HEADER_HEIGHT }}
@@ -28,7 +49,7 @@ export default function AppShell({ children }: AppShellProps) {
         <DashboardHeader />
       </div>
 
-      {/* SIDEBAR: fixed, starts below header */}
+      {/* SIDEBAR */}
       <div
         style={{
           position: "fixed",
@@ -49,7 +70,6 @@ export default function AppShell({ children }: AppShellProps) {
         style={{
           marginLeft: sidebarWidth,
           paddingTop: HEADER_HEIGHT,
-          //backgroundColor: "rgba(15, 23, 42, 0.14)", // lighter tint with 50% opacity
         }}
       >
         <div className="p-6">{children}</div>
