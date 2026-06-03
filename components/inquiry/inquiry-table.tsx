@@ -56,7 +56,7 @@ export function InquiryTable({
             <thead>
               <tr className="border-b border-border bg-muted">
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                  Ref #
+                  Inquiry ID
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                   Vessel
@@ -91,12 +91,7 @@ export function InquiryTable({
                   >
                     {/* Ref # */}
                     <td className="px-6 py-4 text-sm font-mono font-medium text-primary">
-                      {idToUse
-                        ? `INQ-${idToUse
-                            .replace("inq_", "")
-                            .substring(0, 6)
-                            .toUpperCase()}`
-                        : "-"}
+                      {safeText(inquiry.inq_id)}
                     </td>
 
                     {/* Vessel */}

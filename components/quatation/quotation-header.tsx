@@ -15,7 +15,7 @@ export function QuotationHeader({ inquiry, basis, formatBasis }: Props) {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border p-4 rounded text-sm">
         <div>
-          <b>Ref:</b> {inquiry.inq_id}
+          <b>Inquiry ID: </b> {inquiry.inq_id}
         </div>
 
         <div>
