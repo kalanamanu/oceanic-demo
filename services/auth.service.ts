@@ -8,6 +8,7 @@ import type {
   LogoutResponse,
   APIError,
 } from '@/types/auth.types';
+import type { UserData } from "@/types/auth.types";
 
 export class AuthService {
   /**
@@ -102,8 +103,18 @@ static async checkAuth(): Promise<any> {
   /**
    * Get current user from localStorage (cached)
    */
-  static getCurrentUser() {
-    return UserStorage.getUser();
+  static getCurrentUser(): UserData | null {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const data = localStorage.getItem("user_data");
+      if (!data) return null;
+
+      return JSON.parse(data);
+    } catch (err) {
+      console.error("Failed to parse user_data", err);
+      return null;
+    }
   }
 
   /**
