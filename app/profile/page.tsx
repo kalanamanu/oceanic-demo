@@ -15,15 +15,31 @@ export default function ProfilePage() {
   const [loading, setLoading] = React.useState(true);
 
   /**
-   * Load current user profile
-   * (You can replace this with session-based user ID later)
+   * SAFE USER ID LOADER
+   */
+  const getUserId = () => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const raw = localStorage.getItem("user_data");
+      if (!raw) return null;
+
+      const parsed = JSON.parse(raw);
+      return parsed?.id || null;
+    } catch (e) {
+      console.error("Invalid user_data in localStorage");
+      return null;
+    }
+  };
+
+  /**
+   * Load profile safely
    */
   const loadProfile = async () => {
     try {
       setLoading(true);
 
-      // Replace this with auth user id if available
-      const userId = localStorage.getItem("id");
+      const userId = getUserId();
 
       if (!userId) {
         throw new Error("User ID not found. Please login again.");
