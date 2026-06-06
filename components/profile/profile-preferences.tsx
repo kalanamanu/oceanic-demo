@@ -10,6 +10,7 @@ import {
 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 
 import {
   Select,
@@ -18,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { useTheme } from "next-themes";
 
 interface ProfilePreferencesProps {
   theme?: "light" | "dark";
@@ -33,6 +36,31 @@ export default function ProfilePreferences({
   onThemeChange,
   onNotificationsChange,
 }: ProfilePreferencesProps) {
+  const { resolvedTheme } = useTheme();
+
+  const resetBackground = () => {
+    try {
+      // Remove custom background
+      localStorage.removeItem("user_background_url");
+
+      // Apply default based on current theme
+      const defaultBg =
+        (resolvedTheme || theme) === "dark"
+          ? "/background2.png"
+          : "/background.png";
+
+      document.documentElement.style.setProperty(
+        "--app-background-image",
+        `url("${defaultBg}")`,
+      );
+
+      // Notify app
+      window.dispatchEvent(new Event("profile-updated"));
+    } catch (err) {
+      console.error("Failed to reset background", err);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -58,7 +86,6 @@ export default function ProfilePreferences({
 
             <SelectContent>
               <SelectItem value="light">Light Theme</SelectItem>
-
               <SelectItem value="dark">Dark Theme</SelectItem>
             </SelectContent>
           </Select>
@@ -79,6 +106,17 @@ export default function ProfilePreferences({
             onCheckedChange={onNotificationsChange}
           />
         </div>
+
+        {/* RESET BACKGROUND */}
+        {/* <div className="pt-2">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={resetBackground}
+          >
+            Reset Background to Default
+          </Button>
+        </div> */}
       </CardContent>
     </Card>
   );
