@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, FileText, Users, ArrowLeft } from "lucide-react";
 import { ConfirmedItemsTable } from "@/components/confirmed-orders/confirmed-items-table";
 
+import { InvoiceDialog } from "@/components/invoices/create-invoice-dialog";
+
 export default function ConfirmedOrderDetailPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -25,6 +27,8 @@ export default function ConfirmedOrderDetailPage() {
   const [user, setUser] = React.useState<any>(null);
   const [data, setData] = React.useState<any>(null);
   const [approving, setApproving] = React.useState(false);
+
+  const [invoiceOpen, setInvoiceOpen] = React.useState(false);
 
   /* ================= AUTH ================= */
   React.useEffect(() => {
@@ -171,9 +175,10 @@ export default function ConfirmedOrderDetailPage() {
               size="sm"
               disabled={isPending}
               className="gap-2"
+              onClick={() => setInvoiceOpen(true)}
             >
               <FileText className="w-4 h-4" />
-              Invoice
+              Generate Invoice
             </Button>
           </div>
         </div>
@@ -273,6 +278,11 @@ export default function ConfirmedOrderDetailPage() {
         <ConfirmedItemsTable
           items={data.confirmedItems}
           removedItems={data.confirmedRemovedItems}
+        />
+        <InvoiceDialog
+          open={invoiceOpen}
+          onOpenChange={setInvoiceOpen}
+          data={data}
         />
       </main>
     </div>
