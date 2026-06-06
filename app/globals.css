@@ -1,14 +1,11 @@
 body {
-  background-image: url("/background.png");
+  background-image: var(--app-background-image);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
   min-height: 100vh;
 }
 
-.dark body {
-  background-image: url("/background2.png");
-}
 @import "tailwindcss";
 @import "tw-animate-css";
 
