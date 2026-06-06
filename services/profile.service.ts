@@ -112,4 +112,25 @@ export class ProfileService {
       error.message || "An unexpected error occurred.",
     );
   }
+
+  /* =====================================================
+   CHANGE PASSWORD (LOGGED IN USER)
+===================================================== */
+
+static async changePassword(payload: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const response = await apiClient.post(
+      "/api/profile/change-password",
+      payload,
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw this.handleError(error);
+  }
 }
+}
+

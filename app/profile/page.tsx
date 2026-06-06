@@ -7,6 +7,8 @@ import { User } from "@/types/user.types";
 import { UserService } from "@/services/user.service";
 
 import ProfileForm from "@/components/profile/profile-form";
+import ProfileChangePassword from "@/components/profile/profile-change-password";
+
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
@@ -93,7 +95,10 @@ export default function ProfilePage() {
    */
   return (
     <div className="max-w-5xl mx-auto space-y-6 py-6">
+      {/* PROFILE DETAILS */}
       <ProfileForm user={user} />
+
+      {/* CHANGE PASSWORD SECTION */}
     </div>
   );
 }
