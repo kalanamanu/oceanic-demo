@@ -137,7 +137,7 @@ export default function ProfilePreferences({
         </div>
 
         {/* RESET BACKGROUND */}
-        <div className="pt-2">
+        {/* <div className="pt-2">
           <Button
             variant="outline"
             className="w-full"
@@ -145,7 +145,7 @@ export default function ProfilePreferences({
           >
             Reset Background to Default
           </Button>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
