@@ -8,10 +8,9 @@ import AppShell from "@/components/AppShell";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ProfileService } from "@/services/profile.service";
 
-/**
- * GLOBAL BACKGROUND MANAGER
- * Runs once on app load + theme change
- */
+/* =====================================================
+   GLOBAL BACKGROUND MANAGER (SAFE VERSION)
+===================================================== */
 function BackgroundManager() {
   const { resolvedTheme } = useTheme();
 
@@ -19,42 +18,52 @@ function BackgroundManager() {
     try {
       let bgUrl: string | null = null;
 
-      // STEP 1: Try cached background first (FASTEST)
-      const cached = localStorage.getItem("user_background_url");
+      // STEP 1: Default fallback (always safe)
+      const defaultBg =
+        resolvedTheme === "dark" ? "/background2.png" : "/background.png";
 
-      if (cached) {
-        bgUrl = cached;
+      // STEP 2: Read cached background (safe sync)
+      if (typeof window !== "undefined") {
+        const cached = localStorage.getItem("user_background_url");
+        if (cached) {
+          bgUrl = cached;
+        }
       }
 
-      // STEP 2: Try API only if user exists
-      const storedUser = localStorage.getItem("user_data");
+      // STEP 3: Try API only if user exists (non-blocking)
+      if (typeof window !== "undefined") {
+        const storedUser = localStorage.getItem("user_data");
 
-      if (storedUser) {
-        const userId = JSON.parse(storedUser)?.id;
-
-        if (userId) {
+        if (storedUser) {
           try {
-            const res = await ProfileService.getProfileBackground(userId);
+            const parsed = JSON.parse(storedUser);
+            const userId = parsed?.id;
 
-            if (res?.backgroundImageUrl) {
-              bgUrl = res.backgroundImageUrl;
+            if (userId) {
+              try {
+                const res = await ProfileService.getProfileBackground(userId);
 
-              // cache new value
-              localStorage.setItem("user_background_url", bgUrl);
+                if (res?.backgroundImageUrl) {
+                  bgUrl = res.backgroundImageUrl;
+
+                  localStorage.setItem("user_background_url", bgUrl);
+                }
+              } catch (err) {
+                console.warn("Background API failed, using fallback");
+              }
             }
-          } catch (err) {
-            console.warn("Background API failed, using cached/default");
+          } catch {
+            console.warn("Invalid user_data in localStorage");
           }
         }
       }
 
-      // STEP 3: fallback system background
+      // STEP 4: final fallback
       if (!bgUrl) {
-        bgUrl =
-          resolvedTheme === "dark" ? "/background2.png" : "/background.png";
+        bgUrl = defaultBg;
       }
 
-      // APPLY immediately
+      // APPLY
       document.documentElement.style.setProperty(
         "--app-background-image",
         `url("${bgUrl}")`,
@@ -64,16 +73,12 @@ function BackgroundManager() {
     }
   }, [resolvedTheme]);
 
-  /**
-   * 🔥 RUN IMMEDIATELY ON MOUNT (NO WAIT)
-   */
+  /* run on mount */
   React.useEffect(() => {
     applyBackground();
   }, [applyBackground]);
 
-  /**
-   * Listen for updates (profile change, upload, reset)
-   */
+  /* listen for updates */
   React.useEffect(() => {
     window.addEventListener("profile-updated", applyBackground);
 
@@ -85,9 +90,9 @@ function BackgroundManager() {
   return null;
 }
 
-/* =========================
+/* =====================================================
    MAIN LAYOUT
-========================= */
+===================================================== */
 
 export default function AppLayoutClient({
   children,
@@ -112,6 +117,7 @@ export default function AppLayoutClient({
       {/* GLOBAL BACKGROUND SYSTEM */}
       <BackgroundManager />
 
+      {/* ROUTING LAYOUT CONTROL */}
       {isPublicRoute ? children : <AppShell>{children}</AppShell>}
     </ThemeProvider>
   );
