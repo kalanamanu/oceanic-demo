@@ -167,7 +167,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
           ) : (
             <>
               <Camera className="w-4 h-4 mr-2" />
-              Change Cover
+              Change Background
             </>
           )}
         </Button>
