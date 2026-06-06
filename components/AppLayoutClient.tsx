@@ -8,27 +8,30 @@ import AppShell from "@/components/AppShell";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ProfileService } from "@/services/profile.service";
 
+/**
+ * GLOBAL BACKGROUND MANAGER
+ * Runs once on app load + theme change
+ */
 function BackgroundManager() {
   const { resolvedTheme } = useTheme();
 
-  React.useEffect(() => {
-    const applyBackground = async () => {
-      try {
-        const storedUser = localStorage.getItem("user_data");
+  const applyBackground = React.useCallback(async () => {
+    try {
+      let bgUrl: string | null = null;
 
-        let userId: string | null = null;
+      // STEP 1: Try cached background first (FASTEST)
+      const cached = localStorage.getItem("user_background_url");
 
-        if (storedUser) {
-          try {
-            userId = JSON.parse(storedUser).id;
-          } catch {
-            userId = null;
-          }
-        }
+      if (cached) {
+        bgUrl = cached;
+      }
 
-        let bgUrl: string | null = null;
+      // STEP 2: Try API only if user exists
+      const storedUser = localStorage.getItem("user_data");
 
-        // 1. TRY API (REAL SOURCE)
+      if (storedUser) {
+        const userId = JSON.parse(storedUser)?.id;
+
         if (userId) {
           try {
             const res = await ProfileService.getProfileBackground(userId);
@@ -36,48 +39,55 @@ function BackgroundManager() {
             if (res?.backgroundImageUrl) {
               bgUrl = res.backgroundImageUrl;
 
-              // cache it
+              // cache new value
               localStorage.setItem("user_background_url", bgUrl);
             }
           } catch (err) {
-            console.warn("Profile background API failed, using fallback");
+            console.warn("Background API failed, using cached/default");
           }
         }
-
-        // 2. FALLBACK LOCAL CACHE
-        if (!bgUrl) {
-          const cached = localStorage.getItem("user_background_url");
-          if (cached) {
-            bgUrl = cached;
-          }
-        }
-
-        // 3. FINAL FALLBACK (SYSTEM DEFAULT)
-        if (!bgUrl) {
-          bgUrl =
-            resolvedTheme === "dark" ? "/background2.png" : "/background.png";
-        }
-
-        document.documentElement.style.setProperty(
-          "--app-background-image",
-          `url("${bgUrl}")`,
-        );
-      } catch (error) {
-        console.error("Failed to apply background", error);
       }
-    };
 
+      // STEP 3: fallback system background
+      if (!bgUrl) {
+        bgUrl =
+          resolvedTheme === "dark" ? "/background2.png" : "/background.png";
+      }
+
+      // APPLY immediately
+      document.documentElement.style.setProperty(
+        "--app-background-image",
+        `url("${bgUrl}")`,
+      );
+    } catch (error) {
+      console.error("Failed to apply background", error);
+    }
+  }, [resolvedTheme]);
+
+  /**
+   * 🔥 RUN IMMEDIATELY ON MOUNT (NO WAIT)
+   */
+  React.useEffect(() => {
     applyBackground();
+  }, [applyBackground]);
 
+  /**
+   * Listen for updates (profile change, upload, reset)
+   */
+  React.useEffect(() => {
     window.addEventListener("profile-updated", applyBackground);
 
     return () => {
       window.removeEventListener("profile-updated", applyBackground);
     };
-  }, [resolvedTheme]);
+  }, [applyBackground]);
 
   return null;
 }
+
+/* =========================
+   MAIN LAYOUT
+========================= */
 
 export default function AppLayoutClient({
   children,
@@ -99,6 +109,7 @@ export default function AppLayoutClient({
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {/* GLOBAL BACKGROUND SYSTEM */}
       <BackgroundManager />
 
       {isPublicRoute ? children : <AppShell>{children}</AppShell>}

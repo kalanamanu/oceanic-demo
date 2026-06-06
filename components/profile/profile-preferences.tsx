@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 interface ProfilePreferencesProps {
   theme?: "light" | "dark";
@@ -36,16 +37,50 @@ export default function ProfilePreferences({
   onThemeChange,
   onNotificationsChange,
 }: ProfilePreferencesProps) {
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">(theme);
+
+  useEffect(() => {
+    setCurrentTheme(theme);
+  }, [theme]);
+
+  const handleThemeChange = async (value: "light" | "dark") => {
+    setCurrentTheme(value);
+
+    // UI update immediately
+    setTheme(value);
+
+    // backend + parent sync
+    await onThemeChange(value);
+
+    // update localStorage sync
+    const stored = localStorage.getItem("user_data");
+
+    if (stored) {
+      const user = JSON.parse(stored);
+
+      const updated = {
+        ...user,
+        profile: {
+          ...user.profile,
+          theme: value,
+        },
+      };
+
+      localStorage.setItem("user_data", JSON.stringify(updated));
+    }
+
+    window.dispatchEvent(new Event("profile-updated"));
+  };
 
   const resetBackground = () => {
     try {
-      // Remove custom background
+      // remove custom background
       localStorage.removeItem("user_background_url");
 
-      // Apply default based on current theme
       const defaultBg =
-        (resolvedTheme || theme) === "dark"
+        (resolvedTheme || currentTheme) === "dark"
           ? "/background2.png"
           : "/background.png";
 
@@ -54,7 +89,6 @@ export default function ProfilePreferences({
         `url("${defaultBg}")`,
       );
 
-      // Notify app
       window.dispatchEvent(new Event("profile-updated"));
     } catch (err) {
       console.error("Failed to reset background", err);
@@ -65,7 +99,6 @@ export default function ProfilePreferences({
     <Card>
       <CardHeader>
         <CardTitle>Preferences</CardTitle>
-
         <CardDescription>
           Manage your application settings and notification preferences
         </CardDescription>
@@ -76,10 +109,7 @@ export default function ProfilePreferences({
         <div className="space-y-2">
           <Label>Theme</Label>
 
-          <Select
-            value={theme}
-            onValueChange={(value) => onThemeChange(value as "light" | "dark")}
-          >
+          <Select value={currentTheme} onValueChange={handleThemeChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select Theme" />
             </SelectTrigger>
@@ -95,7 +125,6 @@ export default function ProfilePreferences({
         <div className="flex items-center justify-between border rounded-lg p-4">
           <div>
             <h4 className="font-medium">Notifications</h4>
-
             <p className="text-sm text-muted-foreground">
               Receive system notifications and updates
             </p>
@@ -108,7 +137,7 @@ export default function ProfilePreferences({
         </div>
 
         {/* RESET BACKGROUND */}
-        {/* <div className="pt-2">
+        <div className="pt-2">
           <Button
             variant="outline"
             className="w-full"
@@ -116,7 +145,7 @@ export default function ProfilePreferences({
           >
             Reset Background to Default
           </Button>
-        </div> */}
+        </div>
       </CardContent>
     </Card>
   );
