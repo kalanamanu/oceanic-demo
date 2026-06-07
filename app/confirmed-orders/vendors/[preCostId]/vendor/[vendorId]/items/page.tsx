@@ -12,6 +12,8 @@ import { VendorItemsTable } from "@/components/confirmed-orders/vendor-items-tab
 
 import type { PreCostVendorItem } from "@/types/precost-vendor.types";
 
+import { CreatePODialog } from "@/components/purchase-orders/create-po-dialog";
+
 export default function VendorItemsPage() {
   const router = useRouter();
   const params = useParams<{ preCostId: string; vendorId: string }>();
@@ -19,6 +21,8 @@ export default function VendorItemsPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [items, setItems] = React.useState<PreCostVendorItem[]>([]);
+
+  const [poDialogOpen, setPoDialogOpen] = React.useState(false);
 
   /* ================= LOAD ================= */
   const loadItems = async () => {
@@ -97,7 +101,11 @@ export default function VendorItemsPage() {
             <Button variant="outline" size="sm" onClick={loadItems}>
               <RefreshCcw className="w-3.5 h-3.5" />
             </Button>
-            <Button size="sm" className="gap-1.5 text-xs font-medium shadow-sm">
+            <Button
+              size="sm"
+              className="gap-1.5 text-xs font-medium shadow-sm"
+              onClick={() => setPoDialogOpen(true)}
+            >
               <FilePlus className="w-4 h-4" />
               Generate Purchase Order
             </Button>
@@ -108,6 +116,12 @@ export default function VendorItemsPage() {
 
         {/* DETACHED ISOLATED VENDOR ITEMS DATA TABLE */}
         <VendorItemsTable items={items} />
+        <CreatePODialog
+          open={poDialogOpen}
+          onOpenChange={setPoDialogOpen}
+          preCostId={preCostId}
+          vendorId={vendorId}
+        />
       </main>
     </div>
   );
