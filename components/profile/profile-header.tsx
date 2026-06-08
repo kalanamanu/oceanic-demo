@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { UploadService } from "@/services/upload.service";
 import { UserService } from "@/services/user.service";
 
-// Dialog
 import ProfileChangePasswordDialog from "@/components/profile/profile-change-password";
 
 interface ProfileHeaderProps {
@@ -54,9 +53,66 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
     loadImages();
   }, [user]);
 
-  // Handler to trigger the hidden background input click
-  const handleBackgroundButtonClick = () => {
-    backgroundInputRef.current?.click();
+  /* ================= AVATAR UPLOAD ================= */
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingAvatar(true);
+
+      const uploaded = await UploadService.uploadFile({
+        file,
+        useFor: "sathira_profile",
+      });
+
+      await UserService.updateUser({
+        id: user.id,
+        profilePicture_id: uploaded.id,
+      });
+
+      const url = await UploadService.getFileUrl(uploaded.id);
+      setAvatarUrl(url);
+
+      // reset input (IMPORTANT FIX)
+      e.target.value = "";
+    } catch (error) {
+      console.error("Avatar upload failed", error);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  /* ================= BACKGROUND UPLOAD ================= */
+  const handleBackgroundUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingBackground(true);
+
+      const uploaded = await UploadService.uploadFile({
+        file,
+        useFor: "sathira_background",
+      });
+
+      await UserService.updateUser({
+        id: user.id,
+        backgroundImage_id: uploaded.id,
+      });
+
+      const url = await UploadService.getFileUrl(uploaded.id);
+      setBackgroundUrl(url);
+
+      // reset input (IMPORTANT FIX)
+      e.target.value = "";
+    } catch (error) {
+      console.error("Background upload failed", error);
+    } finally {
+      setUploadingBackground(false);
+    }
   };
 
   return (
@@ -67,14 +123,15 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
         type="file"
         accept="image/*"
         className="hidden"
+        onChange={handleAvatarUpload}
       />
 
-      {/* FIXED: Added className="hidden" here */}
       <input
         ref={backgroundInputRef}
         type="file"
         accept="image/*"
         className="hidden"
+        onChange={handleBackgroundUpload}
       />
 
       {/* BACKGROUND */}
@@ -89,13 +146,12 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
 
         <div className="absolute inset-0 bg-black/20" />
 
-        {/* FIXED: Added onClick handler here */}
         <Button
           size="sm"
           variant="secondary"
           className="absolute top-4 right-4 z-10"
           disabled={uploadingBackground}
-          onClick={handleBackgroundButtonClick}
+          onClick={() => backgroundInputRef.current?.click()}
         >
           {uploadingBackground ? (
             <>
@@ -119,7 +175,11 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
           <div className="relative">
             <div className="w-28 h-28 rounded-full border-4 border-background bg-muted overflow-hidden shadow-lg">
               {avatarUrl ? (
-                <img src={avatarUrl} className="w-full h-full object-cover" />
+                <img
+                  src={avatarUrl}
+                  className="w-full h-full object-cover"
+                  alt="avatar"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-xl font-bold text-muted-foreground">
                   {user.firstName?.[0]}
@@ -128,13 +188,17 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
               )}
             </div>
 
-            {/* Note: You will want to apply a similar onClick handler here for avatarInputRef.current?.click() */}
             <Button
               size="icon"
               className="absolute bottom-0 right-0 rounded-full h-8 w-8"
+              disabled={uploadingAvatar}
               onClick={() => avatarInputRef.current?.click()}
             >
-              <Camera className="w-4 h-4" />
+              {uploadingAvatar ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
             </Button>
           </div>
 
@@ -151,7 +215,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
           </div>
         </div>
 
-        {/* RIGHT SIDE (ACTION BUTTONS) */}
+        {/* RIGHT SIDE */}
         <div className="flex items-center gap-2 self-start mt-2">
           <ProfileChangePasswordDialog />
         </div>
