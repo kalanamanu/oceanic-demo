@@ -8,7 +8,6 @@ import { PicTodoList } from "@/components/pic-tasks/PicTodoList";
 import { PicTodoFormModal } from "@/components/pic-tasks/PicTodoFormModal";
 import { Button } from "@/components/ui/button";
 import {
-  Ship,
   MapPin,
   User,
   Mail,
@@ -19,7 +18,12 @@ import {
 } from "lucide-react";
 
 export default function PicTodoPage() {
-  const { inq_id } = useParams<{ inq_id: string }>();
+  const params = useParams<{ inq_id: string }>();
+
+  // decode route param safely
+  const inq_id = React.useMemo(() => {
+    return params?.inq_id ? decodeURIComponent(params.inq_id) : "";
+  }, [params]);
 
   const [inquiry, setInquiry] = React.useState<any>(null);
   const [todos, setTodos] = React.useState<any[]>([]);
@@ -27,7 +31,10 @@ export default function PicTodoPage() {
   const [open, setOpen] = React.useState(false);
 
   const loadData = async () => {
+    if (!inq_id) return;
+
     setLoading(true);
+
     try {
       const inquiryRes = await InquiryService.getAllInquiries({
         page: 1,
@@ -37,7 +44,11 @@ export default function PicTodoPage() {
       const found = inquiryRes.data.find((i: any) => i.inq_id === inq_id);
       setInquiry(found || null);
 
-      const todoRes = await PicTodoService.getTodosByInquiry(inq_id);
+      // ✅ FIXED API CALL (IMPORTANT)
+      const todoRes = await PicTodoService.getTodosByInquiry(
+        encodeURIComponent(inq_id),
+      );
+
       setTodos(todoRes);
     } finally {
       setLoading(false);
@@ -46,15 +57,7 @@ export default function PicTodoPage() {
 
   const formatDate = (date?: string) => {
     if (!date) return "-";
-    return new Date(date).toLocaleDateString("en-GB"); // DD/MM/YYYY
-  };
-
-  const formatTime24 = (time?: string) => {
-    if (!time) return "-";
-
-    // supports "HH:mm:ss" or "HH:mm"
-    const [h, m] = time.split(":");
-    return `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
+    return new Date(date).toLocaleDateString("en-GB");
   };
 
   const formatDateTime = (date?: string) => {
@@ -92,19 +95,19 @@ export default function PicTodoPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
-      {/* ================= HEADER SECTION ================= */}
+      {/* HEADER */}
       <div className="bg-card border rounded-2xl p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 mb-6">
           <div className="space-y-1">
+            <h1 className="text-2xl font-bold tracking-tight">
+              {inquiry.vessel_name}
+            </h1>
+
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight">
-                {inquiry.vessel_name}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 ">
               <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-muted text-muted-foreground border">
                 {inquiry.status?.name || "Pending"}
               </span>
+
               <span className="text-[11px] text-muted-foreground font-medium">
                 Inquiry ID: {inq_id}
               </span>
@@ -120,86 +123,29 @@ export default function PicTodoPage() {
           </Button>
         </div>
 
-        {/* DETAILS GRID */}
+        {/* DETAILS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="space-y-4">
-            <DetailItem
-              icon={<MapPin className="h-4 w-4" />}
-              label="Port"
-              value={inquiry.port}
-            />
-            <DetailItem
-              icon={<User className="h-4 w-4" />}
-              label="Agent"
-              value={inquiry.agent}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <DetailItem
-              icon={<User className="h-4 w-4" />}
-              label="Customer"
-              value={inquiry.customer || "-"}
-            />
-            <DetailItem
-              icon={<Mail className="h-4 w-4" />}
-              label="Email"
-              value={inquiry.customerEmail || "-"}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <DetailItem
-              icon={<CalendarDays className="h-4 w-4" />}
-              label="ETA"
-              value={formatDateTime(inquiry.eta)}
-            />{" "}
-            <DetailItem
-              icon={<Clock className="h-4 w-4" />}
-              label="Received"
-              value={formatDateTime(inquiry.received_date)}
-            />
-          </div>
-        </div>
-
-        {/* PERSONNEL SECTION */}
-        <div className="mt-8 pt-6 border-t grid md:grid-cols-2 gap-8">
-          <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Key PIC
-            </p>
-            <div>
-              <p className="text-sm font-semibold">
-                {inquiry.key_pic?.name || "Unassigned"}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Other PICs
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {inquiry.other_pics?.length > 0 ? (
-                inquiry.other_pics.map((p: any) => (
-                  <span
-                    key={p.id}
-                    className="text-xs px-3 py-1.5 rounded-full bg-background border border-border font-medium shadow-sm"
-                  >
-                    {p.name}
-                  </span>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground italic">
-                  No other personnel assigned
-                </p>
-              )}
-            </div>
-          </div>
+          <DetailItem icon={<MapPin />} label="Port" value={inquiry.port} />
+          <DetailItem icon={<User />} label="Agent" value={inquiry.agent} />
+          <DetailItem
+            icon={<Mail />}
+            label="Email"
+            value={inquiry.customerEmail || "-"}
+          />
+          <DetailItem
+            icon={<CalendarDays />}
+            label="ETA"
+            value={formatDateTime(inquiry.eta)}
+          />
+          <DetailItem
+            icon={<Clock />}
+            label="Received"
+            value={formatDateTime(inquiry.received_date)}
+          />
         </div>
       </div>
 
-      {/* ================= TASKS LIST ================= */}
+      {/* TASKS */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold flex items-center gap-2 px-1">
           Assigned Tasks
@@ -207,10 +153,11 @@ export default function PicTodoPage() {
             {todos.length}
           </span>
         </h2>
+
         <PicTodoList todos={todos} refresh={loadData} />
       </div>
 
-      {/* ================= MODAL ================= */}
+      {/* MODAL */}
       <PicTodoFormModal
         open={open}
         onClose={() => setOpen(false)}
@@ -225,7 +172,7 @@ export default function PicTodoPage() {
   );
 }
 
-/** HELPER COMPONENT FOR CONSISTENT VISIBILITY **/
+/** HELPER **/
 function DetailItem({
   icon,
   label,
@@ -239,7 +186,7 @@ function DetailItem({
     <div className="flex items-start gap-3">
       <div className="text-muted-foreground mt-0.5">{icon}</div>
       <div className="space-y-0.5">
-        <p className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/70">
+        <p className="text-[10px] font-bold uppercase text-muted-foreground/70">
           {label}
         </p>
         <p className="text-sm font-medium leading-none">{value}</p>

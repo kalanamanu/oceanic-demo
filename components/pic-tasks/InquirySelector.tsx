@@ -3,7 +3,17 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-export function InquirySelector({ inquiries, value, onChange }: any) {
+interface InquirySelectorProps {
+  inquiries: any[];
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function InquirySelector({
+  inquiries,
+  value,
+  onChange,
+}: InquirySelectorProps) {
   const [search, setSearch] = React.useState("");
   const router = useRouter();
 
@@ -15,7 +25,8 @@ export function InquirySelector({ inquiries, value, onChange }: any) {
         inq.vessel_name?.toLowerCase().includes(q) ||
         inq.port?.toLowerCase().includes(q) ||
         inq.agent?.toLowerCase().includes(q) ||
-        inq.customer?.toLowerCase().includes(q)
+        inq.customer?.toLowerCase().includes(q) ||
+        inq.inq_id?.toLowerCase().includes(q)
       );
     });
   }, [search, inquiries]);
@@ -25,11 +36,25 @@ export function InquirySelector({ inquiries, value, onChange }: any) {
     return new Date(date).toLocaleDateString("en-GB");
   };
 
+  const handleViewTodoList = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    inquiryId: string,
+  ) => {
+    e.stopPropagation();
+
+    // IMPORTANT:
+    // Encode inquiry IDs like:
+    // OSC/INQ/2026/COLOMBO/0010
+    // ->
+    // OSC%2FINQ%2F2026%2FCOLOMBO%2F0010
+    router.push(`/pic-tasks/${encodeURIComponent(inquiryId)}`);
+  };
+
   return (
     <div className="space-y-4">
       {/* TIP */}
       <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md border">
-        💡 Select an inquiry or open its PIC Todo list for full task management.
+        Select an inquiry or open its PIC Todo list for full task management.
       </div>
 
       {/* TITLE */}
@@ -44,7 +69,7 @@ export function InquirySelector({ inquiries, value, onChange }: any) {
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search vessel, port, agent..."
+        placeholder="Search vessel, port, agent, inquiry ID..."
         className="w-full border rounded-md px-3 py-2 text-sm bg-background text-foreground border-border focus:ring-2 focus:ring-primary"
       />
 
@@ -67,8 +92,13 @@ export function InquirySelector({ inquiries, value, onChange }: any) {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-semibold text-sm">{inq.vessel_name}</p>
+
                   <p className="text-xs text-muted-foreground">
                     {inq.port} • {inq.agent}
+                  </p>
+
+                  <p className="text-[11px] mt-1 font-mono text-muted-foreground">
+                    {inq.inq_id}
                   </p>
                 </div>
 
@@ -96,11 +126,9 @@ export function InquirySelector({ inquiries, value, onChange }: any) {
               {/* ACTION BUTTON */}
               <div className="flex gap-2 mt-2">
                 <button
+                  type="button"
                   className="w-full text-xs px-3 py-2 rounded-md bg-primary text-white hover:bg-primary/90"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/pic-tasks/${inq.inq_id}`);
-                  }}
+                  onClick={(e) => handleViewTodoList(e, inq.inq_id)}
                 >
                   View PIC Todo List
                 </button>

@@ -80,7 +80,7 @@ export default function PicTodoPage() {
         onChange={setSelectedInquiry}
       />
 
-      {/* ================= TODO LIST ================= */}
+      {/* ================= TODO LIST ================== */}
       {loading ? (
         <p className="text-sm text-muted-foreground animate-pulse">
           Loading todos...
