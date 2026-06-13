@@ -54,9 +54,9 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="flex justify-center mb-12">
             <img
-              src="/Oceanic-Titan-Logo.jpg"
+              src="/Oceanic-Titan-Logo.png"
               alt="Oceanic Maritime Services Logo"
-              className="w-30 h-auto object-contain"
+              className="w-60 h-auto object-contain"
               draggable="false"
             />
           </div>
