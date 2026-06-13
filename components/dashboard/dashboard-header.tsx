@@ -24,28 +24,6 @@ export function DashboardHeader() {
     lastSynced: "Just now",
   };
 
-  useEffect(() => {
-    setMounted(true);
-
-    const userData = AuthService.getCurrentUser();
-    setUser(userData);
-
-    const loadAvatar = async () => {
-      try {
-        if (!userData?.id) return;
-
-        const res = await ProfileService.getProfileAvatar(userData.id);
-        setAvatarUrl(res?.profilePictureUrl || null);
-      } catch (err) {
-        console.log("Avatar load failed");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadAvatar();
-  }, []);
-
   const getUserInitials = (firstName?: string, lastName?: string) => {
     if (!firstName || !lastName) return "U";
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -58,6 +36,52 @@ export function DashboardHeader() {
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
   };
+
+  // ===================== INITIAL LOAD =====================
+  useEffect(() => {
+    setMounted(true);
+
+    const userData = AuthService.getCurrentUser();
+    setUser(userData);
+
+    const loadAvatar = async () => {
+      try {
+        if (!userData?.id) return;
+
+        const res = await ProfileService.getProfileAvatar(userData.id);
+        setAvatarUrl(res?.profilePictureUrl || null);
+      } catch {
+        console.log("Avatar load failed");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAvatar();
+  }, []);
+
+  // ===================== GLOBAL SYNC LISTENER =====================
+  useEffect(() => {
+    const handleUpdate = async () => {
+      const userData = AuthService.getCurrentUser();
+      setUser(userData);
+
+      if (!userData?.id) return;
+
+      try {
+        const res = await ProfileService.getProfileAvatar(userData.id);
+        setAvatarUrl(res?.profilePictureUrl || null);
+      } catch {
+        console.log("Avatar refresh failed");
+      }
+    };
+
+    window.addEventListener("auth-user-changed", handleUpdate);
+
+    return () => {
+      window.removeEventListener("auth-user-changed", handleUpdate);
+    };
+  }, []);
 
   return (
     <div className="border-b border-border bg-card sticky top-0 z-30 shadow-sm">
@@ -101,12 +125,12 @@ export function DashboardHeader() {
 
           <div className="h-6 w-px bg-border mx-1" />
 
-          {/* USER SECTION (CLICKABLE → PROFILE PAGE) */}
+          {/* USER SECTION */}
           <div
             onClick={() => router.push("/profile")}
             className="flex items-center gap-3 cursor-pointer hover:bg-muted/40 px-2 py-1 rounded-lg transition"
           >
-            {/* AVATAR ONLY */}
+            {/* AVATAR */}
             <div className="h-9 w-9 rounded-full border border-border overflow-hidden bg-muted flex items-center justify-center">
               {avatarUrl ? (
                 <img
@@ -126,7 +150,7 @@ export function DashboardHeader() {
               )}
             </div>
 
-            {/* 👇 KEEP YOUR EXISTING NAME + ROLE DISPLAY */}
+            {/* NAME + ROLE */}
             <div className="text-left hidden sm:block max-w-[160px]">
               {isLoading ? (
                 <>

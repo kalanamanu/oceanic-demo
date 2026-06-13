@@ -104,7 +104,19 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
       });
 
       const url = await UploadService.getFileUrl(uploaded.id);
+
       setBackgroundUrl(url);
+
+      // 1. update THIS component immediately
+      if (typeof window !== "undefined") {
+        document.documentElement.style.setProperty(
+          "--app-background-image",
+          `url("${url}")`,
+        );
+
+        // 2. sync global systems (optional but good)
+        window.dispatchEvent(new Event("auth-user-changed"));
+      }
 
       // reset input (IMPORTANT FIX)
       e.target.value = "";
