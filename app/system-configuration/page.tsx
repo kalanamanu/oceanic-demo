@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Card,
@@ -18,6 +19,8 @@ import {
   Users,
 } from "lucide-react";
 
+import { AuthService } from "@/services/auth.service";
+
 const configItems = [
   {
     title: "Basis",
@@ -25,21 +28,18 @@ const configItems = [
     href: "/system-configuration/basis",
     icon: Layers3,
   },
-
   {
     title: "Categories",
     description: "Manage inquiry and quotation categories",
     href: "/system-configuration/categories",
     icon: FolderKanban,
   },
-
   {
     title: "Permissions",
     description: "Manage permissions, roles and user access control",
     href: "/system-configuration/permissions",
     icon: ShieldCheck,
   },
-
   {
     title: "Roles",
     description: "Manage system roles and role permissions",
@@ -49,12 +49,31 @@ const configItems = [
 ];
 
 export default function ConfigurationPage() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    AuthService.checkAuth().then(setUser);
+  }, []);
+
+  const restrictedRoles = ["Purchasing - Manager", "General Manager"];
+
+  const filteredConfigItems = useMemo(() => {
+    if (!user?.role) return configItems;
+
+    if (restrictedRoles.includes(user.role)) {
+      return configItems.filter(
+        (item) => item.title !== "Permissions" && item.title !== "Roles",
+      );
+    }
+
+    return configItems;
+  }, [user]);
+
   return (
     <div className="p-6 space-y-6">
       {/* HEADER */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Configuration</h1>
-
         <p className="text-muted-foreground text-sm">
           Manage system configuration modules
         </p>
@@ -62,7 +81,7 @@ export default function ConfigurationPage() {
 
       {/* CONFIG GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {configItems.map((item) => {
+        {filteredConfigItems.map((item) => {
           const Icon = item.icon;
 
           return (
@@ -79,7 +98,6 @@ export default function ConfigurationPage() {
 
                   <div>
                     <CardTitle className="text-lg">{item.title}</CardTitle>
-
                     <CardDescription className="pt-1 text-sm">
                       {item.description}
                     </CardDescription>

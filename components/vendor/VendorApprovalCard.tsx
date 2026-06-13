@@ -56,12 +56,10 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
 
   /* ================= ROLE CHECKS ================= */
 
-  const canManagerApprove = role === "Manager" || role === "System Developer";
+  const canManagerApprove =
+    role === "Purchasing - Manager" || role === "System Developer";
 
-  const canMDApprove =
-    role === "MD" ||
-    role === "Managing Director" ||
-    role === "System Developer";
+  const canMDApprove = role === "MD" || role === "System Developer";
 
   /* ================= APPROVAL ACTION ================= */
 
@@ -167,7 +165,7 @@ export function VendorApprovalCard({ vendorId, status, onRefresh }: Props) {
         {/* ================= MANAGER ================= */}
 
         <ApprovalSection
-          title="Manager Approval"
+          title="Purchasing Manager Approval"
           description="First approval stage"
           approved={status?.is_manager_approved}
         >

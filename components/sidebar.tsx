@@ -36,14 +36,7 @@ const sidebarConfig = {
       path: "/audit-trail",
     },
     { value: "users", label: "Users", icon: Users, path: "/users" },
-    // { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
     { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
-    // {
-    //   value: "categories",
-    //   label: "Categories",
-    //   icon: Tags,
-    //   path: "/categories",
-    // },
     {
       value: "picTasks",
       label: "PIC Tasks",
@@ -56,7 +49,6 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -85,14 +77,7 @@ const sidebarConfig = {
 
   management: [
     { value: "dashboard", label: "Dashboard", icon: Gauge, path: "/dashboard" },
-    // { value: "basis", label: "Basis", icon: BadgeDollarSign, path: "/basis" },
     { value: "vendors", label: "Vendors", icon: Truck, path: "/vendors" },
-    // {
-    //   value: "categories",
-    //   label: "Categories",
-    //   icon: Tags,
-    //   path: "/categories",
-    // },
     {
       value: "picTasks",
       label: "PIC Tasks",
@@ -105,7 +90,6 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -152,7 +136,6 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -181,7 +164,6 @@ const sidebarConfig = {
       icon: FileText,
       path: "/inquiry",
     },
-    // { value: "myTasks", label: "My Tasks", icon: ListTodo, path: "/my-tasks" },
     {
       value: "preCost",
       label: "Pre Cost",
@@ -211,6 +193,13 @@ const roleMap: Record<string, keyof typeof sidebarConfig> = {
   staff: "staff",
 };
 
+// ❌ roles that should NOT see Audit + Users
+const restrictedRoles = [
+  "Purchasing - Manager",
+  "General Manager",
+  "Accounts Assistant",
+];
+
 export interface SidebarProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
@@ -228,20 +217,32 @@ export function Sidebar({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  // Get user from backend (more reliable than localStorage only)
   useEffect(() => {
     AuthService.checkAuth().then(setUser);
   }, []);
 
   const userAccountType = user?.accountType;
 
-  // Get sidebar items based on role
   const sidebarItems = useMemo(() => {
     if (!userAccountType) return [];
 
     const roleKey = roleMap[userAccountType] || "staff";
-    return sidebarConfig[roleKey] || [];
-  }, [userAccountType]);
+    let items = sidebarConfig[roleKey] || [];
+
+    if (restrictedRoles.includes(user?.role)) {
+      items = items.filter(
+        (item) =>
+          item.value !== "audit" &&
+          item.value !== "users" &&
+          !(
+            user?.role === "Accounts Assistant" &&
+            item.value === "system-configuration"
+          ),
+      );
+    }
+
+    return items;
+  }, [userAccountType, user?.role]);
 
   const activeTab =
     sidebarItems.find((i) => pathname.startsWith(i.path))?.value || "dashboard";
@@ -260,7 +261,6 @@ export function Sidebar({
     }
   };
 
-  // ⚠️ Prevent rendering before auth loads
   if (!userAccountType) return null;
 
   return (

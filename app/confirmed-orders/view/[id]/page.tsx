@@ -128,7 +128,9 @@ export default function ConfirmedOrderDetailPage() {
   }
 
   const isAllowed =
-    user?.role === "Manager" || user?.role === "System Developer";
+    user?.role === "Manager" ||
+    user?.role === "System Developer" ||
+    user?.role === "Purchasing - Manager";
   const isPending = data.gm_status === "pending";
   const isLkrNegative = Number(data.variance_lkr) < 0;
   const isUsdNegative = Number(data.variance_usd) < 0;
@@ -157,7 +159,6 @@ export default function ConfirmedOrderDetailPage() {
             </div>
           </div>
 
-          {/* ACTION SUB-GROUP */}
           {/* ACTION SUB-GROUP */}
           <div className="flex items-center gap-2">
             {isAllowed && data.gm_status !== "approved" && (
@@ -300,7 +301,7 @@ export default function ConfirmedOrderDetailPage() {
                 }
                 className="capitalize text-xs font-semibold py-0.5 px-2.5"
               >
-                GM: {data.gm_status}
+                Purchasing Manager: {data.gm_status}
               </Badge>
               <span className="text-xs text-muted-foreground font-medium capitalize pl-0.5">
                 Doc Workflow:{" "}
