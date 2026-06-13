@@ -83,9 +83,7 @@ export function InquiryDetailDialog({
     try {
       setLoadingInquiry(true);
 
-      const data = await InquiryService.getInquiryById(
-        encodeURIComponent(inqId),
-      );
+      const data = await InquiryService.getInquiryById(inqId);
 
       setFullInquiry(data);
     } catch (err) {
