@@ -15,7 +15,7 @@ interface AddRemarkDialogProps {
   inquiryId: string;
   open: boolean;
   onClose: () => void;
-  onSave: (remarkText: string) => Promise<void>;
+  onSave: (inquiryId: string, remarkText: string) => Promise<void>;
 }
 
 export function AddRemarkDialog({
@@ -34,13 +34,20 @@ export function AddRemarkDialog({
     }
   }, [open]);
 
+  // ✅ Safe label formatter (handles OSC/INQ/2026/COLOMBO/0010)
+  const formatInquiryLabel = (id?: string) => {
+    if (!id) return "UNKNOWN";
+    return id.split("/").pop()?.toUpperCase() || "UNKNOWN";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!remark.trim()) return;
-    
+
     setLoading(true);
     try {
-      await onSave(remark.trim());
+      await onSave(inquiryId, remark.trim());
       onClose();
     } catch (error) {
       console.error("Failed to save remark", error);
@@ -55,10 +62,13 @@ export function AddRemarkDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add Remark</DialogTitle>
+
             <DialogDescription>
-              Add a new remark for inquiry INQ-{inquiryId ? inquiryId.substring(0, 6).toUpperCase() : "UNKNOWN"}.
+              Add a new remark for inquiry INQ-
+              {formatInquiryLabel(inquiryId)}.
             </DialogDescription>
           </DialogHeader>
+
           <div className="py-4">
             <textarea
               value={remark}
@@ -69,10 +79,17 @@ export function AddRemarkDialog({
               required
             />
           </div>
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
+
             <Button type="submit" disabled={loading || !remark.trim()}>
               {loading ? "Saving..." : "Save Remark"}
             </Button>

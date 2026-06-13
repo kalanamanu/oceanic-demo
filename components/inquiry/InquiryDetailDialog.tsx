@@ -71,11 +71,6 @@ export function InquiryDetailDialog({
   const [loadingInquiry, setLoadingInquiry] = React.useState(false);
 
   React.useEffect(() => {
-    if (open) setDialogState(0);
-    else setDialogState(null);
-  }, [open]);
-
-  React.useEffect(() => {
     const idToUse = inquiry?.inq_id || inquiry?.id;
 
     if (open && idToUse) {
@@ -88,7 +83,9 @@ export function InquiryDetailDialog({
     try {
       setLoadingInquiry(true);
 
-      const data = await InquiryService.getInquiryById(inqId);
+      const data = await InquiryService.getInquiryById(
+        encodeURIComponent(inqId),
+      );
 
       setFullInquiry(data);
     } catch (err) {
@@ -102,7 +99,9 @@ export function InquiryDetailDialog({
     setLoadingRemarks(true);
 
     try {
-      const data = await InquiryRemarkService.getRemarksByInquiryId(inqId);
+      const data = await InquiryRemarkService.getRemarksByInquiryId(
+        encodeURIComponent(inqId),
+      );
 
       setLiveRemarks(data);
     } catch (e) {
@@ -112,34 +111,24 @@ export function InquiryDetailDialog({
     }
   };
 
-  const handleAddRemarkSave = async (remarkText: string) => {
-    if (!fullInquiry) return;
-
-    const idToUse = fullInquiry.inq_id || fullInquiry.id;
-
-    if (!idToUse) return;
-
+  const handleAddRemarkSave = async (inqId: string, remarkText: string) => {
     await InquiryRemarkService.createRemark({
-      inq_id: idToUse as string,
+      inq_id: inqId,
       remark: remarkText,
     });
 
-    await loadRemarks(idToUse as string);
-
-    setDialogState(0);
+    await loadRemarks(inqId);
   };
 
   const handleEditRemarkSave = async (remarkId: string, remarkText: string) => {
     const idToUse = fullInquiry?.inq_id || fullInquiry?.id;
-
     if (!idToUse) return;
 
-    await InquiryRemarkService.updateRemark(remarkId, {
+    await InquiryRemarkService.updateRemark(encodeURIComponent(remarkId), {
       remark: remarkText,
     });
 
-    await loadRemarks(idToUse as string);
-
+    await loadRemarks(idToUse);
     setDialogState(0);
   };
 
@@ -526,7 +515,7 @@ export function InquiryDetailDialog({
       )}
 
       {/* Edit Remark */}
-      {dialogState === 3 && editingRemark && (
+      {dialogState === 3 && editingRemark?.remark_id && (
         <EditRemarkDialog
           remark={editingRemark}
           open={dialogState === 3}

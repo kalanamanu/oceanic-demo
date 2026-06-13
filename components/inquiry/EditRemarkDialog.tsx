@@ -25,23 +25,34 @@ export function EditRemarkDialog({
   onClose,
   onSave,
 }: EditRemarkDialogProps) {
-  const [text, setText] = React.useState(remark.remark || "");
+  const [text, setText] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
+  // ✅ safer reset logic
   React.useEffect(() => {
-    if (open) {
-      setText(remark.remark || "");
+    if (open && remark?.remark) {
+      setText(remark.remark);
       setLoading(false);
     }
   }, [open, remark]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log("👉 SUBMIT CLICKED"); // ADD THIS
+
     if (!text.trim()) return;
 
     setLoading(true);
+
     try {
+      console.log("👉 CALLING onSave"); // ADD THIS
+      console.log("remark id:", remark.remark_id);
+      console.log("text:", text.trim());
+
       await onSave(remark.remark_id, text.trim());
+
+      console.log("👉 AFTER onSave");
       onClose();
     } catch (error) {
       console.error("Failed to update remark", error);
@@ -49,6 +60,8 @@ export function EditRemarkDialog({
       setLoading(false);
     }
   };
+
+  const isUnchanged = !remark?.remark || text.trim() === remark.remark.trim();
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -60,6 +73,7 @@ export function EditRemarkDialog({
               Update your remark text below.
             </DialogDescription>
           </DialogHeader>
+
           <div className="py-4">
             <textarea
               value={text}
@@ -70,6 +84,7 @@ export function EditRemarkDialog({
               required
             />
           </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -79,7 +94,11 @@ export function EditRemarkDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !text.trim() || text.trim() === remark.remark}>
+
+            <Button
+              type="submit"
+              disabled={loading || !text.trim() || isUnchanged}
+            >
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
