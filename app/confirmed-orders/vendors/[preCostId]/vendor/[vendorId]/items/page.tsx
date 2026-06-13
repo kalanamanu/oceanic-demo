@@ -106,7 +106,6 @@ export default function VendorItemsPage() {
               className="gap-1.5 text-xs font-medium shadow-sm"
               onClick={() => setPoDialogOpen(true)}
             >
-              <FilePlus className="w-4 h-4" />
               Generate Purchase Order
             </Button>
           </div>

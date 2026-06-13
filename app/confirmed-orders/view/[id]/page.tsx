@@ -12,7 +12,21 @@ import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-import { CheckCircle, FileText, Users, ArrowLeft } from "lucide-react";
+import {
+  CheckCircle,
+  FileText,
+  Users,
+  ArrowLeft,
+  MoreVertical,
+  Truck,
+  Send,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ConfirmedItemsTable } from "@/components/confirmed-orders/confirmed-items-table";
 
 import { InvoiceDialog } from "@/components/invoices/create-invoice-dialog";
@@ -144,6 +158,7 @@ export default function ConfirmedOrderDetailPage() {
           </div>
 
           {/* ACTION SUB-GROUP */}
+          {/* ACTION SUB-GROUP */}
           <div className="flex items-center gap-2">
             {isAllowed && data.gm_status !== "approved" && (
               <Button
@@ -170,16 +185,37 @@ export default function ConfirmedOrderDetailPage() {
               Vendors
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              className="gap-2"
-              onClick={() => setInvoiceOpen(true)}
-            >
-              <FileText className="w-4 h-4" />
-              Generate Invoice
-            </Button>
+            {/* 3 DOT MENU */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="px-2">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-44">
+                {/* Generate Invoice (your existing action) */}
+                <DropdownMenuItem onClick={() => setInvoiceOpen(true)}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate Invoice
+                </DropdownMenuItem>
+
+                {/* NEW OPTIONS (UI only for now) */}
+                <DropdownMenuItem
+                  onClick={() => toast.info("Delivery Note coming soon")}
+                >
+                  <Truck className="w-4 h-4 mr-2" />
+                  Delivery Note
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => toast.info("Dispatch Note coming soon")}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Dispatch Note
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
