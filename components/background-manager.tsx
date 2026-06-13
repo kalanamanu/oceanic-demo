@@ -21,22 +21,23 @@ export default function BackgroundManager() {
   const applyBackground = async () => {
     const userId = getUserId();
 
-    try {
-      let bgUrl = "";
+    let bgUrl: string | null = null;
 
-      // 1. Try profile background
+    try {
+      // 1. Try user profile background
       if (userId) {
         try {
           const res = await ProfileService.getProfileBackground(userId);
+
           if (res?.backgroundImageUrl) {
             bgUrl = res.backgroundImageUrl;
           }
-        } catch (e) {
-          // ignore profile error → fallback
+        } catch {
+          // ignore API failure
         }
       }
 
-      // 2. fallback to default system backgrounds
+      // 2. fallback to system default backgrounds
       if (!bgUrl) {
         bgUrl =
           resolvedTheme === "dark" ? "/background2.png" : "/background.png";
@@ -51,14 +52,21 @@ export default function BackgroundManager() {
     }
   };
 
+  // initial + theme change
   useEffect(() => {
     applyBackground();
   }, [resolvedTheme]);
 
+  // global sync
   useEffect(() => {
-    window.addEventListener("auth-user-changed", applyBackground);
-    return () => window.removeEventListener("profile-updated", applyBackground);
-  }, []);
+    const handler = () => applyBackground();
+
+    window.addEventListener("auth-user-changed", handler);
+
+    return () => {
+      window.removeEventListener("auth-user-changed", handler);
+    };
+  }, [resolvedTheme]);
 
   return null;
 }
