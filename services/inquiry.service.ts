@@ -115,6 +115,26 @@ export class InquiryService {
     }
   }
 
+/**
+ * Update inquiry status
+ * PATCH /api/inquiry/{id}/status
+ */
+static async updateInquiryStatus(
+  id: string,
+  status: string,
+): Promise<Inquiry> {
+  try {
+    const response = await apiClient.patch<InquiryResponse>(
+      `/api/inquiry/${this.encodeId(id)}/status`,
+      { status },
+    );
+
+    return response.data.data;
+  } catch (error: any) {
+    throw this.handleError(error);
+  }
+}
+
   /**
    * Centralized error handling
    */

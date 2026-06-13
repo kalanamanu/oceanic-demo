@@ -130,9 +130,11 @@ export function EditInquiryDialog({
     e.preventDefault();
 
     try {
-      await InquiryService.updateInquiry({
-        id: inquiry.inq_id!, // or inquiry.id depending on your model
+      const id = inquiry.inq_id!;
 
+      // 1. Update full inquiry data
+      await InquiryService.updateInquiry({
+        id,
         vessel_name: fields.vessel_name,
         agent: fields.agent,
         eta: fields.eta,
@@ -143,7 +145,6 @@ export function EditInquiryDialog({
 
         key_pic_usr_id: fields.key_pic_usr_id,
 
-        // IMPORTANT: ensure backend format
         categories: (fields.categories || []).map((c: any) => ({
           id: c.cte_id ?? c.id,
           name: c.cte_name ?? c.name,
@@ -159,8 +160,12 @@ export function EditInquiryDialog({
         customerEmail: fields.customerEmail,
         commissionParty: fields.commissionParty,
 
+        // optional (can remove if backend ignores it here)
         status: fields.status ?? "Pending",
       });
+
+      // 2. Update STATUS separately (THIS IS YOUR NEW REQUIREMENT)
+      await InquiryService.updateInquiryStatus(id, fields.status ?? "Pending");
 
       toast.success("Inquiry updated successfully");
 
