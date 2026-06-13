@@ -54,10 +54,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * 🔥 IMPORTANT FIX:
+   * Notify the whole app (background, header, layout, etc.)
+   * whenever auth state changes.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.dispatchEvent(new Event("auth-user-changed"));
+  }, [user]);
+
   const logout = async () => {
     try {
       await AuthService.logout();
+
       setUser(null);
+
+      // trigger global sync
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("auth-user-changed"));
+      }
+
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);

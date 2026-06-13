@@ -56,7 +56,7 @@ export default function BackgroundManager() {
   }, [resolvedTheme]);
 
   useEffect(() => {
-    window.addEventListener("profile-updated", applyBackground);
+    window.addEventListener("auth-user-changed", applyBackground);
     return () => window.removeEventListener("profile-updated", applyBackground);
   }, []);
 

@@ -34,7 +34,7 @@ export default function AppShell({ children }: AppShellProps) {
     ? SIDEBAR_COLLAPSED_WIDTH
     : SIDEBAR_EXPANDED_WIDTH;
 
-  // 🚨 IMPORTANT: Do NOT render shell for public pages
+  // IMPORTANT: Do NOT render shell for public pages
   if (isPublicRoute) {
     return <>{children}</>;
   }
