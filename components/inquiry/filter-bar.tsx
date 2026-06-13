@@ -38,14 +38,14 @@ export function FilterBar({
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* LEFT SIDE */}
         <div className="flex items-center gap-3 flex-1">
-          <Button
+          {/* <Button
             variant={showFilters ? "default" : "outline"}
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="mr-2 h-4 w-4" />
             Filters
-          </Button>
+          </Button> */}
 
           {/* 🔥 SEARCH BAR */}
           <div className="relative w-full max-w-sm">
@@ -58,19 +58,19 @@ export function FilterBar({
             />
           </div>
 
-          <p className="text-sm text-muted-foreground hidden md:block">
+          {/* <p className="text-sm text-muted-foreground hidden md:block">
             Filter by status, port, PIC, or date range
-          </p>
+          </p> */}
         </div>
 
         {/* RIGHT SIDE */}
         <div className="flex gap-2">
-          {onExport && (
+          {/* {onExport && (
             <Button variant="outline" size="sm" onClick={onExport}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-          )}
+          )} */}
 
           {onCreateNew && (
             <VesselInquiryDialog>
