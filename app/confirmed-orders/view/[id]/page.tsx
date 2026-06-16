@@ -198,7 +198,7 @@ export default function ConfirmedOrderDetailPage() {
                 {/* Generate Invoice (your existing action) */}
                 <DropdownMenuItem onClick={() => setInvoiceOpen(true)}>
                   <FileText className="w-4 h-4 mr-2" />
-                  Generate Invoice
+                  Invoice
                 </DropdownMenuItem>
 
                 {/* NEW OPTIONS (UI only for now) */}
