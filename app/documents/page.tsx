@@ -1,90 +1,163 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, FolderOpen } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  FileText,
+  Receipt,
+  Truck,
+  ShoppingCart,
+  ShieldCheck,
+  Search,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+
+// Document Types Configuration
+const DOCUMENT_TYPES = [
+  {
+    id: "pre-cost",
+    title: "Pre-Costing",
+    description: "Estimations and initial cost analysis for vessel inquiries.",
+    icon: FileText,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    href: "/documents/pre-cost",
+  },
+  {
+    id: "invoice",
+    title: "Invoices",
+    description: "Manage billing, commercial invoices, and payment tracking.",
+    icon: Receipt,
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    href: "/documents/invoice",
+  },
+  {
+    id: "dispatch-note",
+    title: "Dispatch Notes",
+    description: "Tracking delivery logs and issued items manifesto.",
+    icon: Truck,
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
+    href: "/documents/dispatch-note",
+  },
+  {
+    id: "purchase-order",
+    title: "Purchase Orders",
+    description: "Supplier orders, PO numbers, and procurement records.",
+    icon: ShoppingCart,
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
+    href: "/documents/purchase-order",
+  },
+  {
+    id: "customs",
+    title: "Customs Documents",
+    description: "Regulatory filings, clearing documents, and permits.",
+    icon: ShieldCheck,
+    color: "text-red-500",
+    bgColor: "bg-red-500/10",
+    href: "/documents/customs",
+  },
+];
 
 export default function DocumentsPage() {
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    // Infinite fake loading
-    setLoading(true);
-  }, []);
+  const filteredDocs = DOCUMENT_TYPES.filter((doc) =>
+    doc.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      <div className="mx-auto max-w-7xl space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-
-            <p className="mt-1 text-muted-foreground">
-              Manage vessel inquiry documents and files.
+            <p className="text-muted-foreground">
+              Centralized repository for vessel documentation and procurement
+              records.
             </p>
           </div>
-
-          <Button className="h-11 rounded-2xl px-6">
-            <FolderOpen className="mr-2 h-4 w-4" />
-            Browse Files
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search documents..."
+                className="pl-9 h-11 rounded-xl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Infinite Loading Screen */}
-        <AnimatePresence>
-          {loading && (
+        {/* Document Cards Grid */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredDocs.map((doc, index) => (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm"
+              key={doc.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -4 }}
             >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="w-[420px] rounded-3xl border bg-card p-8 shadow-2xl"
+              <Card
+                className="group cursor-pointer overflow-hidden border-2 transition-all hover:border-primary/50 shadow-sm"
+                onClick={() => router.push(doc.href)}
               >
-                <div className="flex flex-col items-center text-center">
-                  {/* Spinner */}
-                  <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <CardHeader className="space-y-4">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${doc.bgColor}`}
+                  >
+                    <doc.icon className={`h-6 w-6 ${doc.color}`} />
                   </div>
-
-                  {/* Title */}
-                  <h2 className="text-2xl font-semibold">Loading Documents</h2>
-
-                  {/* Description */}
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Preparing vessel documents and syncing records...
-                  </p>
-
-                  {/* Infinite Progress Bar */}
-                  <div className="mt-8 h-3 w-full overflow-hidden rounded-full bg-muted relative">
-                    <motion.div
-                      initial={{ x: "-100%" }}
-                      animate={{ x: "300%" }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 1.8,
-                        ease: "linear",
-                      }}
-                      className="absolute left-0 top-0 h-full w-1/3 rounded-full bg-primary"
-                    />
+                  <div>
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                      {doc.title}
+                    </CardTitle>
+                    <CardDescription className="mt-2 line-clamp-2">
+                      {doc.description}
+                    </CardDescription>
                   </div>
-
-                  {/* Footer Text */}
-                  <div className="mt-5 text-xs text-muted-foreground">
-                    Please wait while we process your files...
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-sm font-semibold text-primary">
+                    View Documents
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
-                </div>
-              </motion.div>
+                </CardContent>
+              </Card>
             </motion.div>
-          )}
-        </AnimatePresence>
+          ))}
+        </div>
+
+        {/* Empty State if search finds nothing */}
+        {filteredDocs.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="rounded-full bg-muted p-6">
+              <Search className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold">
+              No document types found
+            </h3>
+            <p className="text-muted-foreground">
+              Try adjusting your search criteria.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
