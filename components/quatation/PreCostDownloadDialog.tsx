@@ -23,8 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { DocumentService } from "@/services/document.service";
-import { waitForDocumentJob } from "@/services/document-polling.service";
+import { useDocumentEngine } from "@/hooks/use-document-job";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { BasisService } from "@/services/basis.service";
@@ -40,7 +39,10 @@ export function PreCostDownloadDialog({
   onOpenChange,
   precostData,
 }: Props) {
-  const [loading, setLoading] = React.useState(false);
+  const { loading, runJob } = useDocumentEngine({
+    pollInterval: 2000,
+    maxAttempts: 5,
+  });
   const [usdRate, setUsdRate] = React.useState(1);
 
   const [form, setForm] = React.useState({
@@ -124,8 +126,6 @@ export function PreCostDownloadDialog({
     if (loading) return;
 
     try {
-      setLoading(true);
-
       const payload = {
         document: "PRECOST",
         documentType: form.documentType,
@@ -158,44 +158,11 @@ export function PreCostDownloadDialog({
         },
       };
 
-      const res = await DocumentService.generateDocument(payload);
+      await runJob(payload, "PreCost");
 
-      if (!res.jobId) throw new Error("Failed to create job");
-
-      toast.info("Generating document...");
-
-      const job = await waitForDocumentJob(res.jobId, {
-        interval: 2000,
-        maxAttempts: 5,
-      });
-
-      if (job.state === "failed") {
-        throw new Error(job.error || "Generation failed");
-      }
-
-      const fileName = job.result?.fileName;
-      if (!fileName) throw new Error("File not generated");
-
-      const blob = await DocumentService.downloadDocument(fileName);
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-
-      a.href = url;
-      a.download = fileName;
-
-      document.body.appendChild(a);
-      a.click();
-
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Download completed");
       onOpenChange(false);
-    } catch (err: any) {
-      toast.error(err.message || "Download failed");
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error(err);
     }
   };
 
