@@ -324,6 +324,7 @@ export default function ConfirmedOrderDetailPage() {
         <CreateDispatchNoteDialog
           open={dispatchOpen}
           onOpenChange={setDispatchOpen}
+          data={data}
         />
       </main>
     </div>
