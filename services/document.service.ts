@@ -29,19 +29,19 @@ export class DocumentService {
     return res.data;
   }
 
-  /**
-   * Step 3: Download file as Blob
-   */
-  static async downloadDocument(fileName: string): Promise<Blob> {
-    const res = await apiClient.get(
-      `/api/document/download/${fileName}`,
-      {
-        responseType: "blob",
-      },
-    );
+/**
+ * Step 3: Download file as Blob
+ */
+static async downloadDocument(documentId: string): Promise<Blob> {
+  const res = await apiClient.get(
+    `/api/document/download/${documentId}`,
+    {
+      responseType: "blob",
+    },
+  );
 
-    return res.data;
-  }
+  return res.data;
+}
 
   /**
    * Cancel job

@@ -27,14 +27,11 @@ export function useDocumentEngine(options?: EngineOptions) {
   ========================= */
   const saveDraft = async (payload: any) => {
     try {
-      const res = await fetch(
-        "/api/document/draft",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch("/api/document/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       const json = await res.json();
       const id = json?.data?.draft_id || null;
@@ -50,10 +47,7 @@ export function useDocumentEngine(options?: EngineOptions) {
   /* =========================
      JOB RUNNER
   ========================= */
-  const runJob = async (
-    payload: any,
-    label = "Document"
-  ) => {
+  const runJob = async (payload: any, label = "Document") => {
     try {
       setLoading(true);
       lastPayloadRef.current = payload;
@@ -82,16 +76,21 @@ export function useDocumentEngine(options?: EngineOptions) {
         attempt++;
       }
 
-      if (!job?.result?.fileName) {
-        throw new Error("File not ready");
+      if (!job?.result) {
+        throw new Error("Job result not available");
       }
 
-      // STEP 3: DOWNLOAD
-      const blob = await DocumentService.downloadDocument(
-        job.result.fileName
-      );
+      const documentId = job.result.documentId;
+      const fileName = job.result.fileName;
 
-      DocumentService.triggerDownload(blob, job.result.fileName);
+      if (!documentId || !fileName) {
+        throw new Error("Missing document data");
+      }
+
+      // STEP 3: DOWNLOAD (NOW USING documentId)
+      const blob = await DocumentService.downloadDocument(documentId);
+
+      DocumentService.triggerDownload(blob, fileName);
 
       toast.success(`${label} downloaded`);
 
@@ -122,7 +121,6 @@ export function useDocumentEngine(options?: EngineOptions) {
   const autoSave = async (payload: any) => {
     if (!autoSaveDraft) return;
 
-    // avoid spam saving same payload
     const last = JSON.stringify(lastPayloadRef.current);
     const current = JSON.stringify(payload);
 
@@ -135,7 +133,6 @@ export function useDocumentEngine(options?: EngineOptions) {
      RESTORE (future use)
   ========================= */
   const restoreDraft = async (draftId: string) => {
-    // optional backend endpoint later
     console.log("restore draft:", draftId);
   };
 
