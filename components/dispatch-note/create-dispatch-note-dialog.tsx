@@ -18,14 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, FileSpreadsheet, FileText } from "lucide-react";
 import { useDocumentEngine } from "@/hooks/use-document-job";
 import { BasisService } from "@/services/basis.service";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   data: any;
 }
+
 interface DispatchItem {
   product: string;
   supplier: string;
@@ -40,6 +44,7 @@ interface DispatchItem {
   remark: string;
   unit: string;
 }
+
 export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
   const { loading, runJob } = useDocumentEngine({
     pollInterval: 2000,
@@ -211,263 +216,437 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl p-6 gap-6">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Download Dispatch Note</DialogTitle>
-          <DialogDescription>
-            Configure dispatch note details before generating the document.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="max-h-[70vh] overflow-y-auto pr-1 space-y-6">
-          {/* HEADER DETAILS */}
-          <div className="grid grid-cols-3 gap-4">
-            <Field
-              label="Reference No"
-              value={form.reference_no}
-              onChange={(v) => setForm({ ...form, reference_no: v })}
-            />
-            <Field
-              label="Vessel Name"
-              value={form.vessel_name}
-              onChange={(v) => setForm({ ...form, vessel_name: v })}
-            />
-            <Field
-              label="Caption"
-              value={form.caption}
-              onChange={(v) => setForm({ ...form, caption: v })}
-            />
-            <Field
-              label="Cook"
-              value={form.cook}
-              onChange={(v) => setForm({ ...form, cook: v })}
-            />
-            <Field
-              label="Agent"
-              value={form.agent}
-              onChange={(v) => setForm({ ...form, agent: v })}
-            />
-            <Field
-              label="Company"
-              value={form.company}
-              onChange={(v) => setForm({ ...form, company: v })}
-            />
-            <Field
-              label="Port"
-              value={form.port}
-              onChange={(v) => setForm({ ...form, port: v })}
-            />
-            <Field
-              label="Supplier"
-              value={form.supplier}
-              onChange={(v) => setForm({ ...form, supplier: v })}
-            />
-            <Field
-              label="Place of Delivery"
-              value={form.place_of_delivery}
-              onChange={(v) => setForm({ ...form, place_of_delivery: v })}
-            />
-            <Field
-              label="ETA"
-              value={form.ETA}
-              onChange={(v) => setForm({ ...form, ETA: v })}
-            />
-            <Field
-              label="ETD"
-              value={form.ETD}
-              onChange={(v) => setForm({ ...form, ETD: v })}
-            />
-            <Field
-              label="No Of Crew"
-              value={form.no_of_crew}
-              onChange={(v) => setForm({ ...form, no_of_crew: v })}
-            />
-            <Field
-              label="Next Main Order In"
-              value={form.next_main_order_in}
-              onChange={(v) => setForm({ ...form, next_main_order_in: v })}
-            />
-            <Field
-              label="Date"
-              type="date"
-              value={form.date}
-              onChange={(v) => setForm({ ...form, date: v })}
-            />
-          </div>
-          {/* DETAILS */}
-          <div className="space-y-2">
-            <Label>Details</Label>
-            <Input
-              value={form.details}
-              onChange={(e) => setForm({ ...form, details: e.target.value })}
-            />
-          </div>
-          {/* ITEMS */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold"> Dispatch Items </h3>
-              <Button size="sm" variant="outline" onClick={addItem}>
-                <Plus className="w-4 h-4 mr-2" /> Add Item
-              </Button>
+      {/* Changed window constraints to override shadcn defaults to use 90vw width properly */}
+      <DialogContent className="sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] xl:max-w-[1200px] max-h-[90vh] flex flex-col p-0 overflow-hidden gap-0">
+        {/* Persistent Premium Header */}
+        <div className="p-6 border-b bg-muted/20">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight">
+              Download Dispatch Note
+            </DialogTitle>
+            <DialogDescription>
+              Configure and review dispatch logs, maritime routing details, and
+              item receipts before generating documentation.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        {/* Scrollable Layout Context Container */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          {/* Metadata Section Split (Horizontal layout block) */}
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Left Column: Shipping & Vessel Info */}
+            <div className="flex-1 space-y-4">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Vessel & Shipping Details
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <Field
+                  label="Reference No"
+                  value={form.reference_no}
+                  onChange={(v) => setForm({ ...form, reference_no: v })}
+                />
+                <Field
+                  label="Vessel Name"
+                  value={form.vessel_name}
+                  onChange={(v) => setForm({ ...form, vessel_name: v })}
+                />
+                <Field
+                  label="Caption"
+                  value={form.caption}
+                  onChange={(v) => setForm({ ...form, caption: v })}
+                />
+                <Field
+                  label="Company"
+                  value={form.company}
+                  onChange={(v) => setForm({ ...form, company: v })}
+                />
+                <Field
+                  label="Agent"
+                  value={form.agent}
+                  onChange={(v) => setForm({ ...form, agent: v })}
+                />
+                <Field
+                  label="Supplier"
+                  value={form.supplier}
+                  onChange={(v) => setForm({ ...form, supplier: v })}
+                />
+              </div>
             </div>
-            {items.map((item, index) => (
-              <div key={index} className="border rounded-xl p-4 space-y-4">
-                <div className="flex justify-between">
-                  <h4 className="font-medium"> Item #{index + 1} </h4>
-                  {items.length > 1 && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => removeItem(index)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
+
+            {/* Vertical Divider for Clear Space Division */}
+            <div className="hidden md:block w-px bg-border self-stretch" />
+
+            {/* Right Column: Timelines & Logistics */}
+            <div className="flex-1 space-y-4">
+              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Logistics & Timeline
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <Field
+                  label="Port"
+                  value={form.port}
+                  onChange={(v) => setForm({ ...form, port: v })}
+                />
+                <Field
+                  label="Place of Delivery"
+                  value={form.place_of_delivery}
+                  onChange={(v) => setForm({ ...form, place_of_delivery: v })}
+                />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-foreground/80">
+                    ETA
+                  </Label>
+                  <DateTimePicker
+                    date={form.ETA ? new Date(form.ETA) : undefined}
+                    onDateChange={(v) =>
+                      setForm({ ...form, ETA: v ? v.toISOString() : "" })
+                    }
+                  />
                 </div>
-                <div className="grid grid-cols-4 gap-3">
-                  <ItemField
-                    label="Product"
-                    value={item.product}
-                    onChange={(v) => updateItem(index, "product", v)}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-foreground/80">
+                    ETD
+                  </Label>
+                  <DateTimePicker
+                    date={form.ETD ? new Date(form.ETD) : undefined}
+                    onDateChange={(v) =>
+                      setForm({ ...form, ETD: v ? v.toISOString() : "" })
+                    }
                   />
-                  <ItemField
-                    label="Supplier"
-                    value={item.supplier}
-                    onChange={(v) => updateItem(index, "supplier", v)}
-                  />
-                  <ItemField
-                    label="PO No"
-                    value={item.po_no}
-                    onChange={(v) => updateItem(index, "po_no", v)}
-                  />
-                  <ItemField
-                    label="Unit"
-                    value={item.unit}
-                    onChange={(v) => updateItem(index, "unit", v)}
-                  />
-                  <ItemField
-                    label="Received Qty"
-                    value={item.rcvd_qty}
-                    onChange={(v) => updateItem(index, "rcvd_qty", v)}
-                  />
-                  <ItemField
-                    label="Issued Qty"
-                    value={item.issued_qty}
-                    onChange={(v) => updateItem(index, "issued_qty", v)}
-                  />
-                  <ItemField
-                    label="Rejects"
-                    value={item.rejects}
-                    onChange={(v) => updateItem(index, "rejects", v)}
-                  />
-                  <ItemField
-                    label="Fat Con"
-                    value={item.fat_con}
-                    onChange={(v) => updateItem(index, "fat_con", v)}
-                  />
-                  <ItemField
-                    label="Expiry Date"
-                    value={item.exp_date}
-                    onChange={(v) => updateItem(index, "exp_date", v)}
-                  />
-                  <ItemField
-                    label="Received Time"
-                    value={item.revd_time}
-                    onChange={(v) => updateItem(index, "revd_time", v)}
-                  />
-                  <ItemField
-                    label="Date"
-                    value={item.date}
-                    onChange={(v) => updateItem(index, "date", v)}
-                  />
-                  <ItemField
-                    label="Remark"
-                    value={item.remark}
-                    onChange={(v) => updateItem(index, "remark", v)}
+                </div>
+                <Field
+                  label="Cook"
+                  value={form.cook}
+                  onChange={(v) => setForm({ ...form, cook: v })}
+                />
+                <Field
+                  label="No Of Crew"
+                  value={form.no_of_crew}
+                  onChange={(v) => setForm({ ...form, no_of_crew: v })}
+                />
+                <Field
+                  label="Next Main Order In"
+                  value={form.next_main_order_in}
+                  onChange={(v) => setForm({ ...form, next_main_order_in: v })}
+                />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-foreground/80">
+                    Date
+                  </Label>
+                  <DatePicker
+                    date={form.date ? new Date(form.date) : undefined}
+                    onDateChange={(v) =>
+                      setForm({
+                        ...form,
+                        date: v ? v.toISOString().split("T")[0] : "",
+                      })
+                    }
                   />
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={currency === "LKR" ? "default" : "outline"}
-              onClick={() => setCurrency("LKR")}
-            >
-              LKR
-            </Button>
 
-            <Button
-              type="button"
-              variant={currency === "USD" ? "default" : "outline"}
-              onClick={() => setCurrency("USD")}
-            >
-              USD
-            </Button>
+          {/* Details Row */}
+          <div className="space-y-2 border-t pt-4">
+            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              Additional Logistics Details
+            </Label>
+            <Input
+              value={form.details}
+              onChange={(e) => setForm({ ...form, details: e.target.value })}
+              placeholder="Enter explicit instructions or terminal delivery terms..."
+            />
           </div>
-          {/* SUMMARY */}
-          <div className="border rounded-xl p-4 space-y-3">
-            <div className="grid grid-cols-3 gap-4">
-              <Field
-                label={`Sub Total (${currency})`}
-                type="number"
-                value={subTotal.toFixed(2)}
-                onChange={() => {}}
-              />
-              <Field
-                label="Discount"
-                type="number"
-                value={String(form.discount)}
-                onChange={(v) => setForm({ ...form, discount: Number(v) || 0 })}
-              />
-              <Field
-                label="Transport Cost"
-                type="number"
-                value={String(form.transport_cost)}
-                onChange={(v) =>
-                  setForm({ ...form, transport_cost: Number(v) || 0 })
-                }
-              />
+
+          {/* Spreadsheet-like Manifesto Table */}
+          <div className="space-y-4 border-t pt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                  Dispatch Manifesto
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Edit log data directly within the rows below.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={addItem}
+                className="h-8 shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Add New Row
+              </Button>
             </div>
-            <div className="flex justify-between border-t pt-3 font-semibold text-lg">
-              <span>Grand Total</span>
-              <span>
-                {currency} {grandTotal.toLocaleString()}
-              </span>
+
+            <div className="border rounded-lg overflow-x-auto shadow-inner bg-card max-w-full">
+              <table className="w-full min-w-[1400px] text-left border-collapse table-fixed">
+                <thead>
+                  <tr className="bg-muted/70 text-muted-foreground text-[11px] font-bold uppercase border-b tracking-wider">
+                    <th className="p-2.5 w-10 text-center">#</th>
+                    <th className="p-2.5 w-[160px]">Product</th>
+                    <th className="p-2.5 w-[140px]">Supplier</th>
+                    <th className="p-2.5 w-[100px]">PO No</th>
+                    <th className="p-2.5 w-[80px]">Unit</th>
+                    <th className="p-2.5 w-[95px]">Rcvd Qty</th>
+                    <th className="p-2.5 w-[95px]">Issd Qty</th>
+                    <th className="p-2.5 w-[90px]">Rejects</th>
+                    <th className="p-2.5 w-[90px]">Fat Con</th>
+                    <th className="p-2.5 w-[160px]">Expiry Date</th>
+                    <th className="p-2.5 w-[230px]">Rcvd Time</th>
+                    <th className="p-2.5 w-[160px]">Date</th>
+                    <th className="p-2.5 w-[160px]">Remark</th>
+                    <th className="p-2.5 w-12 text-center"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y text-xs">
+                  {items.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-muted/40 transition-colors"
+                    >
+                      <td className="p-1.5 text-center font-medium text-muted-foreground">
+                        {index + 1}
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.product}
+                          onChange={(v) => updateItem(index, "product", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.supplier}
+                          onChange={(v) => updateItem(index, "supplier", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.po_no}
+                          onChange={(v) => updateItem(index, "po_no", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.unit}
+                          onChange={(v) => updateItem(index, "unit", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.rcvd_qty}
+                          onChange={(v) => updateItem(index, "rcvd_qty", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.issued_qty}
+                          onChange={(v) => updateItem(index, "issued_qty", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.rejects}
+                          onChange={(v) => updateItem(index, "rejects", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.fat_con}
+                          onChange={(v) => updateItem(index, "fat_con", v)}
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <DatePicker
+                          date={
+                            item.exp_date ? new Date(item.exp_date) : undefined
+                          }
+                          onDateChange={(v) =>
+                            updateItem(
+                              index,
+                              "exp_date",
+                              v ? v.toISOString().split("T")[0] : "",
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <DateTimePicker
+                          date={
+                            item.revd_time
+                              ? new Date(item.revd_time)
+                              : undefined
+                          }
+                          onDateChange={(v) =>
+                            updateItem(
+                              index,
+                              "revd_time",
+                              v ? v.toISOString() : "",
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <DatePicker
+                          date={item.date ? new Date(item.date) : undefined}
+                          onDateChange={(v) =>
+                            updateItem(
+                              index,
+                              "date",
+                              v ? v.toISOString().split("T")[0] : "",
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="p-1.5">
+                        <TableInput
+                          value={item.remark}
+                          onChange={(v) => updateItem(index, "remark", v)}
+                        />
+                      </td>
+                      <td className="p-1.5 text-center">
+                        {items.length > 1 && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                            onClick={() => removeItem(index)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-          {/* DOCUMENT TYPE */}
-          <div className="space-y-2">
-            <Label>Document Type</Label>
+
+          {/* Financial Totals Ledger Row */}
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-t pt-6 bg-muted/10 p-4 rounded-xl">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
+                Currency Standard
+              </Label>
+              <div className="flex bg-muted p-1 rounded-lg border shadow-inner">
+                <button
+                  type="button"
+                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${currency === "LKR" ? "bg-background shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}
+                  onClick={() => setCurrency("LKR")}
+                >
+                  LKR
+                </button>
+                <button
+                  type="button"
+                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${currency === "USD" ? "bg-background shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}
+                  onClick={() => setCurrency("USD")}
+                >
+                  USD
+                </button>
+              </div>
+            </div>
+
+            <div className="w-full md:w-80 grid grid-cols-1 gap-2.5">
+              <div className="flex justify-between items-center text-xs font-medium border-b pb-1.5">
+                <span className="text-muted-foreground">
+                  Sub Total ({currency})
+                </span>
+                <span className="font-mono">{subTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center gap-4 text-xs font-medium border-b pb-1.5">
+                <span className="text-muted-foreground">Discount Value</span>
+                <div className="w-24">
+                  <TableInput
+                    type="number"
+                    className="text-right h-6 py-0 font-mono bg-background border"
+                    value={String(form.discount)}
+                    onChange={(v) =>
+                      setForm({ ...form, discount: Number(v) || 0 })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between items-center gap-4 text-xs font-medium border-b pb-1.5">
+                <span className="text-muted-foreground">Transport Cost</span>
+                <div className="w-24">
+                  <TableInput
+                    type="number"
+                    className="text-right h-6 py-0 font-mono bg-background border"
+                    value={String(form.transport_cost)}
+                    onChange={(v) =>
+                      setForm({ ...form, transport_cost: Number(v) || 0 })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between items-center font-bold text-base pt-1 text-foreground">
+                <span>Grand Total</span>
+                <span className="font-mono tracking-tight text-emerald-500">
+                  {currency}{" "}
+                  {grandTotal.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Export File Profile Select */}
+          <div className="w-full md:w-64 space-y-1.5 border-t pt-6">
+            <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
+              Export Engine Profile
+            </Label>
             <Select
               value={form.documentType}
               onValueChange={(v) =>
                 setForm({ ...form, documentType: v as "pdf" | "excel" })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-card shadow-sm h-9 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pdf"> PDF </SelectItem>
-                <SelectItem value="excel"> Excel </SelectItem>
+                <SelectItem value="pdf">
+                  <span className="flex items-center gap-2 text-destructive">
+                    <FileText className="w-3.5 h-3.5" /> Portable Document
+                    Format (.pdf)
+                  </span>
+                </SelectItem>
+                <SelectItem value="excel">
+                  <span className="flex items-center gap-2 text-emerald-500">
+                    <FileSpreadsheet className="w-3.5 h-3.5" /> Microsoft Excel
+                    Sheet (.xlsx)
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-        <DialogFooter className="border-t pt-4">
+
+        {/* Fixed Footer Stack */}
+        <div className="p-4 border-t bg-muted/20 flex justify-end gap-3">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleDownload} disabled={loading}>
+          <Button
+            onClick={handleDownload}
+            disabled={loading}
+            className="px-5 shadow-sm bg-emerald-500 hover:bg-emerald-600 text-white font-medium"
+          >
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {loading ? "Generating..." : "Download"}
+            {loading ? "Compiling..." : "Generate & Download"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+/* Reusable Local Elements */
 function Field({
   label,
   value,
@@ -480,29 +659,35 @@ function Field({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
+    <div className="space-y-1">
+      <Label className="text-xs font-medium text-foreground/80">{label}</Label>
       <Input
         type={type}
         value={value}
+        className="h-9 shadow-sm bg-card focus-visible:ring-1 text-xs"
         onChange={(e) => onChange(e.target.value)}
       />
     </div>
   );
 }
-function ItemField({
-  label,
+
+function TableInput({
   value,
   onChange,
+  type = "text",
+  className = "",
 }: {
-  label: string;
   value: string;
   onChange: (value: string) => void;
+  type?: string;
+  className?: string;
 }) {
   return (
-    <div className="space-y-1">
-      <Label className="text-xs"> {label} </Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} />
-    </div>
+    <Input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`h-8 text-xs bg-muted/20 border-border focus-visible:ring-1 focus-visible:bg-card px-2 rounded ${className}`}
+    />
   );
 }
