@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ConfirmedItemsTable } from "@/components/confirmed-orders/confirmed-items-table";
+import { CreateDispatchNoteDialog } from "@/components/dispatch-note/create-dispatch-note-dialog";
 
 import { InvoiceDialog } from "@/components/invoices/create-invoice-dialog";
 
@@ -43,6 +44,7 @@ export default function ConfirmedOrderDetailPage() {
   const [approving, setApproving] = React.useState(false);
 
   const [invoiceOpen, setInvoiceOpen] = React.useState(false);
+  const [dispatchOpen, setDispatchOpen] = React.useState(false);
 
   /* ================= AUTH ================= */
   React.useEffect(() => {
@@ -209,9 +211,7 @@ export default function ConfirmedOrderDetailPage() {
                   Delivery Note
                 </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onClick={() => toast.info("Dispatch Note coming soon")}
-                >
+                <DropdownMenuItem onClick={() => setDispatchOpen(true)}>
                   <Send className="w-4 h-4 mr-2" />
                   Dispatch Note
                 </DropdownMenuItem>
@@ -320,6 +320,10 @@ export default function ConfirmedOrderDetailPage() {
           open={invoiceOpen}
           onOpenChange={setInvoiceOpen}
           data={data}
+        />
+        <CreateDispatchNoteDialog
+          open={dispatchOpen}
+          onOpenChange={setDispatchOpen}
         />
       </main>
     </div>
