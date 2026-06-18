@@ -194,8 +194,7 @@ export default function CalendarHolidayPage() {
             Manage Calendar Holidays
           </h1>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CalendarDays className="h-4 w-4" />
-            <span>Active Ledger Identifier Token:</span>
+            <span>Calender ID:</span>
             <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-xs text-foreground font-semibold">
               {calender_id}
             </code>
@@ -250,8 +249,7 @@ export default function CalendarHolidayPage() {
                     {MONTH_NAMES[month - 1]} Overview
                   </CardTitle>
                   <CardDescription>
-                    Review system operational schedules and milestone
-                    exclusions.
+                    Review and Manage the Holidays.
                   </CardDescription>
                 </div>
 
