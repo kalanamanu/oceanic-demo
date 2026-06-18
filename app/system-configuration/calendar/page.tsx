@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 import {
@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { CalendarDays, Plus, Trash2, Calendar } from "lucide-react";
+import { toast } from "sonner";
+
+import { CalendarService } from "@/services/calendar.service";
 
 interface CalendarYear {
   calender_id: string;
@@ -26,17 +29,55 @@ export default function CalendarConfigurationPage() {
   const currentYear = new Date().getFullYear();
 
   const [year, setYear] = useState(String(currentYear));
+  const [calendars, setCalendars] = useState<CalendarYear[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Temporary until API list endpoint exists
-  const [calendars] = useState<CalendarYear[]>([]);
+  /* ================= LOAD CALENDARS ================= */
+  const loadCalendars = async () => {
+    try {
+      const data = await CalendarService.getAllCalendars();
+      setCalendars(data);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
 
+  useEffect(() => {
+    loadCalendars();
+  }, []);
+
+  /* ================= CREATE ================= */
   const handleCreate = async () => {
-    console.log("Create calendar:", year);
+    if (!year) return;
 
-    // Later:
-    // await CalendarService.createCalendar({
-    //   year: Number(year),
-    // });
+    try {
+      setLoading(true);
+
+      await CalendarService.createCalendar({
+        year: Number(year),
+      });
+
+      toast.success("Calendar created successfully");
+
+      setYear(String(currentYear));
+      loadCalendars();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================= DELETE ================= */
+  const handleDelete = async (id: string) => {
+    try {
+      await CalendarService.deleteCalendar(id);
+
+      toast.success("Calendar deleted");
+      loadCalendars();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
   };
 
   return (
@@ -74,9 +115,9 @@ export default function CalendarConfigurationPage() {
                 className="max-w-[220px]"
               />
 
-              <Button onClick={handleCreate}>
+              <Button onClick={handleCreate} disabled={loading}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Calendar
+                {loading ? "Creating..." : "Create Calendar"}
               </Button>
             </div>
           </CardContent>
@@ -136,7 +177,11 @@ export default function CalendarConfigurationPage() {
                           Manage Holidays
                         </Button>
 
-                        <Button variant="outline" size="icon">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDelete(calendar.calender_id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

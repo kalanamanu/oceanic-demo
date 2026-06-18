@@ -3,11 +3,11 @@ import apiClient from "@/lib/api-client";
 import type {
   Calendar,
   CalendarDate,
-  Holiday,
 
   CreateCalendarRequest,
   CreateCalendarResponse,
 
+  GetCalendarsResponse,
   CalendarMonthResponse,
 
   CreateHolidaysRequest,
@@ -17,27 +17,57 @@ import type {
 
   UpdateHolidayRequest,
   UpdateHolidayResponse,
-
-  CalendarActionResponse,
 } from "@/types/calendar.types";
 
+/* ================= ERROR HANDLER ================= */
+
+const getErrorMessage = (err: any, fallback: string) => {
+  return (
+    err?.response?.data?.message ||
+    err?.message ||
+    fallback
+  );
+};
+
 export class CalendarService {
+  /* ================= GET ALL CALENDARS ================= */
+
+  static async getAllCalendars(): Promise<Calendar[]> {
+    try {
+      const res = await apiClient.get<GetCalendarsResponse>(
+        "/api/calender",
+      );
+
+      return res.data.data;
+    } catch (err: any) {
+      throw new Error(
+        getErrorMessage(
+          err,
+          "Failed to fetch calendars",
+        ),
+      );
+    }
+  }
+
   /* ================= CREATE CALENDAR ================= */
 
   static async createCalendar(
     payload: CreateCalendarRequest,
   ): Promise<Calendar> {
     try {
-      const res = await apiClient.post<CreateCalendarResponse>(
-        "/api/calender",
-        payload,
-      );
+      const res =
+        await apiClient.post<CreateCalendarResponse>(
+          "/api/calender",
+          payload,
+        );
 
       return res.data.data;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to create calendar",
+        ),
       );
     }
   }
@@ -49,15 +79,18 @@ export class CalendarService {
     month: number,
   ): Promise<CalendarDate[]> {
     try {
-      const res = await apiClient.get<CalendarMonthResponse>(
-        `/api/calender/${calenderId}/month/${month}`,
-      );
+      const res =
+        await apiClient.get<CalendarMonthResponse>(
+          `/api/calender/${calenderId}/month/${month}`,
+        );
 
       return res.data.data;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to fetch calendar month",
+        ),
       );
     }
   }
@@ -73,8 +106,10 @@ export class CalendarService {
       );
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to delete calendar",
+        ),
       );
     }
   }
@@ -83,18 +118,18 @@ export class CalendarService {
 
   static async createHolidays(
     payload: CreateHolidaysRequest,
-  ): Promise<Holiday[]> {
+  ): Promise<void> {
     try {
-      const res = await apiClient.post<CreateHolidaysResponse>(
+      await apiClient.post<CreateHolidaysResponse>(
         "/api/calender/holidays",
         payload,
       );
-
-      return res.data.data;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to create holidays",
+        ),
       );
     }
   }
@@ -103,17 +138,20 @@ export class CalendarService {
 
   static async getHolidayById(
     holidayId: string,
-  ): Promise<Holiday> {
+  ): Promise<HolidayResponse["data"]> {
     try {
-      const res = await apiClient.get<HolidayResponse>(
-        `/api/calender/holidays/${holidayId}`,
-      );
+      const res =
+        await apiClient.get<HolidayResponse>(
+          `/api/calender/holidays/${holidayId}`,
+        );
 
       return res.data.data;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to fetch holiday",
+        ),
       );
     }
   }
@@ -123,18 +161,21 @@ export class CalendarService {
   static async updateHoliday(
     holidayId: string,
     payload: UpdateHolidayRequest,
-  ): Promise<Holiday> {
+  ): Promise<UpdateHolidayResponse["data"]> {
     try {
-      const res = await apiClient.put<UpdateHolidayResponse>(
-        `/api/calender/holidays/${holidayId}`,
-        payload,
-      );
+      const res =
+        await apiClient.put<UpdateHolidayResponse>(
+          `/api/calender/holidays/${holidayId}`,
+          payload,
+        );
 
       return res.data.data;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to update holiday",
+        ),
       );
     }
   }
@@ -150,8 +191,10 @@ export class CalendarService {
       );
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message ||
+        getErrorMessage(
+          err,
           "Failed to delete holiday",
+        ),
       );
     }
   }

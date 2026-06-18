@@ -37,7 +37,6 @@ export interface CalendarDate {
   weekday: string;
 
   isHoliday: boolean;
-
   holidayDetails: Holiday | null;
 }
 
@@ -53,7 +52,15 @@ export interface CreateCalendarResponse {
   data: Calendar;
 }
 
-/* ================= GET MONTH RESPONSE ================= */
+/* ================= GET ALL CALENDARS ================= */
+
+export interface GetCalendarsResponse {
+  success: boolean;
+  message: string;
+  data: Calendar[];
+}
+
+/* ================= GET MONTH ================= */
 
 export interface CalendarMonthResponse {
   success: boolean;
@@ -100,21 +107,29 @@ export interface HolidayResponse {
 }
 
 /* ================= UPDATE HOLIDAY ================= */
+/* FIX: backend supports partial updates */
 
 export interface UpdateHolidayRequest {
-  month: number;
-  day: number;
+  month?: number;
+  day?: number;
 
-  name: string;
-  type: HolidayType;
+  name?: string;
+  type?: HolidayType;
 
-  shouldConsiderAsHoliday: boolean;
+  shouldConsiderAsHoliday?: boolean;
 }
 
 export interface UpdateHolidayResponse {
   success: boolean;
   message: string;
   data: Holiday;
+}
+
+/* ================= DELETE HOLIDAY ================= */
+
+export interface DeleteHolidayResponse {
+  success: boolean;
+  message: string;
 }
 
 /* ================= COMMON ACTION RESPONSE ================= */
