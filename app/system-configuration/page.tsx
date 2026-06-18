@@ -19,6 +19,7 @@ import {
   Users,
   ArrowRight,
   Sliders,
+  CalendarDays,
 } from "lucide-react";
 
 import { AuthService } from "@/services/auth.service";
@@ -55,6 +56,15 @@ const configItems = [
     icon: Users,
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
+  },
+  {
+    title: "Calendar",
+    description:
+      "Manage calendar years, holidays, working days, and holiday configurations.",
+    href: "/system-configuration/calendar",
+    icon: CalendarDays,
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
   },
 ];
 
