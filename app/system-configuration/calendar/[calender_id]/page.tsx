@@ -64,6 +64,17 @@ const MONTH_NAMES = [
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+// Map to calculate prefix padding offsets based on the first day's weekday string
+const WEEKDAY_INDEX_MAP: Record<string, number> = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
 /* ================= PAGE ================= */
 export default function CalendarHolidayPage() {
   const { calender_id } = useParams<{ calender_id: string }>();
@@ -156,6 +167,10 @@ export default function CalendarHolidayPage() {
       toast.error(err.message || "Purge exception fault");
     }
   };
+
+  // Calculate grid padding dynamically from the first element's weekday text
+  const firstDayWeekday = days[0]?.weekday || "Sunday";
+  const startOffsetCount = WEEKDAY_INDEX_MAP[firstDayWeekday] || 0;
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -275,28 +290,36 @@ export default function CalendarHolidayPage() {
 
                 {/* Days Matrix */}
                 <div className="grid grid-cols-7 gap-2">
+                  {/* 1. RENDER OFFSET EMPTY BLOCKS TO SHIFT JANUARY 1ST TO THURSDAY */}
+                  {Array.from({ length: startOffsetCount }).map(
+                    (_, emptyIdx) => (
+                      <div
+                        key={`empty-${emptyIdx}`}
+                        className="min-h-[90px] border-2 border-dashed border-muted/20 rounded-xl opacity-20 bg-muted/5 text-transparent select-none"
+                      />
+                    ),
+                  )}
+
+                  {/* 2. RENDER THE ACTUAL DATA DAYS FROM BACKEND */}
                   {days.map((d, index) => {
                     const isHoliday = d.isHoliday && d.holidayDetails;
 
-                    // Direct layout checking fallback: Column 1 (index % 7 === 0) is Sunday, Column 7 (index % 7 === 6) is Saturday
-                    const isSundayColumn = index % 7 === 0;
-                    const isSaturdayColumn = index % 7 === 6;
+                    // Directly checks explicit capitalization structure returned by your backend logs
                     const isWeekend =
-                      isSundayColumn ||
-                      isSaturdayColumn ||
+                      d.weekday === "Sunday" ||
+                      d.weekday === "Saturday" ||
                       d.weekday === "Sun" ||
                       d.weekday === "Sat";
 
-                    // Dynamic background box styling configurations
+                    // Style adjustments matching dark themes
                     let dayCardStyles =
                       "bg-card hover:border-primary/40 text-card-foreground shadow-sm";
                     if (isHoliday) {
                       dayCardStyles =
-                        "bg-rose-500/5 border-rose-500/20 text-rose-700 dark:text-rose-400";
+                        "bg-rose-500/5 border-rose-500/25 text-rose-400";
                     } else if (isWeekend) {
-                      // Noticeable amber structural framing configuration matching your layout's theme header
                       dayCardStyles =
-                        "bg-amber-500/[0.03] border-amber-500/20 text-muted-foreground hover:border-amber-500/40 shadow-none";
+                        "bg-amber-500/[0.04] border-amber-500/20 text-muted-foreground hover:border-amber-500/40 shadow-none";
                     }
 
                     return (
@@ -309,9 +332,9 @@ export default function CalendarHolidayPage() {
                           <span
                             className={`text-base font-bold font-mono tracking-tight ${
                               isHoliday
-                                ? "text-rose-600 dark:text-rose-400"
+                                ? "text-rose-500"
                                 : isWeekend
-                                  ? "text-amber-700"
+                                  ? "text-amber-500"
                                   : "text-foreground"
                             }`}
                           >
@@ -402,7 +425,7 @@ export default function CalendarHolidayPage() {
                   Holiday Name
                 </Label>
                 <Input
-                  placeholder="e.g. Poya Day ,Christmas Day, National Day"
+                  placeholder="e.g. Poya Day, Christmas Day, National Day"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="h-10 text-xs shadow-sm bg-card"
@@ -411,7 +434,7 @@ export default function CalendarHolidayPage() {
 
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase">
-                  EType of Holiday
+                  Type of Holiday
                 </Label>
                 <Select
                   value={form.type}
