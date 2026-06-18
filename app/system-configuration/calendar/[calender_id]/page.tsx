@@ -30,6 +30,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   CalendarDays,
   Plus,
@@ -45,6 +47,7 @@ interface HolidayForm {
   day: number;
   name: string;
   type: "public" | "bank" | "mercantile" | "company";
+  shouldConsiderAsHoliday: boolean;
 }
 
 const MONTH_NAMES = [
@@ -90,6 +93,7 @@ export default function CalendarHolidayPage() {
     day: 0,
     name: "",
     type: "public",
+    shouldConsiderAsHoliday: true,
   });
 
   /* ================= LOAD MONTH ================= */
@@ -109,18 +113,27 @@ export default function CalendarHolidayPage() {
   /* ================= OPEN CREATE ================= */
   const openCreate = (day: number) => {
     setEditMode(false);
-    setForm({ day, name: "", type: "public" });
+    setForm({
+      day,
+      name: "",
+      type: "public",
+      shouldConsiderAsHoliday: true,
+    });
     setShowModal(true);
   };
 
   /* ================= OPEN EDIT ================= */
   const openEdit = (holiday: any) => {
     setEditMode(true);
+
     setForm({
       day: holiday.day,
       name: holiday.holidayDetails.name,
       type: holiday.holidayDetails.type || "public",
+      shouldConsiderAsHoliday:
+        holiday.holidayDetails.shouldConsiderAsHoliday ?? true,
     });
+
     setShowModal(true);
   };
 
@@ -140,7 +153,7 @@ export default function CalendarHolidayPage() {
             day: form.day,
             name: form.name,
             type: form.type,
-            shouldConsiderAsHoliday: true,
+            shouldConsiderAsHoliday: form.shouldConsiderAsHoliday,
           },
         ],
       });
@@ -455,6 +468,26 @@ export default function CalendarHolidayPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-1">
+              <Checkbox
+                id="holiday-consider"
+                checked={form.shouldConsiderAsHoliday}
+                onCheckedChange={(val) =>
+                  setForm({
+                    ...form,
+                    shouldConsiderAsHoliday: !!val,
+                  })
+                }
+              />
+
+              <Label
+                htmlFor="holiday-consider"
+                className="text-xs text-muted-foreground"
+              >
+                Treat this as a Company Holiday
+              </Label>
             </div>
 
             <DialogFooter className="mt-2">
