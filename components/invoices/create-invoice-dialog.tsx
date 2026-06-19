@@ -12,15 +12,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker"; // Adjust this import path to match your project structure
 
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { BasisService } from "@/services/basis.service";
 
@@ -40,10 +33,10 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
 
   const [form, setForm] = React.useState({
     reference_no: "",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date(), // Storing as a true Date object for the DatePicker
     billToName: "",
     currency: "LKR" as "LKR" | "USD",
-    documentType: "pdf" as "pdf" | "excel",
+    documentType: "pdf" as const, // Locked to PDF
   });
 
   /* ================= LOAD RATE ================= */
@@ -69,7 +62,8 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
     documentType: form.documentType,
     documentData: {
       reference_no: form.reference_no,
-      date: form.date,
+      // Format to string safely during payload building if your API expects standard YYYY-MM-DD
+      date: form.date.toISOString().split("T")[0],
       billToName: form.billToName,
 
       discount: 0,
@@ -131,10 +125,12 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
             onChange={(e) => setForm({ ...form, reference_no: e.target.value })}
           />
 
-          <Input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
+          {/* CUSTOM DATE PICKER */}
+          <DatePicker
+            date={form.date}
+            onDateChange={(newDate) => {
+              if (newDate) setForm({ ...form, date: newDate });
+            }}
           />
 
           <Input
@@ -159,20 +155,6 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
               LKR
             </Button>
           </div>
-
-          {/* DOC TYPE */}
-          <Select
-            value={form.documentType}
-            onValueChange={(v) => setForm({ ...form, documentType: v as any })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Document Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pdf">PDF</SelectItem>
-              <SelectItem value="excel">Excel</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* SUMMARY */}
