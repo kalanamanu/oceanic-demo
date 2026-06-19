@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -11,8 +11,12 @@ import {
   ShieldCheck,
   Search,
   ArrowRight,
+  LucideIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { DocumentService } from "@/services/document.service";
+import { DocumentType } from "@/types/document.types";
+
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -22,10 +26,17 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
-// Document Types Configuration
-const DOCUMENT_TYPES = [
-  {
-    id: "pre-cost",
+type DocumentCardConfig = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+  href: string;
+};
+
+const DOCUMENT_TYPE_CONFIG: Record<string, DocumentCardConfig> = {
+  PRECOST: {
     title: "Pre-Costing",
     description: "Estimations and initial cost analysis for vessel inquiries.",
     icon: FileText,
@@ -33,8 +44,7 @@ const DOCUMENT_TYPES = [
     bgColor: "bg-blue-500/10",
     href: "/documents/pre-cost",
   },
-  {
-    id: "invoice",
+  INVOICE: {
     title: "Invoices",
     description: "Manage billing, commercial invoices, and payment tracking.",
     icon: Receipt,
@@ -42,8 +52,7 @@ const DOCUMENT_TYPES = [
     bgColor: "bg-emerald-500/10",
     href: "/documents/invoice",
   },
-  {
-    id: "dispatch-note",
+  DISPATCHNOTE: {
     title: "Dispatch Notes",
     description: "Tracking delivery logs and issued items manifesto.",
     icon: Truck,
@@ -51,8 +60,7 @@ const DOCUMENT_TYPES = [
     bgColor: "bg-orange-500/10",
     href: "/documents/dispatch-note",
   },
-  {
-    id: "purchase-order",
+  PO: {
     title: "Purchase Orders",
     description: "Supplier orders, PO numbers, and procurement records.",
     icon: ShoppingCart,
@@ -60,29 +68,64 @@ const DOCUMENT_TYPES = [
     bgColor: "bg-purple-500/10",
     href: "/documents/purchase-order",
   },
-  {
-    id: "customs",
-    title: "Customs Documents",
-    description: "Regulatory filings, clearing documents, and permits.",
+  CUSTOMDOCUMENT: {
+    title: "Custom Documents",
+    description: "Custom document templates and generated records.",
     icon: ShieldCheck,
     color: "text-red-500",
     bgColor: "bg-red-500/10",
-    href: "/documents/customs",
+    href: "/documents/custom-document",
   },
-];
+};
 
 export default function DocumentsPage() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredDocs = DOCUMENT_TYPES.filter((doc) =>
+  const [searchQuery, setSearchQuery] = useState("");
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDocumentTypes = async () => {
+      try {
+        const response = await DocumentService.getDocumentTypes();
+
+        if (response.success) {
+          setDocumentTypes(response.availableDocumentTypes);
+        }
+      } catch (error) {
+        console.error("Failed to load document types:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDocumentTypes();
+  }, []);
+
+  const documents = documentTypes
+    .filter((type) => DOCUMENT_TYPE_CONFIG[type])
+    .map((type) => ({
+      id: type,
+      ...DOCUMENT_TYPE_CONFIG[type],
+    }));
+
+  const filteredDocs = documents.filter((doc) =>
     doc.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-muted-foreground">Loading document types...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-7xl space-y-8">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
@@ -91,31 +134,31 @@ export default function DocumentsPage() {
               records.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search documents..."
-                className="pl-9 h-11 rounded-xl"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+            <Input
+              placeholder="Search documents..."
+              className="h-11 rounded-xl pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
 
-        {/* Document Cards Grid */}
+        {/* Document Cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredDocs.map((doc, index) => (
             <motion.div
               key={doc.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.08 }}
               whileHover={{ y: -4 }}
             >
               <Card
-                className="group cursor-pointer overflow-hidden border-2 transition-all hover:border-primary/50 shadow-sm"
+                className="group cursor-pointer overflow-hidden border-2 shadow-sm transition-all hover:border-primary/50"
                 onClick={() => router.push(doc.href)}
               >
                 <CardHeader className="space-y-4">
@@ -124,15 +167,18 @@ export default function DocumentsPage() {
                   >
                     <doc.icon className={`h-6 w-6 ${doc.color}`} />
                   </div>
+
                   <div>
-                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    <CardTitle className="text-xl transition-colors group-hover:text-primary">
                       {doc.title}
                     </CardTitle>
+
                     <CardDescription className="mt-2 line-clamp-2">
                       {doc.description}
                     </CardDescription>
                   </div>
                 </CardHeader>
+
                 <CardContent>
                   <div className="flex items-center text-sm font-semibold text-primary">
                     View Documents
@@ -144,15 +190,17 @@ export default function DocumentsPage() {
           ))}
         </div>
 
-        {/* Empty State if search finds nothing */}
-        {filteredDocs.length === 0 && (
+        {/* Empty State */}
+        {!loading && filteredDocs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="rounded-full bg-muted p-6">
               <Search className="h-10 w-10 text-muted-foreground" />
             </div>
+
             <h3 className="mt-4 text-lg font-semibold">
               No document types found
             </h3>
+
             <p className="text-muted-foreground">
               Try adjusting your search criteria.
             </p>
