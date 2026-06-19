@@ -13,14 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/datetime-picker"; // Adjust path to match your project structure
 
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -58,11 +52,11 @@ export function CreatePODialog({
   const [form, setForm] = React.useState({
     reference_no: "",
     company: "",
-    ETA: "",
-    date: new Date().toISOString().split("T")[0],
+    ETA: undefined as Date | undefined, // Handles Date + Time
+    date: new Date(), // Handles Date only
     transport_cost: "",
     currency: "LKR" as Currency,
-    documentType: "pdf" as "pdf" | "excel",
+    documentType: "pdf" as const, // Locked to PDF
   });
 
   /* ================= LOAD DATA ================= */
@@ -101,10 +95,8 @@ export function CreatePODialog({
     return items.reduce((sum, item) => sum + Number(item.total_price || 0), 0);
   }, [items, form.currency]);
 
-  // Convert transport cost dynamically based on chosen display currency
   const transportCost = React.useMemo(() => {
-    const rawTransport = Number(form.transport_cost || 0);
-    return rawTransport;
+    return Number(form.transport_cost || 0);
   }, [form.transport_cost]);
 
   const fullTotal = subTotal + transportCost;
@@ -119,14 +111,15 @@ export function CreatePODialog({
         reference_no: form.reference_no,
         company: form.company,
         supplier: vendor?.name || "",
-        ETA: form.ETA,
+        // If your backend expects a complete timestamp use: form.ETA?.toISOString()
+        ETA: form.ETA ? form.ETA.toISOString() : "",
         currency: form.currency,
         usd_rate: usdRate,
         discount: 0,
         sub_total: Number(subTotal.toFixed(2)),
         full_total_cost: Number(fullTotal.toFixed(2)),
         transport_cost: transportCost,
-        date: form.date,
+        date: form.date.toISOString().split("T")[0],
         items: items.map((item, index) => ({
           no: index + 1,
           item_name: item.item_name,
@@ -196,7 +189,7 @@ export function CreatePODialog({
                   Reference Number
                 </Label>
                 <Input
-                  placeholder="e.g. PO-2024-001"
+                  placeholder="e.g. PO-2026-001"
                   value={form.reference_no}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, reference_no: e.target.value }))
@@ -229,17 +222,17 @@ export function CreatePODialog({
               />
             </div>
 
-            {/* GRID 2: ETA & DATE */}
+            {/* GRID 2: ETA (WITH DATE TIME) & DOCUMENT DATE (DATE ONLY) */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  ETA
+                  ETA (Date & Time)
                 </Label>
-                <Input
-                  type="date"
-                  value={form.ETA}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, ETA: e.target.value }))
+                <DateTimePicker
+                  date={form.ETA}
+                  placeholder="Select ETA Date & Time"
+                  onDateChange={(newDateTime) =>
+                    setForm((p) => ({ ...p, ETA: newDateTime }))
                   }
                 />
               </div>
@@ -247,12 +240,11 @@ export function CreatePODialog({
                 <Label className="text-xs font-medium text-muted-foreground">
                   Document Date
                 </Label>
-                <Input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, date: e.target.value }))
-                  }
+                <DatePicker
+                  date={form.date}
+                  onDateChange={(newDate) => {
+                    if (newDate) setForm((p) => ({ ...p, date: newDate }));
+                  }}
                 />
               </div>
             </div>
@@ -282,7 +274,6 @@ export function CreatePODialog({
                     size="sm"
                     variant={form.currency === "LKR" ? "default" : "outline"}
                     onClick={() => {
-                      // Automatically convert input value from USD back to LKR
                       if (form.currency === "USD" && form.transport_cost) {
                         const valLkr = Number(form.transport_cost) * usdRate;
                         setForm((p) => ({
@@ -302,7 +293,6 @@ export function CreatePODialog({
                     size="sm"
                     variant={form.currency === "USD" ? "default" : "outline"}
                     onClick={() => {
-                      // Automatically convert input value from LKR to USD
                       if (
                         form.currency === "LKR" &&
                         form.transport_cost &&
@@ -323,27 +313,6 @@ export function CreatePODialog({
                   </Button>
                 </div>
               </div>
-            </div>
-
-            {/* DOCUMENT FORMAT */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Export Format
-              </Label>
-              <Select
-                value={form.documentType}
-                onValueChange={(v) =>
-                  setForm((p) => ({ ...p, documentType: v as any }))
-                }
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select Format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pdf">PDF Document</SelectItem>
-                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
