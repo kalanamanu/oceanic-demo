@@ -34,18 +34,12 @@ import { useDocumentEngine } from "@/hooks/use-document-job";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  preCostId: string;
-  vendorId: string;
+  document?: any;
 }
 
 type Currency = "LKR" | "USD";
 
-export function CreatePODialog({
-  open,
-  onOpenChange,
-  preCostId,
-  vendorId,
-}: Props) {
+export default function PurchaseOrderEditDialog({ open, onOpenChange }: Props) {
   const { loading, runJob, autoSave } = useDocumentEngine({
     pollInterval: 2000,
     maxAttempts: 10,
@@ -67,27 +61,38 @@ export function CreatePODialog({
 
   /* ================= LOAD DATA ================= */
   React.useEffect(() => {
-    if (!open) return;
+    if (!document?.document?.data) return;
 
-    const load = async () => {
-      try {
-        const [vendorRes, itemsRes, basisRes] = await Promise.all([
-          VendorService.getVendorById(vendorId),
-          PreCostVendorService.getVendorItems(preCostId, vendorId),
-          BasisService.getActiveBasis(),
-        ]);
+    const data = document.document.data;
 
-        setVendor(vendorRes);
-        setItems(itemsRes || []);
-        setUsdRate(basisRes?.USDRate || 1);
-      } catch (err: any) {
-        console.error(err);
-        toast.error("Failed to load PO data");
-      }
-    };
+    setForm({
+      reference_no: data.reference_no || "",
+      company: data.company || "",
+      ETA: data.ETA || "",
+      date: data.date || new Date().toISOString().split("T")[0],
 
-    load();
-  }, [open, preCostId, vendorId]);
+      transport_cost: String(data.transport_cost || 0),
+
+      currency: (data.currency as Currency) || "LKR",
+
+      documentType: "pdf",
+    });
+
+    setVendor({
+      name: data.supplier || "",
+    });
+
+    setItems(
+      (data.items || []).map((item: any) => ({
+        item_name: item.item_name,
+        remark: item.remark,
+        quantity: item.quantity,
+        unit: item.unit,
+        unit_price: item.unit_price,
+        total_price: item.total_price,
+      })),
+    );
+  }, [document]);
 
   /* ================= CALCULATIONS ================= */
 
@@ -101,12 +106,7 @@ export function CreatePODialog({
     return items.reduce((sum, item) => sum + Number(item.total_price || 0), 0);
   }, [items, form.currency]);
 
-  // Convert transport cost dynamically based on chosen display currency
-  const transportCost = React.useMemo(() => {
-    const rawTransport = Number(form.transport_cost || 0);
-    return rawTransport;
-  }, [form.transport_cost]);
-
+  const transportCost = Number(form.transport_cost || 0);
   const fullTotal = subTotal + transportCost;
 
   /* ================= BUILD PAYLOAD ================= */
@@ -120,8 +120,6 @@ export function CreatePODialog({
         company: form.company,
         supplier: vendor?.name || "",
         ETA: form.ETA,
-        currency: form.currency,
-        usd_rate: usdRate,
         discount: 0,
         sub_total: Number(subTotal.toFixed(2)),
         full_total_cost: Number(fullTotal.toFixed(2)),
@@ -141,12 +139,10 @@ export function CreatePODialog({
             form.currency === "USD"
               ? Number(item.total_price_usd || 0)
               : Number(item.total_price || 0),
-          unit_rate_usd: Number(item.unit_rate_usd || 0),
-          total_price_usd: Number(item.total_price_usd || 0),
         })),
       },
     };
-  }, [form, vendor, items, subTotal, fullTotal, transportCost, usdRate]);
+  }, [form, vendor, items, subTotal, fullTotal, transportCost]);
 
   /* ================= DRAFT ON CLOSE ================= */
 
@@ -261,7 +257,7 @@ export function CreatePODialog({
             <div className="grid grid-cols-2 gap-4 pt-1">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Transport Cost ({form.currency})
+                  Transport Cost
                 </Label>
                 <Input
                   type="number"
@@ -281,19 +277,7 @@ export function CreatePODialog({
                     type="button"
                     size="sm"
                     variant={form.currency === "LKR" ? "default" : "outline"}
-                    onClick={() => {
-                      // Automatically convert input value from USD back to LKR
-                      if (form.currency === "USD" && form.transport_cost) {
-                        const valLkr = Number(form.transport_cost) * usdRate;
-                        setForm((p) => ({
-                          ...p,
-                          currency: "LKR",
-                          transport_cost: valLkr.toFixed(2),
-                        }));
-                      } else {
-                        setForm((p) => ({ ...p, currency: "LKR" }));
-                      }
-                    }}
+                    onClick={() => setForm((p) => ({ ...p, currency: "LKR" }))}
                   >
                     LKR
                   </Button>
@@ -301,23 +285,7 @@ export function CreatePODialog({
                     type="button"
                     size="sm"
                     variant={form.currency === "USD" ? "default" : "outline"}
-                    onClick={() => {
-                      // Automatically convert input value from LKR to USD
-                      if (
-                        form.currency === "LKR" &&
-                        form.transport_cost &&
-                        usdRate > 0
-                      ) {
-                        const valUsd = Number(form.transport_cost) / usdRate;
-                        setForm((p) => ({
-                          ...p,
-                          currency: "USD",
-                          transport_cost: valUsd.toFixed(2),
-                        }));
-                      } else {
-                        setForm((p) => ({ ...p, currency: "USD" }));
-                      }
-                    }}
+                    onClick={() => setForm((p) => ({ ...p, currency: "USD" }))}
                   >
                     USD
                   </Button>

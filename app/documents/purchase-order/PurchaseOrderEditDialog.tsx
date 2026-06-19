@@ -25,61 +25,97 @@ import {
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { VendorService } from "@/services/vendor.service";
-import { PreCostVendorService } from "@/services/precost-vendor.service";
+import { DocumentService } from "@/services/document.service";
 import { BasisService } from "@/services/basis.service";
-
 import { useDocumentEngine } from "@/hooks/use-document-job";
 
 interface Props {
+  docId: string;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  preCostId: string;
-  vendorId: string;
+  onClose: () => void;
 }
 
 type Currency = "LKR" | "USD";
 
-export function CreatePODialog({
-  open,
-  onOpenChange,
-  preCostId,
-  vendorId,
-}: Props) {
+export default function EditPODialog({ docId, open, onClose }: Props) {
   const { loading, runJob, autoSave } = useDocumentEngine({
     pollInterval: 2000,
     maxAttempts: 10,
   });
 
-  const [vendor, setVendor] = React.useState<any>(null);
-  const [items, setItems] = React.useState<any[]>([]);
   const [usdRate, setUsdRate] = React.useState(1);
+  const [items, setItems] = React.useState<any[]>([]);
 
   const [form, setForm] = React.useState({
     reference_no: "",
     company: "",
+    supplier: "",
     ETA: "",
-    date: new Date().toISOString().split("T")[0],
+    date: "",
     transport_cost: "",
     currency: "LKR" as Currency,
     documentType: "pdf" as "pdf" | "excel",
   });
 
-  /* ================= LOAD DATA ================= */
+  /* ================= LOAD DATA & COERCE RATES ================= */
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || !docId) return;
 
     const load = async () => {
       try {
-        const [vendorRes, itemsRes, basisRes] = await Promise.all([
-          VendorService.getVendorById(vendorId),
-          PreCostVendorService.getVendorItems(preCostId, vendorId),
+        const [docRes, basisRes] = await Promise.all([
+          DocumentService.getDocument(docId),
           BasisService.getActiveBasis(),
         ]);
 
-        setVendor(vendorRes);
-        setItems(itemsRes || []);
-        setUsdRate(basisRes?.USDRate || 1);
+        const activeUsdRate = basisRes?.USDRate || 1;
+        setUsdRate(activeUsdRate);
+
+        const docWrapper = docRes.document;
+        const d = docWrapper?.data || {};
+        const savedCurrency = (d.currency as Currency) || "LKR";
+        const savedDocumentType =
+          docWrapper && "documentType" in docWrapper
+            ? (docWrapper.documentType as "pdf" | "excel")
+            : "pdf";
+
+        setForm({
+          reference_no: d.reference_no || "",
+          company: d.company || "",
+          supplier: d.supplier || "",
+          ETA: d.ETA || "",
+          date: d.date || "",
+          transport_cost: d.transport_cost?.toString() || "",
+          currency: savedCurrency,
+          documentType: savedDocumentType,
+        });
+
+        // Parse items back into predictable LKR vs USD properties for clean runtime toggling
+        const parsedItems = (d.items || []).map((item: any) => {
+          let uPriceLkr = Number(item.unit_price || 0);
+          let tPriceLkr = Number(item.total_price || 0);
+          let uPriceUsd = Number(item.unit_rate_usd || 0);
+          let tPriceUsd = Number(item.total_price_usd || 0);
+
+          // If fallback fields are missing from historical documents, back-calculate using active rate
+          if (savedCurrency === "LKR" && !tPriceUsd) {
+            uPriceUsd = uPriceLkr / activeUsdRate;
+            tPriceUsd = tPriceLkr / activeUsdRate;
+          } else if (savedCurrency === "USD" && !tPriceLkr) {
+            uPriceLkr = uPriceUsd * activeUsdRate;
+            tPriceLkr = tPriceUsd * activeUsdRate;
+          }
+
+          return {
+            ...item,
+            unit_price: uPriceLkr,
+            total_price: tPriceLkr,
+            unit_rate_usd: uPriceUsd,
+            total_price_usd: tPriceUsd,
+          };
+        });
+
+        setItems(parsedItems);
       } catch (err: any) {
         console.error(err);
         toast.error("Failed to load PO data");
@@ -87,7 +123,7 @@ export function CreatePODialog({
     };
 
     load();
-  }, [open, preCostId, vendorId]);
+  }, [open, docId]);
 
   /* ================= CALCULATIONS ================= */
 
@@ -101,10 +137,8 @@ export function CreatePODialog({
     return items.reduce((sum, item) => sum + Number(item.total_price || 0), 0);
   }, [items, form.currency]);
 
-  // Convert transport cost dynamically based on chosen display currency
   const transportCost = React.useMemo(() => {
-    const rawTransport = Number(form.transport_cost || 0);
-    return rawTransport;
+    return Number(form.transport_cost || 0);
   }, [form.transport_cost]);
 
   const fullTotal = subTotal + transportCost;
@@ -118,19 +152,19 @@ export function CreatePODialog({
       documentData: {
         reference_no: form.reference_no,
         company: form.company,
-        supplier: vendor?.name || "",
+        supplier: form.supplier,
         ETA: form.ETA,
-        currency: form.currency,
-        usd_rate: usdRate,
         discount: 0,
         sub_total: Number(subTotal.toFixed(2)),
         full_total_cost: Number(fullTotal.toFixed(2)),
         transport_cost: transportCost,
         date: form.date,
+        currency: form.currency,
+        usd_rate: usdRate,
         items: items.map((item, index) => ({
-          no: index + 1,
+          no: item.no || index + 1,
           item_name: item.item_name,
-          remark: item.customer_remark || "",
+          remark: item.remark || item.customer_remark || "",
           quantity: item.quantity,
           unit: item.unit,
           unit_price:
@@ -146,15 +180,15 @@ export function CreatePODialog({
         })),
       },
     };
-  }, [form, vendor, items, subTotal, fullTotal, transportCost, usdRate]);
+  }, [form, items, subTotal, fullTotal, transportCost, usdRate]);
 
   /* ================= DRAFT ON CLOSE ================= */
 
   const handleOpenChange = async (state: boolean) => {
     if (!state) {
       await autoSave(buildPayload());
+      onClose();
     }
-    onOpenChange(state);
   };
 
   /* ================= GENERATE ================= */
@@ -162,7 +196,7 @@ export function CreatePODialog({
   const handleGenerate = async () => {
     try {
       await runJob(buildPayload(), "Purchase Order");
-      onOpenChange(false);
+      onClose();
     } catch (err) {
       console.error(err);
     }
@@ -172,7 +206,7 @@ export function CreatePODialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-xl p-6 gap-6">
         <DialogHeader className="space-y-1">
-          <DialogTitle className="text-xl">Generate Purchase Order</DialogTitle>
+          <DialogTitle className="text-xl">Edit Purchase Order</DialogTitle>
           <DialogDescription>
             Configuration will be saved as a draft when you close this dialog.
           </DialogDescription>
@@ -222,11 +256,7 @@ export function CreatePODialog({
               <Label className="text-xs font-medium text-muted-foreground">
                 Supplier / Vendor
               </Label>
-              <Input
-                value={vendor?.name || ""}
-                disabled
-                className="bg-muted/30"
-              />
+              <Input value={form.supplier} disabled className="bg-muted/30" />
             </div>
 
             {/* GRID 2: ETA & DATE */}
@@ -282,7 +312,6 @@ export function CreatePODialog({
                     size="sm"
                     variant={form.currency === "LKR" ? "default" : "outline"}
                     onClick={() => {
-                      // Automatically convert input value from USD back to LKR
                       if (form.currency === "USD" && form.transport_cost) {
                         const valLkr = Number(form.transport_cost) * usdRate;
                         setForm((p) => ({
@@ -302,7 +331,6 @@ export function CreatePODialog({
                     size="sm"
                     variant={form.currency === "USD" ? "default" : "outline"}
                     onClick={() => {
-                      // Automatically convert input value from LKR to USD
                       if (
                         form.currency === "LKR" &&
                         form.transport_cost &&
