@@ -4,6 +4,10 @@ import {
   GenerateDocumentResponse,
   DocumentJobStatusResponse,
   CancelJobResponse,
+  DocumentTypesResponse,
+  GetSavedDocumentsRequest,
+  GetSavedDocumentsResponse,
+  GetDocumentResponse,
 } from "@/types/document.types";
 
 export class DocumentService {
@@ -13,7 +17,11 @@ export class DocumentService {
   static async generateDocument(
     payload: GenerateDocumentRequest,
   ): Promise<GenerateDocumentResponse> {
-    const res = await apiClient.post("/api/document/generate", payload);
+    const res = await apiClient.post(
+      "/api/document/generate",
+      payload,
+    );
+
     return res.data;
   }
 
@@ -26,27 +34,32 @@ export class DocumentService {
     const res = await apiClient.get(
       `/api/document/job/${jobId}/status`,
     );
+
     return res.data;
   }
 
-/**
- * Step 3: Download file as Blob
- */
-static async downloadDocument(documentId: string): Promise<Blob> {
-  const res = await apiClient.get(
-    `/api/document/download/${documentId}`,
-    {
-      responseType: "blob",
-    },
-  );
+  /**
+   * Step 3: Download file as Blob
+   */
+  static async downloadDocument(
+    documentId: string,
+  ): Promise<Blob> {
+    const res = await apiClient.get(
+      `/api/document/download/${documentId}`,
+      {
+        responseType: "blob",
+      },
+    );
 
-  return res.data;
-}
+    return res.data;
+  }
 
   /**
    * Cancel job
    */
-  static async cancelJob(jobId: string): Promise<CancelJobResponse> {
+  static async cancelJob(
+    jobId: string,
+  ): Promise<CancelJobResponse> {
     const res = await apiClient.delete(
       `/api/document/job/${jobId}`,
     );
@@ -55,14 +68,59 @@ static async downloadDocument(documentId: string): Promise<Blob> {
   }
 
   /**
+   * Get available document types
+   * GET /api/document/types
+   */
+  static async getDocumentTypes(): Promise<DocumentTypesResponse> {
+    const res = await apiClient.get(
+      "/api/document/types",
+    );
+
+    return res.data;
+  }
+
+  /**
+   * Get saved documents by type
+   * POST /api/document/saved
+   */
+  static async getSavedDocuments(
+    payload: GetSavedDocumentsRequest,
+  ): Promise<GetSavedDocumentsResponse> {
+    const res = await apiClient.post(
+      "/api/document/saved",
+      payload,
+    );
+
+    return res.data;
+  }
+
+  /**
+   * Get document by ID
+   * GET /api/document/:doc_id
+   */
+  static async getDocument(
+    docId: string,
+  ): Promise<GetDocumentResponse> {
+    const res = await apiClient.get(
+      `/api/document/${docId}`,
+    );
+
+    return res.data;
+  }
+
+  /**
    * Helper: browser download trigger
    */
-  static triggerDownload(blob: Blob, fileName: string) {
+  static triggerDownload(
+    blob: Blob,
+    fileName: string,
+  ) {
     const url = window.URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
     a.download = fileName;
+
     document.body.appendChild(a);
     a.click();
 

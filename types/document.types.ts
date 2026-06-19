@@ -113,3 +113,92 @@ export interface ApiErrorResponse {
   success: false;
   message: string;
 }
+
+/**
+ * GET /api/document/types
+ */
+export interface DocumentTypesResponse {
+  success: boolean;
+  availableDocumentTypes: DocumentType[];
+  note: string;
+}
+
+/**
+ * Generic item structure found in document.data.items
+ */
+export interface DocumentItem {
+  quantity: number;
+  item_name: string;
+  unit_price: number;
+  total_price: number;
+}
+
+/**
+ * Generic document data
+ * Different document types may contain additional fields
+ */
+export interface DocumentData {
+  date?: string;
+  items?: DocumentItem[];
+
+  discount?: number;
+  total_cost?: number;
+  additional_charges?: number;
+
+  reference_no?: string;
+
+  billToName?: string;
+
+  [key: string]: any;
+}
+
+/**
+ * Document status
+ */
+export type DocumentStatus =
+  | "DRAFT"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "COMPLETED";
+
+/**
+ * Saved document
+ */
+export interface SavedDocument {
+  doc_id: string;
+  reference_no: string;
+  doc_type: DocumentType;
+  data: DocumentData;
+  status: DocumentStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * POST /api/document/saved
+ */
+export interface GetSavedDocumentsRequest {
+  documentType: DocumentType;
+}
+
+export interface GetSavedDocumentsResponse {
+  success: boolean;
+  savedDocuments: SavedDocument[];
+}
+
+/**
+ * GET /api/document/:doc_id
+ */
+export interface GetDocumentResponse {
+  success: boolean;
+  document: SavedDocument;
+}
+
+/**
+ * Generic API error
+ */
+export interface ApiErrorResponse {
+  success: false;
+  message: string;
+}
