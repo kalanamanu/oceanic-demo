@@ -666,7 +666,7 @@ export default function DispatchEditDialog({
             className="px-5 shadow-sm bg-emerald-500 hover:bg-emerald-600 text-white font-medium"
           >
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {loading ? "Compiling..." : "Update and Regenerate Dispatch Note"}
+            {loading ? "Compiling..." : "Edit and Regenerate"}
           </Button>
         </div>
       </DialogContent>

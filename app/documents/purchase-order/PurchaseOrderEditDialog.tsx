@@ -421,7 +421,7 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
                 Generating...
               </>
             ) : (
-              "Edit and Regenerate PO"
+              "Edit and Regenerate"
             )}
           </Button>
         </DialogFooter>

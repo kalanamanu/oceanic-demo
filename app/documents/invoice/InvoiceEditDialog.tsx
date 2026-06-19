@@ -233,7 +233,7 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
 
           <Button onClick={handleSubmit} disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {loading ? "Processing..." : "Save & Generate"}
+            {loading ? "Processing..." : "Edit and Regenerate"}
           </Button>
         </DialogFooter>
       </DialogContent>
