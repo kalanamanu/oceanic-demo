@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Search,
   ArrowRight,
+  ClipboardList, // New icon for Delivery Note
+  Coins, // New icon for Credit Note
   LucideIcon,
 } from "lucide-react";
 
@@ -60,6 +62,15 @@ const DOCUMENT_TYPE_CONFIG: Record<string, DocumentCardConfig> = {
     bgColor: "bg-orange-500/10",
     href: "/documents/dispatch-note",
   },
+  DELIVERYNOTE: {
+    title: "Delivery Notes",
+    description:
+      "Proof of shipment delivery, structural acknowledgments, and customer receipts.",
+    icon: ClipboardList,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    href: "/documents/delivery-note",
+  },
   PO: {
     title: "Purchase Orders",
     description: "Supplier orders, PO numbers, and procurement records.",
@@ -67,6 +78,15 @@ const DOCUMENT_TYPE_CONFIG: Record<string, DocumentCardConfig> = {
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
     href: "/documents/purchase-order",
+  },
+  CREDITNOTE: {
+    title: "Credit Notes",
+    description:
+      "Manage returns, balance adjustments, and customer credit values.",
+    icon: Coins,
+    color: "text-cyan-500",
+    bgColor: "bg-cyan-500/10",
+    href: "/documents/credit-note",
   },
   CUSTOMDOCUMENT: {
     title: "Custom Documents",
