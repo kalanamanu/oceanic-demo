@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, Receipt, ArrowRight } from "lucide-react";
+import { Search, Receipt } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -17,13 +17,24 @@ import {
 import { DocumentService } from "@/services/document.service";
 import { SavedDocument } from "@/types/document.types";
 
-export default function InvoicePage() {
-  const router = useRouter();
+// dialogs
+import { InvoiceViewDialog } from "./InvoiceViewDialog";
+import { InvoiceEditDialog } from "./InvoiceEditDialog";
 
+export default function InvoicePage() {
   const [documents, setDocuments] = useState<SavedDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
+  /* ================= VIEW STATE ================= */
+  const [viewDoc, setViewDoc] = useState<any>(null);
+  const [viewOpen, setViewOpen] = useState(false);
+
+  /* ================= EDIT STATE ================= */
+  const [editDoc, setEditDoc] = useState<any>(null);
+  const [editOpen, setEditOpen] = useState(false);
+
+  /* ================= LOAD LIST ================= */
   useEffect(() => {
     const loadInvoices = async () => {
       try {
@@ -44,6 +55,7 @@ export default function InvoicePage() {
     loadInvoices();
   }, []);
 
+  /* ================= FILTER ================= */
   const filteredDocuments = documents.filter((doc) => {
     const ref = doc.reference_no?.toLowerCase() || "";
     const status = doc.status?.toLowerCase() || "";
@@ -52,6 +64,39 @@ export default function InvoicePage() {
     return ref.includes(query) || status.includes(query);
   });
 
+  /* ================= VIEW HANDLER ================= */
+  const handleViewDocument = async (docId: string) => {
+    try {
+      setViewOpen(true);
+      setViewDoc(null);
+
+      const res = await DocumentService.getDocument(docId);
+
+      if (res.success) {
+        setViewDoc(res.document);
+      }
+    } catch (err) {
+      console.error("Failed to load document:", err);
+    }
+  };
+
+  /* ================= EDIT HANDLER ================= */
+  const handleEditDocument = async (docId: string) => {
+    try {
+      setEditOpen(true);
+      setEditDoc(null);
+
+      const res = await DocumentService.getDocument(docId);
+
+      if (res.success) {
+        setEditDoc(res.document);
+      }
+    } catch (err) {
+      console.error("Failed to load document:", err);
+    }
+  };
+
+  /* ================= LOADING ================= */
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -60,10 +105,11 @@ export default function InvoicePage() {
     );
   }
 
+  /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        {/* Header */}
+        {/* HEADER */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Invoices</h1>
@@ -72,7 +118,7 @@ export default function InvoicePage() {
             </p>
           </div>
 
-          {/* Search */}
+          {/* SEARCH */}
           <div className="relative w-full md:w-72">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -85,7 +131,7 @@ export default function InvoicePage() {
           </div>
         </div>
 
-        {/* List */}
+        {/* LIST */}
         <div className="grid grid-cols-1 gap-4">
           {filteredDocuments.map((doc, index) => (
             <motion.div
@@ -94,10 +140,8 @@ export default function InvoicePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <Card
-                className="cursor-pointer transition hover:border-primary/50"
-                onClick={() => router.push(`/documents/invoice/${doc.doc_id}`)}
-              >
+              <Card className="transition hover:border-primary/50">
+                {/* HEADER */}
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-emerald-500/10 p-2">
@@ -112,21 +156,44 @@ export default function InvoicePage() {
                       <CardDescription>Status: {doc.status}</CardDescription>
                     </div>
                   </div>
-
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
 
-                <CardContent>
+                {/* FOOTER WITH ACTIONS */}
+                <CardContent className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    Created: {new Date(doc.createdAt).toLocaleDateString()}
+                    Created:{" "}
+                    {new Date(doc.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
                   </p>
+
+                  <div className="flex gap-2">
+                    {/* VIEW */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewDocument(doc.doc_id)}
+                    >
+                      View
+                    </Button>
+
+                    {/* EDIT */}
+                    <Button
+                      size="sm"
+                      onClick={() => handleEditDocument(doc.doc_id)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
 
-        {/* Empty state */}
+        {/* EMPTY STATE */}
         {!loading && filteredDocuments.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Receipt className="h-10 w-10 text-muted-foreground" />
@@ -139,6 +206,21 @@ export default function InvoicePage() {
           </div>
         )}
       </div>
+
+      {/* ================= VIEW DIALOG ================= */}
+      <InvoiceViewDialog
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        document={viewDoc}
+        onDownload={() => console.log("download view")}
+      />
+
+      {/* ================= EDIT DIALOG ================= */}
+      <InvoiceEditDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        document={editDoc}
+      />
     </div>
   );
 }
