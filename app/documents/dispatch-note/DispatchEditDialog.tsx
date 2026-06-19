@@ -624,7 +624,7 @@ export default function DispatchEditDialog({
           </div>
 
           {/* Export File Profile Select */}
-          <div className="w-full md:w-64 space-y-1.5 border-t pt-6">
+          {/* <div className="w-full md:w-64 space-y-1.5 border-t pt-6">
             <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
               Export Engine Profile
             </Label>
@@ -652,7 +652,7 @@ export default function DispatchEditDialog({
                 </SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
 
         {/* Fixed Footer Stack */}
