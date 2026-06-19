@@ -12,13 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker"; // Adjust this import path to match your project structure
 
 import { Loader2 } from "lucide-react";
 
@@ -58,24 +52,27 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
   /* ================= FORM ================= */
   const [form, setForm] = React.useState({
     reference_no: "",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date(), // Managed as a real Date object
     billToName: "",
     currency: "LKR" as "LKR" | "USD",
-    documentType: "pdf" as "pdf" | "excel",
+    documentType: "pdf" as const, // Locked strictly to PDF format
   });
 
   /* ================= LOAD EXISTING DATA ================= */
   React.useEffect(() => {
     if (doc) {
+      // Parse the saved date string to a Date object safely, or fallback to today
+      const existingDate = data?.date ? new Date(data.date) : new Date();
+
       setForm({
         reference_no: doc.reference_no || "",
-        date: data?.date || new Date().toISOString().split("T")[0],
+        date: isNaN(existingDate.getTime()) ? new Date() : existingDate,
         billToName: data?.billToName || "",
         currency: "LKR",
         documentType: "pdf",
       });
     }
-  }, [doc]);
+  }, [doc, data]);
 
   /* ================= CONVERT ================= */
   const convert = (value: number) =>
@@ -91,7 +88,8 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
     documentType: form.documentType,
     documentData: {
       reference_no: form.reference_no,
-      date: form.date,
+      // Formatted safely back to standard YYYY-MM-DD for backend processing
+      date: form.date.toISOString().split("T")[0],
       billToName: form.billToName,
 
       discount: 0,
@@ -102,8 +100,6 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
       items: (data?.items || []).map((item: any) => ({
         item_name: item.item_name,
         quantity: item.quantity,
-
-        // ✅ FIXED: same conversion logic as Create
         unit_price: Number(convert(item.unit_price).toFixed(2)),
         total_price: Number(convert(item.total_price).toFixed(2)),
       })),
@@ -165,10 +161,12 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
             onChange={(e) => setForm({ ...form, reference_no: e.target.value })}
           />
 
-          <Input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
+          {/* CUSTOM DATE PICKER */}
+          <DatePicker
+            date={form.date}
+            onDateChange={(newDate) => {
+              if (newDate) setForm({ ...form, date: newDate });
+            }}
           />
 
           <Input
@@ -193,21 +191,6 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
               LKR
             </Button>
           </div>
-
-          {/* DOC TYPE */}
-          <Select
-            value={form.documentType}
-            onValueChange={(v) => setForm({ ...form, documentType: v as any })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Document Type" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectItem value="pdf">PDF</SelectItem>
-              <SelectItem value="excel">Excel</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* SUMMARY */}
