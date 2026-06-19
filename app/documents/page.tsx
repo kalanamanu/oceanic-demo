@@ -36,14 +36,14 @@ type DocumentCardConfig = {
 };
 
 const DOCUMENT_TYPE_CONFIG: Record<string, DocumentCardConfig> = {
-  PRECOST: {
-    title: "Pre-Costing",
-    description: "Estimations and initial cost analysis for vessel inquiries.",
-    icon: FileText,
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10",
-    href: "/documents/pre-cost",
-  },
+  // PRECOST: {
+  //   title: "Pre-Costing",
+  //   description: "Estimations and initial cost analysis for vessel inquiries.",
+  //   icon: FileText,
+  //   color: "text-blue-500",
+  //   bgColor: "bg-blue-500/10",
+  //   href: "/documents/pre-cost",
+  // },
   INVOICE: {
     title: "Invoices",
     description: "Manage billing, commercial invoices, and payment tracking.",
