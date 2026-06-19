@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
-import { DateTimePicker } from "@/components/ui/datetime-picker"; // Adjust path to match your project structure
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -52,11 +52,11 @@ export function CreatePODialog({
   const [form, setForm] = React.useState({
     reference_no: "",
     company: "",
-    ETA: undefined as Date | undefined, // Handles Date + Time
-    date: new Date(), // Handles Date only
+    ETA: undefined as Date | undefined,
+    date: new Date(),
     transport_cost: "",
     currency: "LKR" as Currency,
-    documentType: "pdf" as const, // Locked to PDF
+    documentType: "pdf" as const,
   });
 
   /* ================= LOAD DATA ================= */
@@ -226,7 +226,7 @@ export function CreatePODialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  ETA (Date & Time)
+                  ETA
                 </Label>
                 <DateTimePicker
                   date={form.ETA}
