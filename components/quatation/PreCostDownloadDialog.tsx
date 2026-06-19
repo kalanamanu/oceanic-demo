@@ -27,6 +27,8 @@ import { useDocumentEngine } from "@/hooks/use-document-job";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { BasisService } from "@/services/basis.service";
+// IMPORT YOUR CUSTOM DATE PICKER HERE
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface Props {
   open: boolean;
@@ -49,7 +51,7 @@ export function PreCostDownloadDialog({
     clientRfqNum: "",
     omsRfqNum: "",
     supplyPort: "",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date(), // Changed from string to a real Date object for the picker
     currency: "LKR" as "LKR" | "USD",
     documentType: "pdf" as "pdf" | "excel",
   });
@@ -138,7 +140,8 @@ export function PreCostDownloadDialog({
           clientRfqNum: form.clientRfqNum,
           omsRfqNum: form.omsRfqNum,
           supplyPort: form.supplyPort,
-          date: form.date,
+          // Formats Date object back into standard YYYY-MM-DD string for your API payload
+          date: form.date.toISOString().split("T")[0],
 
           usd_rate: usdRate,
           currency: form.currency,
@@ -230,14 +233,16 @@ export function PreCostDownloadDialog({
                   }
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">
+              <div className="space-y-1.5 flex flex-col justify-end">
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5">
                   Date
                 </Label>
-                <Input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                {/* REPLACED WITH INTEGRATED DATEPICKER */}
+                <DatePicker
+                  date={form.date}
+                  onDateChange={(newDate) =>
+                    setForm({ ...form, date: newDate || new Date() })
+                  }
                 />
               </div>
             </div>
