@@ -14,13 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -50,11 +45,11 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
     reference_no: "",
     company: "",
     supplier: "",
-    ETA: "",
-    date: "",
+    ETA: undefined as Date | undefined, // Handles Date + Time object
+    date: new Date(), // Handles Date only object
     transport_cost: "",
     currency: "LKR" as Currency,
-    documentType: "pdf" as "pdf" | "excel",
+    documentType: "pdf" as const, // Locked strictly to PDF format
   });
 
   /* ================= LOAD DATA & COERCE RATES ================= */
@@ -74,20 +69,26 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
         const docWrapper = docRes.document;
         const d = docWrapper?.data || {};
         const savedCurrency = (d.currency as Currency) || "LKR";
-        const savedDocumentType =
-          docWrapper && "documentType" in docWrapper
-            ? (docWrapper.documentType as "pdf" | "excel")
-            : "pdf";
+
+        // Safely parse timestamps into JS Date objects
+        const incomingEta = d.ETA ? new Date(d.ETA) : undefined;
+        const incomingDate = d.date ? new Date(d.date) : new Date();
 
         setForm({
           reference_no: d.reference_no || "",
           company: d.company || "",
           supplier: d.supplier || "",
-          ETA: d.ETA || "",
-          date: d.date || "",
+          ETA:
+            incomingEta && !isNaN(incomingEta.getTime())
+              ? incomingEta
+              : undefined,
+          date:
+            incomingDate && !isNaN(incomingDate.getTime())
+              ? incomingDate
+              : new Date(),
           transport_cost: d.transport_cost?.toString() || "",
           currency: savedCurrency,
-          documentType: savedDocumentType,
+          documentType: "pdf",
         });
 
         // Parse items back into predictable LKR vs USD properties for clean runtime toggling
@@ -153,12 +154,12 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
         reference_no: form.reference_no,
         company: form.company,
         supplier: form.supplier,
-        ETA: form.ETA,
+        ETA: form.ETA ? form.ETA.toISOString() : "", // Full timestamp for ETA
         discount: 0,
         sub_total: Number(subTotal.toFixed(2)),
         full_total_cost: Number(fullTotal.toFixed(2)),
         transport_cost: transportCost,
-        date: form.date,
+        date: form.date.toISOString().split("T")[0], // Date fragment only
         currency: form.currency,
         usd_rate: usdRate,
         items: items.map((item, index) => ({
@@ -230,7 +231,7 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
                   Reference Number
                 </Label>
                 <Input
-                  placeholder="e.g. PO-2024-001"
+                  placeholder="e.g. PO-2026-001"
                   value={form.reference_no}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, reference_no: e.target.value }))
@@ -259,17 +260,17 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
               <Input value={form.supplier} disabled className="bg-muted/30" />
             </div>
 
-            {/* GRID 2: ETA & DATE */}
+            {/* GRID 2: ETA (DATE & TIME) & DOCUMENT DATE (DATE ONLY) */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  ETA
+                  ETA (Date & Time)
                 </Label>
-                <Input
-                  type="date"
-                  value={form.ETA}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, ETA: e.target.value }))
+                <DateTimePicker
+                  date={form.ETA}
+                  placeholder="Select ETA Date & Time"
+                  onDateChange={(newDateTime) =>
+                    setForm((p) => ({ ...p, ETA: newDateTime }))
                   }
                 />
               </div>
@@ -277,12 +278,11 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
                 <Label className="text-xs font-medium text-muted-foreground">
                   Document Date
                 </Label>
-                <Input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, date: e.target.value }))
-                  }
+                <DatePicker
+                  date={form.date}
+                  onDateChange={(newDate) => {
+                    if (newDate) setForm((p) => ({ ...p, date: newDate }));
+                  }}
                 />
               </div>
             </div>
@@ -351,27 +351,6 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
                   </Button>
                 </div>
               </div>
-            </div>
-
-            {/* DOCUMENT FORMAT */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Export Format
-              </Label>
-              <Select
-                value={form.documentType}
-                onValueChange={(v) =>
-                  setForm((p) => ({ ...p, documentType: v as any }))
-                }
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select Format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pdf">PDF Document</SelectItem>
-                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
