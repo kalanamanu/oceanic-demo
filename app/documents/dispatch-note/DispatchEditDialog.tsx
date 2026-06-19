@@ -206,7 +206,7 @@ export default function DispatchEditDialog({
   const handleDownload = async () => {
     try {
       const payload = {
-        document: "dispatchnote",
+        document: "DISPATCHNOTE",
         documentType: form.documentType,
         documentData: {
           reference_no: form.reference_no,
@@ -660,11 +660,7 @@ export default function DispatchEditDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={handleDownload}
-            disabled={loading}
-            className="px-5 shadow-sm bg-emerald-500 hover:bg-emerald-600 text-white font-medium"
-          >
+          <Button onClick={handleDownload} disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {loading ? "Compiling..." : "Edit and Regenerate"}
           </Button>
