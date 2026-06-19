@@ -191,19 +191,24 @@ export default function ConfirmedOrderDetailPage() {
             {/* 3 DOT MENU */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="px-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-2"
+                  disabled={isPending}
+                >
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-44">
-                {/* Generate Invoice (your existing action) */}
+                {/* Generate Invoice */}
                 <DropdownMenuItem onClick={() => setInvoiceOpen(true)}>
                   <FileText className="w-4 h-4 mr-2" />
                   Invoice
                 </DropdownMenuItem>
 
-                {/* NEW OPTIONS (UI only for now) */}
+                {/* Delivery Note */}
                 <DropdownMenuItem
                   onClick={() => toast.info("Delivery Note coming soon")}
                 >
@@ -211,6 +216,7 @@ export default function ConfirmedOrderDetailPage() {
                   Delivery Note
                 </DropdownMenuItem>
 
+                {/* Dispatch Note */}
                 <DropdownMenuItem onClick={() => setDispatchOpen(true)}>
                   <Send className="w-4 h-4 mr-2" />
                   Dispatch Note
