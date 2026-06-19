@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { FileSpreadsheet, FileText, Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 
 import { useDocumentEngine } from "@/hooks/use-document-job";
 
@@ -201,20 +201,20 @@ export default function DispatchViewDialog({
 
         {/* FOOTER ACTIONS */}
         <div className="p-4 border-t flex justify-end items-center gap-2 bg-muted/10">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
           <Button
-            variant="outline"
             onClick={() => handleDownload("pdf")}
             disabled={loading || !data}
           >
             {loading ? (
               <Loader2 className="w-4 h-4 mr-1 animate-spin" />
             ) : (
-              <FileText className="w-4 h-4 mr-2" />
+              <Download className="mr-2 h-4 w-4" />
             )}
             Download
           </Button>
-
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
         </div>
       </DialogContent>
     </Dialog>

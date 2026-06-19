@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,33 +11,79 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-import { Receipt, Loader2 } from "lucide-react";
+import { Receipt, Loader2, Download } from "lucide-react";
 
 import { SavedDocument } from "@/types/document.types";
+import { useDocumentEngine } from "@/hooks/use-document-job";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   document: SavedDocument | null;
-  onDownload: () => void;
 }
 
-export function InvoiceViewDialog({
-  open,
-  onOpenChange,
-  document,
-  onDownload,
-}: Props) {
+export function InvoiceViewDialog({ open, onOpenChange, document }: Props) {
+  const { loading: engineLoading, runJob } = useDocumentEngine({
+    pollInterval: 2000,
+    maxAttempts: 10,
+  });
+
   const doc = document;
   const data = (doc as any)?.data;
 
+  /* ================= BUILD PAYLOAD ================= */
+  const buildPayload = React.useCallback(() => {
+    if (!doc || !data) return null;
+
+    return {
+      document: "INVOICE",
+      documentType: "pdf",
+      documentData: {
+        reference_no: doc.reference_no,
+        date: data.date || "",
+        billToName: data.billToName || "",
+        billToCompany: data.billToCompany || "",
+        billToAddress: data.billToAddress || "",
+        sub_total: Number(data.sub_total || data.total_cost || 0),
+        total_cost: Number(data.total_cost || 0),
+        items: (data.items || []).map((item: any, index: number) => ({
+          no: item.no || index + 1,
+          item_name: item.item_name,
+          description: item.description || "",
+          quantity: Number(item.quantity || 1),
+          unit_price: Number(item.unit_price || 0),
+          total_price: Number(item.total_price || 0),
+        })),
+      },
+    };
+  }, [doc, data]);
+
+  /* ================= DOWNLOAD WORKFLOW HANDLER ================= */
+  const handleGenerateAndDownload = async () => {
+    const payload = buildPayload();
+    if (!payload) return;
+
+    try {
+      await runJob(payload, "Invoice");
+      onOpenChange(false);
+    } catch (err) {
+      console.error("Invoice job generation failed:", err);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(state) => {
+        // Prevent closing the dialog modal manually while processing an active background task
+        if (!state && engineLoading) return;
+        onOpenChange(state);
+      }}
+    >
       <DialogContent className="max-w-lg">
         {/* HEADER */}
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-emerald-500" />
             Invoice Details
           </DialogTitle>
 
@@ -50,7 +97,7 @@ export function InvoiceViewDialog({
           <p className="text-sm text-muted-foreground">Loading invoice...</p>
         ) : (
           <div className="space-y-3 mt-2">
-            {/* BASIC INFO (same structure style as create dialog) */}
+            {/* BASIC INFO */}
             <div className="border rounded-lg p-3 text-sm space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Reference No</span>
@@ -85,18 +132,20 @@ export function InvoiceViewDialog({
             <div className="border rounded-lg p-3">
               <h3 className="text-sm font-semibold mb-2">Items</h3>
 
-              <div className="space-y-2">
+              <div className="max-h-[20vh] overflow-y-auto space-y-2 pr-1">
                 {data?.items?.length ? (
                   data.items.map((item: any, idx: number) => (
                     <div
                       key={idx}
-                      className="flex justify-between text-sm border-b pb-1"
+                      className="flex justify-between text-sm border-b pb-1 last:border-0 last:pb-0"
                     >
                       <span>
                         {item.item_name} × {item.quantity}
                       </span>
 
-                      <span className="font-medium">{item.total_price}</span>
+                      <span className="font-medium">
+                        {Number(item.total_price || 0).toFixed(2)}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -111,19 +160,38 @@ export function InvoiceViewDialog({
             <div className="border rounded-lg p-3 text-sm">
               <div className="flex justify-between font-bold">
                 <span>Total</span>
-                <span>{data?.total_cost || 0}</span>
+                <span>{Number(data?.total_cost || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>
         )}
 
         {/* FOOTER */}
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={engineLoading}
+          >
             Close
           </Button>
 
-          <Button onClick={onDownload}>Download</Button>
+          <Button
+            onClick={handleGenerateAndDownload}
+            disabled={!doc || engineLoading}
+          >
+            {engineLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                Download
+              </>
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

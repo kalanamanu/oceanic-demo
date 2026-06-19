@@ -39,7 +39,11 @@ interface Props {
 
 type Currency = "LKR" | "USD";
 
-export default function PurchaseOrderEditDialog({ open, onOpenChange }: Props) {
+export default function PurchaseOrderEditDialog({
+  open,
+  onOpenChange,
+  document,
+}: Props) {
   const { loading, runJob, autoSave } = useDocumentEngine({
     pollInterval: 2000,
     maxAttempts: 10,
@@ -169,9 +173,7 @@ export default function PurchaseOrderEditDialog({ open, onOpenChange }: Props) {
       <DialogContent className="max-w-xl p-6 gap-6">
         <DialogHeader className="space-y-1">
           <DialogTitle className="text-xl">Generate Purchase Order</DialogTitle>
-          <DialogDescription>
-            Configuration will be saved as a draft when you close this dialog.
-          </DialogDescription>
+          <DialogDescription>Edit and Regenerate the PO.</DialogDescription>
         </DialogHeader>
 
         {/* SCROLLABLE BODY */}

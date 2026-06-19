@@ -161,8 +161,6 @@ export default function DispatchNotePage() {
                     <Button size="sm" onClick={() => handleEdit(doc.doc_id)}>
                       Edit
                     </Button>
-
-                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-1" />
                   </div>
                 </CardHeader>
 

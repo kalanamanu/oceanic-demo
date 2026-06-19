@@ -208,7 +208,7 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
         <DialogHeader className="space-y-1">
           <DialogTitle className="text-xl">Edit Purchase Order</DialogTitle>
           <DialogDescription>
-            Configuration will be saved as a draft when you close this dialog.
+            Edit and Regenerate the Purchase Order Document.
           </DialogDescription>
         </DialogHeader>
 
@@ -421,7 +421,7 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
                 Generating...
               </>
             ) : (
-              "Generate Purchase Order"
+              "Edit and Regenerate PO"
             )}
           </Button>
         </DialogFooter>
