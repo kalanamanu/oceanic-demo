@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { VendorService } from "@/services/vendor.service";
-import { VendorForm } from "@/components/vendor/VendorForm";
+import { VendorEditForm } from "@/components/vendor/VendorEditForm";
 import { VendorDocumentSection } from "@/components/vendor/VendorDocumentSection";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,15 +23,9 @@ export default function EditVendorPage() {
 
         const response = await VendorService.getVendorById(id as string);
 
-        // 🔍 DEBUG: log full API response
-        console.log("RAW Vendor API Response:", response);
-
-        // if API returns wrapped object { data: {...} }
+        // API response unwrap
         const vendorData =
           (response as unknown as { data?: any })?.data ?? response;
-
-        // 🔍 DEBUG: log extracted vendor
-        console.log("EXTRACTED Vendor Data:", vendorData);
 
         setVendor(vendorData);
       } catch (err) {
@@ -46,18 +40,21 @@ export default function EditVendorPage() {
   }, [id]);
 
   const handleSuccess = () => {
-    router.push(`/vendors`);
+    router.push("/vendors");
   };
-
-  // 🔍 DEBUG: watch vendor state changes
-  React.useEffect(() => {
-    console.log("VENDOR STATE UPDATED:", vendor);
-  }, [vendor]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen animate-pulse">
         Loading vendor data...
+      </div>
+    );
+  }
+
+  if (!vendor) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-muted-foreground">
+        Vendor not found
       </div>
     );
   }
@@ -84,18 +81,14 @@ export default function EditVendorPage() {
           </div>
         </div>
 
-        {/* 1. General Info Form */}
+        {/* General Info */}
         <div className="border rounded-xl p-6 bg-card shadow-sm">
           <h2 className="text-lg font-semibold mb-4">General Details</h2>
 
-          <VendorForm
-            mode="edit"
-            initialData={vendor}
-            onSuccess={handleSuccess}
-          />
+          <VendorEditForm initialData={vendor} onSuccess={handleSuccess} />
         </div>
 
-        {/* 2. Document Management Section */}
+        {/* Document Section */}
         <div className="border rounded-xl p-6 bg-card shadow-sm">
           <VendorDocumentSection vendorId={id as string} />
         </div>
