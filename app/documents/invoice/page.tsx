@@ -153,7 +153,7 @@ export default function InvoicePage() {
                         {doc.reference_no}
                       </CardTitle>
 
-                      <CardDescription>Status: {doc.status}</CardDescription>
+                      {/* <CardDescription>Status: {doc.status}</CardDescription> */}
                     </div>
                   </div>
                 </CardHeader>
