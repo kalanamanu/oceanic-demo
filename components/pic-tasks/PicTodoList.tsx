@@ -39,14 +39,17 @@ export function PicTodoList({
     refresh();
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string, status?: string) => {
+    if (status === "completed") return;
+
     await PicTodoService.deleteTodo(id);
     refresh();
   };
 
   const openEdit = (todo: Todo) => {
-    setEditTodo(todo);
+    if (todo.status === "completed") return;
 
+    setEditTodo(todo);
     const safeDate = todo.due_date?.split("T")[0] || "";
 
     setForm({
@@ -151,16 +154,26 @@ export function PicTodoList({
                   <Button
                     variant="ghost"
                     size="icon"
+                    disabled={isDone}
                     onClick={() => openEdit(todo)}
-                    className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    className={`h-8 w-8 ${
+                      isDone
+                        ? "opacity-30 cursor-not-allowed"
+                        : "text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    }`}
                   >
                     <Pencil size={14} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => remove(todo.todo_id)}
-                    className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    disabled={isDone}
+                    onClick={() => remove(todo.todo_id, todo.status)}
+                    className={`h-8 w-8 ${
+                      isDone
+                        ? "opacity-30 cursor-not-allowed"
+                        : "text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    }`}
                   >
                     <Trash2 size={14} />
                   </Button>
