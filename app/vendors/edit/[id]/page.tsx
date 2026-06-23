@@ -4,7 +4,7 @@ import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { VendorService } from "@/services/vendor.service";
 import { VendorForm } from "@/components/vendor/VendorForm";
-import { VendorDocumentSection } from "@/components/vendor/VendorDocumentSection"; // Full functionality
+import { VendorDocumentSection } from "@/components/vendor/VendorDocumentSection";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -20,9 +20,22 @@ export default function EditVendorPage() {
     const load = async () => {
       try {
         setLoading(true);
-        const data = await VendorService.getVendorById(id as string);
-        setVendor(data);
+
+        const response = await VendorService.getVendorById(id as string);
+
+        // 🔍 DEBUG: log full API response
+        console.log("RAW Vendor API Response:", response);
+
+        // if API returns wrapped object { data: {...} }
+        const vendorData =
+          (response as unknown as { data?: any })?.data ?? response;
+
+        // 🔍 DEBUG: log extracted vendor
+        console.log("EXTRACTED Vendor Data:", vendorData);
+
+        setVendor(vendorData);
       } catch (err) {
+        console.error("Load vendor error:", err);
         toast.error("Failed to load vendor");
       } finally {
         setLoading(false);
@@ -35,6 +48,11 @@ export default function EditVendorPage() {
   const handleSuccess = () => {
     router.push(`/vendors`);
   };
+
+  // 🔍 DEBUG: watch vendor state changes
+  React.useEffect(() => {
+    console.log("VENDOR STATE UPDATED:", vendor);
+  }, [vendor]);
 
   if (loading) {
     return (
@@ -57,6 +75,7 @@ export default function EditVendorPage() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
+
           <div>
             <h1 className="text-2xl font-bold">Edit Vendor</h1>
             <p className="text-sm text-muted-foreground">
@@ -68,6 +87,7 @@ export default function EditVendorPage() {
         {/* 1. General Info Form */}
         <div className="border rounded-xl p-6 bg-card shadow-sm">
           <h2 className="text-lg font-semibold mb-4">General Details</h2>
+
           <VendorForm
             mode="edit"
             initialData={vendor}
@@ -75,7 +95,7 @@ export default function EditVendorPage() {
           />
         </div>
 
-        {/* 2. Document Management Section (Upload, Edit, Delete, View) */}
+        {/* 2. Document Management Section */}
         <div className="border rounded-xl p-6 bg-card shadow-sm">
           <VendorDocumentSection vendorId={id as string} />
         </div>
