@@ -22,7 +22,12 @@ export default function VendorsPage() {
 
       const data = await VendorService.getAllVendors();
 
-      setVendors(data);
+      const sortedVendors = [...data].sort(
+        (a, b) =>
+          new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+      );
+
+      setVendors(sortedVendors);
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to load vendors");
@@ -112,15 +117,10 @@ export default function VendorsPage() {
           "
         >
           <div>Name</div>
-
           <div>Email</div>
-
           <div>Phone</div>
-
           <div>Categories</div>
-
           <div>Status</div>
-
           <div className="text-right">Actions</div>
         </div>
 
