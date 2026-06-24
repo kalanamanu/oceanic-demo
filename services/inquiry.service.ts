@@ -13,20 +13,6 @@ interface PaginationParams {
 }
 
 export class InquiryService {
-  /**
-   * Encode IDs that may contain slashes
-   * Example:
-   * OSC/INQ/2026/Colombo/0007
-   * =>
-   * OSC%2FINQ%2F2026%2FColombo%2F0007
-   */
-  private static encodeId(id: string): string {
-    return encodeURIComponent(id);
-  }
-
-  /**
-   * Create a new inquiry
-   */
   static async createInquiry(
     data: CreateInquiryRequest,
   ): Promise<Inquiry> {
@@ -42,9 +28,6 @@ export class InquiryService {
     }
   }
 
-  /**
-   * Get all inquiries with pagination
-   */
   static async getAllInquiries(
     params?: PaginationParams,
   ): Promise<PaginatedInquiriesResponse> {
@@ -54,10 +37,7 @@ export class InquiryService {
       const response = await apiClient.get<PaginatedInquiriesResponse>(
         "/api/inquiry",
         {
-          params: {
-            page,
-            pageSize,
-          },
+          params: { page, pageSize },
         },
       );
 
@@ -67,13 +47,10 @@ export class InquiryService {
     }
   }
 
-  /**
-   * Get inquiry by ID
-   */
   static async getInquiryById(id: string): Promise<Inquiry> {
     try {
       const response = await apiClient.get<InquiryResponse>(
-        `/api/inquiry/${this.encodeId(id)}`,
+        `/api/inquiry/${id}`,
       );
 
       return response.data.data;
@@ -82,9 +59,6 @@ export class InquiryService {
     }
   }
 
-  /**
-   * Update inquiry
-   */
   static async updateInquiry(
     data: UpdateInquiryRequest,
   ): Promise<Inquiry> {
@@ -92,7 +66,7 @@ export class InquiryService {
       const { id, ...updateData } = data;
 
       const response = await apiClient.put<InquiryResponse>(
-        `/api/inquiry/${this.encodeId(id)}`,
+        `/api/inquiry/${id}`,
         updateData,
       );
 
@@ -102,49 +76,34 @@ export class InquiryService {
     }
   }
 
-  /**
-   * Delete inquiry
-   */
   static async deleteInquiry(id: string): Promise<void> {
     try {
-      await apiClient.delete(
-        `/api/inquiry/${this.encodeId(id)}`,
-      );
+      await apiClient.delete(`/api/inquiry/${id}`);
     } catch (error: any) {
       throw this.handleError(error);
     }
   }
 
-/**
- * Update inquiry status
- * PATCH /api/inquiry/{id}/status
- */
-static async updateInquiryStatus(
-  id: string,
-  status: string,
-): Promise<Inquiry> {
-  try {
-    const response = await apiClient.patch<InquiryResponse>(
-      `/api/inquiry/${this.encodeId(id)}/status`,
-      { status },
-    );
+  static async updateInquiryStatus(
+    id: string,
+    status: string,
+  ): Promise<Inquiry> {
+    try {
+      const response = await apiClient.patch<InquiryResponse>(
+        `/api/inquiry/${id}/status`,
+        { status },
+      );
 
-    return response.data.data;
-  } catch (error: any) {
-    throw this.handleError(error);
+      return response.data.data;
+    } catch (error: any) {
+      throw this.handleError(error);
+    }
   }
-}
 
-  /**
-   * Centralized error handling
-   */
   private static handleError(error: any): Error {
     if (error.response) {
       const apiError = error.response.data;
-
-      return new Error(
-        apiError?.message || "An error occurred",
-      );
+      return new Error(apiError?.message || "An error occurred");
     }
 
     if (error.request) {

@@ -210,11 +210,7 @@ export function InquiryDetailDialog({
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
               <div>
                 <DialogTitle className="text-3xl font-bold tracking-tight">
-                  INQ-
-                  {currentIdToUse
-                    ?.replace("inq_", "")
-                    .substring(0, 6)
-                    .toUpperCase()}
+                  {data.reference_number || "N/A"}
                 </DialogTitle>
 
                 <DialogDescription className="mt-2 text-sm">
@@ -517,6 +513,7 @@ export function InquiryDetailDialog({
       {dialogState === 2 && data && (
         <AddRemarkDialog
           inquiryId={currentIdToUse || ""}
+          referenceNumber={data.reference_number || ""}
           open={dialogState === 2}
           onClose={() => setDialogState(0)}
           onSave={handleAddRemarkSave}

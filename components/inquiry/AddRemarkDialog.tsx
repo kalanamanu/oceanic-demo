@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 
 interface AddRemarkDialogProps {
   inquiryId: string;
+  referenceNumber: string;
   open: boolean;
   onClose: () => void;
   onSave: (inquiryId: string, remarkText: string) => Promise<void>;
@@ -20,6 +21,7 @@ interface AddRemarkDialogProps {
 
 export function AddRemarkDialog({
   inquiryId,
+  referenceNumber, // ✅ FIX: destructure it
   open,
   onClose,
   onSave,
@@ -33,12 +35,6 @@ export function AddRemarkDialog({
       setLoading(false);
     }
   }, [open]);
-
-  // ✅ Safe label formatter (handles OSC/INQ/2026/COLOMBO/0010)
-  const formatInquiryLabel = (id?: string) => {
-    if (!id) return "UNKNOWN";
-    return id.split("/").pop()?.toUpperCase() || "UNKNOWN";
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,15 +53,19 @@ export function AddRemarkDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add Remark</DialogTitle>
 
             <DialogDescription>
-              Add a new remark for inquiry INQ-
-              {formatInquiryLabel(inquiryId)}.
+              Add a new remark for inquiry {referenceNumber}.
             </DialogDescription>
           </DialogHeader>
 

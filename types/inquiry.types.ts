@@ -12,7 +12,7 @@ export interface InquiryCategory {
 export interface Inquiry {
   id?: string;
   inq_id?: string;
-
+  reference_number: string;
   vessel_name: string;
   agent: string;
   eta: string;
