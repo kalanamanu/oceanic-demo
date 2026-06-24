@@ -82,6 +82,9 @@ export function InquiryTable({
             <tbody className="divide-y divide-border">
               {inquiries.map((inquiry, index) => {
                 const idToUse = inquiry.inq_id || inquiry.id;
+                // safe reference resolver: accommodate different backend shapes
+                const reference = (inquiry as any).reference_number;
+                idToUse;
                 const status = getStatus(inquiry.status);
 
                 return (
@@ -91,7 +94,7 @@ export function InquiryTable({
                   >
                     {/* Ref # */}
                     <td className="px-6 py-4 text-sm font-mono font-medium text-primary">
-                      {safeText(inquiry.inq_id)}
+                      {safeText(reference)}
                     </td>
 
                     {/* Vessel */}
