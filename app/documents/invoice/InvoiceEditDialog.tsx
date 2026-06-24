@@ -40,8 +40,9 @@ export function InvoiceEditDialog({ open, onOpenChange, document }: Props) {
   React.useEffect(() => {
     const load = async () => {
       try {
-        const res = await BasisService.getActiveBasis();
-        setUsdRate(res?.USDRate || 1);
+        const usdRateData = await BasisService.getLatestUSDRate();
+
+        setUsdRate(usdRateData.USDRate);
       } catch (err) {
         console.error("Failed to load rate", err);
       }

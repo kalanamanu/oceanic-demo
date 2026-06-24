@@ -58,12 +58,12 @@ export default function EditPODialog({ docId, open, onClose }: Props) {
 
     const load = async () => {
       try {
-        const [docRes, basisRes] = await Promise.all([
+        const [docRes, usdRateRes] = await Promise.all([
           DocumentService.getDocument(docId),
-          BasisService.getActiveBasis(),
+          BasisService.getLatestUSDRate(), // ✅ correct API
         ]);
 
-        const activeUsdRate = basisRes?.USDRate || 1;
+        const activeUsdRate = usdRateRes?.USDRate || 1;
         setUsdRate(activeUsdRate);
 
         const docWrapper = docRes.document;

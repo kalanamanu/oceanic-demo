@@ -57,11 +57,9 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
   React.useEffect(() => {
     const loadBasis = async () => {
       try {
-        const basis = await BasisService.getActiveBasis();
+        const usdRateData = await BasisService.getLatestUSDRate();
 
-        const rate = Number(basis?.USDRate ?? 1) || 1;
-
-        setUsdRate(rate);
+        setUsdRate(usdRateData.USDRate);
       } catch (err) {
         console.error(err);
       }

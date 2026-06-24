@@ -65,15 +65,16 @@ export function CreatePODialog({
 
     const load = async () => {
       try {
-        const [vendorRes, itemsRes, basisRes] = await Promise.all([
+        const [vendorRes, itemsRes, usdRateRes] = await Promise.all([
           VendorService.getVendorById(vendorId),
           PreCostVendorService.getVendorItems(preCostId, vendorId),
-          BasisService.getActiveBasis(),
+          BasisService.getLatestUSDRate(), // ✅ correct
         ]);
+
+        setUsdRate(usdRateRes?.USDRate || 1);
 
         setVendor(vendorRes);
         setItems(itemsRes || []);
-        setUsdRate(basisRes?.USDRate || 1);
       } catch (err: any) {
         console.error(err);
         toast.error("Failed to load PO data");

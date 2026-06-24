@@ -67,8 +67,9 @@ export function PreCostDownloadDialog({
   React.useEffect(() => {
     const loadRate = async () => {
       try {
-        const basis = await BasisService.getActiveBasis();
-        setUsdRate(basis?.USDRate || 1);
+        const usdRateData = await BasisService.getLatestUSDRate();
+
+        setUsdRate(usdRateData.USDRate);
       } catch (err) {
         console.error(err);
       }

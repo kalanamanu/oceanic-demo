@@ -42,8 +42,9 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
   /* ================= LOAD RATE ================= */
   React.useEffect(() => {
     const load = async () => {
-      const res = await BasisService.getActiveBasis();
-      setUsdRate(res?.USDRate || 1);
+      const usdRateData = await BasisService.getLatestUSDRate();
+
+      setUsdRate(usdRateData.USDRate);
     };
     load();
   }, []);

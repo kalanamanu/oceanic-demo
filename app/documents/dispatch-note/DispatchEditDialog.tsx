@@ -203,7 +203,7 @@ export default function DispatchEditDialog({
 
   const convert = (value: number) => {
     if (currency === "USD") {
-      return value / usdRate; // 🔥 conversion happens here
+      return value / usdRate;
     }
     return value;
   };
