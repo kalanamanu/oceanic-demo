@@ -164,6 +164,8 @@ export function EditInquiryDialog({
         status: fields.status ?? "Pending",
       });
 
+      console.log("STATUS", fields.status);
+
       // 2. Update STATUS separately (THIS IS YOUR NEW REQUIREMENT)
       await InquiryService.updateInquiryStatus(id, fields.status ?? "Pending");
 
@@ -209,7 +211,9 @@ export function EditInquiryDialog({
                 {fields.port || "No Port"}
               </Badge>
               <Badge className="rounded-xl px-3 py-1">
-                {fields.status || "Pending"}
+                {typeof fields.status === "object"
+                  ? (fields.status as any)?.name
+                  : fields.status || "Pending"}
               </Badge>
             </div>
           </div>
@@ -311,7 +315,11 @@ export function EditInquiryDialog({
                 >
                   <select
                     name="status"
-                    value={fields.status || "Pending"}
+                    value={
+                      typeof fields.status === "object"
+                        ? (fields.status as any)?.name
+                        : fields.status || "Pending"
+                    }
                     onChange={handleChange}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >

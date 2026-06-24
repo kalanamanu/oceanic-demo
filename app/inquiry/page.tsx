@@ -96,9 +96,14 @@ export default function InquiryPage() {
 
   const handleEditInquiry = (updatedInquiry: Inquiry) => {
     setInquiries((prev) =>
-      prev.map((inq) => (inq.id === updatedInquiry.id ? updatedInquiry : inq)),
+      prev.map((inq) =>
+        (inq.inq_id || inq.id) === (updatedInquiry.inq_id || updatedInquiry.id)
+          ? { ...updatedInquiry }
+          : inq,
+      ),
     );
-    setSelectedInquiry(updatedInquiry);
+
+    setSelectedInquiry({ ...updatedInquiry });
   };
 
   const handleExport = () => {

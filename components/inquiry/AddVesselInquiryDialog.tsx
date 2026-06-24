@@ -192,6 +192,7 @@ export function VesselInquiryDialog({
               is_key_pic: false,
             })),
         ],
+        status: "Pending",
       };
 
       await InquiryService.createInquiry(inquiryData);
