@@ -28,7 +28,7 @@ const configItems = [
   {
     title: "Basis",
     description: "Manage quotation basis, active rates, and global parameters.",
-    href: "/system-configuration/basis",
+    href: "/system-configuration/basis/margins",
     icon: Layers3,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",

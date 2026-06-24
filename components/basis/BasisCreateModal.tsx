@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,31 +19,29 @@ import { Label } from "@/components/ui/label";
 export function BasisCreateModal({
   open,
   onClose,
-  onSuccess,
+  onSubmit,
 }: {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSubmit: (payload: { margin: number; name: string }) => Promise<void>;
 }) {
+  const [name, setName] = React.useState("");
   const [margin, setMargin] = React.useState("");
-  const [usd, setUsd] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
 
-      await BasisService.createBasis({
+      await onSubmit({
+        name,
         margin: Number(margin),
-        USDRate: Number(usd),
       });
 
-      toast.success("Basis created");
+      toast.success("Margin created successfully");
 
+      setName("");
       setMargin("");
-      setUsd("");
-
-      onSuccess();
       onClose();
     } catch (err: any) {
       toast.error(err.message);
@@ -55,22 +54,33 @@ export function BasisCreateModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Basis</DialogTitle>
+          <DialogTitle>Create New Margin</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* COMPANY NAME */}
+          <div>
+            <Label>Company Name</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Revelo"
+            />
+          </div>
+
+          {/* MARGIN */}
           <div>
             <Label>Margin (%)</Label>
-            <Input value={margin} onChange={(e) => setMargin(e.target.value)} />
+            <Input
+              value={margin}
+              onChange={(e) => setMargin(e.target.value)}
+              placeholder="e.g. 18"
+            />
           </div>
 
-          <div>
-            <Label>USD Rate</Label>
-            <Input value={usd} onChange={(e) => setUsd(e.target.value)} />
-          </div>
-
+          {/* SUBMIT */}
           <Button onClick={handleSubmit} disabled={loading} className="w-full">
-            {loading ? "Saving..." : "Create Basis"}
+            {loading ? "Saving..." : "Create Margin"}
           </Button>
         </div>
       </DialogContent>

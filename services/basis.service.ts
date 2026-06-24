@@ -1,55 +1,117 @@
 import apiClient from "@/lib/api-client";
 
 import type {
-  Basis,
-  BasisListResponse,
-  CreateBasisRequest,
-  CreateBasisResponse,
+  MarginListResponse,
+  CreateMarginRequest,
+  CreateMarginResponse,
+} from "@/types/margin.types";
+
+import type {
+  CreateUSDRateRequest,
+  CreateUSDRateResponse,
+  LatestUSDRateResponse,
+  USDRateHistoryResponse,
+} from "@/types/usd-rate.types";
+
+import type {
+  BasisCalculationResponse,
 } from "@/types/basis.types";
 
 export class BasisService {
-  /* ================= GET ALL BASIS ================= */
-  static async getAllBasis(): Promise<Basis[]> {
+  /* ================= MARGINS ================= */
+
+  static async getAllMargins(): Promise<MarginListResponse["data"]["basisList"]> {
     try {
-      const res = await apiClient.get<BasisListResponse>("/api/basis");
+      const res = await apiClient.get<MarginListResponse>(
+        "api/basis/margins",
+      );
 
       return res.data.data.basisList;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message || "Failed to fetch basis",
+        err?.response?.data?.message || "Failed to fetch margins",
       );
     }
   }
 
-  /* ================= GET ACTIVE BASIS ================= */
-  static async getActiveBasis(): Promise<Basis | null> {
+  static async createMargin(
+    payload: CreateMarginRequest,
+  ): Promise<CreateMarginResponse["data"]> {
     try {
-      const res = await apiClient.get<BasisListResponse>("/api/basis");
-
-      const list = res.data.data.basisList;
-
-      return list.find((b) => b.is_active) || null;
-    } catch (err: any) {
-      throw new Error(
-        err?.response?.data?.message || "Failed to fetch active basis",
-      );
-    }
-  }
-
-  /* ================= CREATE BASIS ================= */
-  static async createBasis(
-    payload: CreateBasisRequest,
-  ): Promise<Basis> {
-    try {
-      const res = await apiClient.post<CreateBasisResponse>(
-        "/api/basis",
+      const res = await apiClient.post<CreateMarginResponse>(
+        "api/basis/margins",
         payload,
       );
 
       return res.data.data;
     } catch (err: any) {
       throw new Error(
-        err?.response?.data?.message || "Failed to create basis",
+        err?.response?.data?.message || "Failed to create margin",
+      );
+    }
+  }
+
+  /* ================= USD RATE ================= */
+
+  static async createUSDRate(
+    payload: CreateUSDRateRequest,
+  ): Promise<CreateUSDRateResponse["data"]> {
+    try {
+      const res = await apiClient.post<CreateUSDRateResponse>(
+        "api/basis/usdrate",
+        payload,
+      );
+
+      return res.data.data;
+    } catch (err: any) {
+      throw new Error(
+        err?.response?.data?.message || "Failed to create USD rate",
+      );
+    }
+  }
+
+  static async getLatestUSDRate(): Promise<LatestUSDRateResponse["data"]> {
+    try {
+      const res = await apiClient.get<LatestUSDRateResponse>(
+        "api/basis/usdrate/latest",
+      );
+
+      return res.data.data;
+    } catch (err: any) {
+      throw new Error(
+        err?.response?.data?.message || "Failed to fetch latest USD rate",
+      );
+    }
+  }
+
+  static async getUSDRateHistory(): Promise<USDRateHistoryResponse["data"]> {
+    try {
+      const res = await apiClient.get<USDRateHistoryResponse>(
+        "api/basis/usdrate/history",
+      );
+
+      return res.data.data;
+    } catch (err: any) {
+      throw new Error(
+        err?.response?.data?.message || "Failed to fetch USD rate history",
+      );
+    }
+  }
+
+  /* ================= BASIS CALCULATION ================= */
+
+  static async calculateBasis(
+    marginId: number,
+  ): Promise<BasisCalculationResponse["data"]> {
+    try {
+      const res = await apiClient.get<BasisCalculationResponse>(
+        `api/basis/margins/${marginId}/basis`,
+      );
+
+      return res.data.data;
+    } catch (err: any) {
+      throw new Error(
+        err?.response?.data?.message || "Failed to calculate basis",
       );
     }
   }
