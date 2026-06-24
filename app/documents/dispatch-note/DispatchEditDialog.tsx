@@ -63,11 +63,9 @@ export default function DispatchEditDialog({
   React.useEffect(() => {
     const loadBasis = async () => {
       try {
-        const basis = await BasisService.getActiveBasis();
+        const usdRateData = await BasisService.getLatestUSDRate();
 
-        const rate = Number(basis?.USDRate ?? 1) || 1;
-
-        setUsdRate(rate);
+        setUsdRate(usdRateData.USDRate);
       } catch (err) {
         console.error(err);
       }
@@ -199,9 +197,21 @@ export default function DispatchEditDialog({
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const subTotal = Number(form.full_total_cost || 0);
-  const discount = Number(form.discount || 0);
-  const transportCost = Number(form.transport_cost || 0);
+  const rawSubTotal = Number(form.full_total_cost || 0);
+  const rawDiscount = Number(form.discount || 0);
+  const rawTransportCost = Number(form.transport_cost || 0);
+
+  const convert = (value: number) => {
+    if (currency === "USD") {
+      return value / usdRate; // 🔥 conversion happens here
+    }
+    return value;
+  };
+
+  const subTotal = convert(rawSubTotal);
+  const discount = convert(rawDiscount);
+  const transportCost = convert(rawTransportCost);
+
   const grandTotal = subTotal - discount + transportCost;
   const handleDownload = async () => {
     try {
