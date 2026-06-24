@@ -7,45 +7,79 @@ interface Props {
 }
 
 export function QuotationHeader({ inquiry, basis, formatBasis }: Props) {
-  if (!inquiry || !basis) return null;
+  if (!inquiry) return null;
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Generate Quotation</h1>
+    <div className="space-y-6">
+      {/* TITLE */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Generate Quotation
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Review inquiry details and pricing basis before generating quotation
+        </p>
+      </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border p-4 rounded text-sm">
-        <div>
-          <b>Inquiry ID: </b> {inquiry.inq_id}
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border rounded-xl p-5 bg-muted/20">
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Inquiry ID</p>
+          <p className="font-medium">{inquiry.inq_id}</p>
         </div>
 
-        <div>
-          <b>Vessel:</b> {inquiry.vessel_name}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Vessel</p>
+          <p className="font-medium">{inquiry.vessel_name}</p>
         </div>
 
-        <div>
-          <b>Agent:</b> {inquiry.agent}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Agent</p>
+          <p className="font-medium">{inquiry.agent}</p>
         </div>
 
-        <div>
-          <b>Port:</b> {inquiry.port}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Port</p>
+          <p className="font-medium">{inquiry.port}</p>
         </div>
 
-        <div>
-          <b>ETA:</b> {new Date(inquiry.eta).toLocaleString()}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">ETA</p>
+          <p className="font-medium">
+            {inquiry.eta ? new Date(inquiry.eta).toLocaleString() : "-"}
+          </p>
         </div>
 
-        <div>
-          <b>Basis:</b> {formatBasis(basis.basis)}
+        {/* BASIS */}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Basis</p>
+          <p className="font-medium">
+            {basis ? formatBasis(Number(basis.basis)) : "Loading..."}
+          </p>
         </div>
 
-        <div>
-          <b>USD Rate:</b> {basis.USDRate}
+        {/* USD RATE */}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">USD Rate</p>
+          <p className="font-medium">{basis?.usdRate ?? "Loading..."}</p>
         </div>
 
-        <div>
-          <b>Margin:</b> {basis.margin}%
+        {/* MARGIN */}
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Margin</p>
+          <p className="font-medium">
+            {basis?.margin != null ? `${basis.margin}%` : "Loading..."}
+          </p>
         </div>
       </div>
+
+      {/* BASIS HIGHLIGHT CARD */}
+      {/* <div className="border rounded-xl p-4 bg-background shadow-sm">
+        <p className="text-xs text-muted-foreground">Current Basis Value</p>
+        <p className="text-lg font-semibold">
+          {basis ? formatBasis(Number(basis.basis)) : "Loading..."}
+        </p>
+      </div> */}
     </div>
   );
 }

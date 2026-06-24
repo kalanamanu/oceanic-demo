@@ -1,5 +1,5 @@
 export interface BasisCalculation {
-  basis: string;
+  basis: number;
   margin: number;
   usdRate: number;
 }
@@ -7,5 +7,9 @@ export interface BasisCalculation {
 export interface BasisCalculationResponse {
   success: boolean;
   message: string;
-  data: BasisCalculation;
+  data: {
+    basis: string;
+    margin: number;
+    usdRate: number;
+  };
 }

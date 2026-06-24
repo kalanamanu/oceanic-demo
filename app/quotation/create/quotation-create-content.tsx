@@ -84,23 +84,19 @@ export function QuotationCreateContent() {
   }, []);
 
   /* ================= LOAD BASIS ================= */
-
   React.useEffect(() => {
-    const loadBasis = async () => {
-      try {
-        const data = await BasisService.getActiveBasis();
+    const storedBasis = sessionStorage.getItem("quotation_basis");
 
-        const basisItem = Array.isArray(data) ? data[0] : data;
+    if (!storedBasis) return;
 
-        setBasis(basisItem);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    try {
+      const parsed = JSON.parse(storedBasis);
 
-    loadBasis();
+      setBasis(parsed);
+    } catch (err) {
+      console.error("Failed to parse basis", err);
+    }
   }, []);
-
   /* ================= FETCH INQUIRY ================= */
 
   React.useEffect(() => {
@@ -175,7 +171,11 @@ export function QuotationCreateContent() {
       }));
 
       if (basis) {
-        const calculated = QuotationCalculator.recalculateAll(enriched, basis);
+        const calculated = QuotationCalculator.recalculateAll(enriched, {
+          usdRate: basis.usdRate,
+          basis: Number(basis.basis),
+          margin: Number(basis.margin),
+        });
 
         setItems(calculated);
       } else {
@@ -200,7 +200,11 @@ export function QuotationCreateContent() {
       };
 
       if (basis) {
-        copy[index] = QuotationCalculator.calculate(copy[index], basis);
+        copy[index] = QuotationCalculator.calculate(copy[index], {
+          usdRate: basis.usdRate,
+          basis: Number(basis.basis),
+          margin: Number(basis.margin),
+        });
       }
 
       return copy;
@@ -252,9 +256,15 @@ export function QuotationCreateContent() {
   const totalLKR = React.useMemo(() => {
     if (!basis) return 0;
 
+    if (!basis) return 0;
+
     return QuotationCalculator.calculateGrandTotalLKR(
       items,
-      basis,
+      {
+        usdRate: basis.usdRate,
+        basis: Number(basis.basis),
+        margin: Number(basis.margin),
+      },
       additionalCharges,
       discountLKR,
     );
@@ -265,9 +275,15 @@ export function QuotationCreateContent() {
   const totalUSD = React.useMemo(() => {
     if (!basis) return 0;
 
-    return QuotationCalculator.calculateGrandTotalUSD(
+    if (!basis) return 0;
+
+    return QuotationCalculator.calculateGrandTotalLKR(
       items,
-      basis,
+      {
+        usdRate: basis.usdRate,
+        basis: Number(basis.basis),
+        margin: Number(basis.margin),
+      },
       additionalCharges,
       discountLKR,
     );
@@ -292,7 +308,7 @@ export function QuotationCreateContent() {
 
         discount: Number(discountLKR || 0),
 
-        usd_rate: Number(basis?.USDRate || 0),
+        usd_rate: Number(basis?.usdRate || 0),
 
         total_cost: Number(totalLKR || 0),
 

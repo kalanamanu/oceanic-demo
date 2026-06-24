@@ -40,6 +40,8 @@ import { EditRemarkDialog } from "@/components/inquiry/EditRemarkDialog";
 import { InquiryRemarkService } from "@/services/inquiry-remark.service";
 import { InquiryService } from "@/services/inquiry.service";
 
+import { SelectBasisDialog } from "@/components/quatation/SelectBasisDialog";
+
 interface InquiryDetailDialogProps {
   inquiry: Inquiry | null;
   remarks: Remark[];
@@ -55,9 +57,9 @@ export function InquiryDetailDialog({
   onClose,
   onEditInquiry,
 }: InquiryDetailDialogProps) {
-  const [dialogState, setDialogState] = React.useState<0 | 1 | 2 | 3 | null>(
-    open ? 0 : null,
-  );
+  const [dialogState, setDialogState] = React.useState<
+    0 | 1 | 2 | 3 | 4 | null
+  >(open ? 0 : null);
 
   const router = useRouter();
 
@@ -69,6 +71,8 @@ export function InquiryDetailDialog({
 
   const [fullInquiry, setFullInquiry] = React.useState<Inquiry | null>(null);
   const [loadingInquiry, setLoadingInquiry] = React.useState(false);
+
+  const [openBasisDialog, setOpenBasisDialog] = React.useState(false);
 
   React.useEffect(() => {
     const idToUse = inquiry?.inq_id || inquiry?.id;
@@ -107,6 +111,17 @@ export function InquiryDetailDialog({
     } finally {
       setLoadingRemarks(false);
     }
+  };
+
+  const handleBasisSelect = (basis: {
+    marginId: number;
+    margin: number;
+    basis: number;
+    usdRate: number;
+  }) => {
+    sessionStorage.setItem("quotation_basis", JSON.stringify(basis));
+
+    router.push(`/quotation/create?inquiryId=${currentIdToUse}`);
   };
 
   const handleAddRemarkSave = async (inqId: string, remarkText: string) => {
@@ -475,11 +490,7 @@ export function InquiryDetailDialog({
 
                     <Button
                       className="w-full justify-start h-11 rounded-xl"
-                      onClick={() =>
-                        router.push(
-                          `/quotation/create?inquiryId=${currentIdToUse || ""}`,
-                        )
-                      }
+                      onClick={() => setDialogState(4)}
                     >
                       <File className="mr-2 h-4 w-4" />
                       Generate Quotation
@@ -519,6 +530,14 @@ export function InquiryDetailDialog({
           open={dialogState === 3}
           onClose={() => setDialogState(0)}
           onSave={handleEditRemarkSave}
+        />
+      )}
+
+      {dialogState === 4 && (
+        <SelectBasisDialog
+          open={dialogState === 4}
+          onClose={() => setDialogState(0)}
+          onSelect={handleBasisSelect}
         />
       )}
     </>

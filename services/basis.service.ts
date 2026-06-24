@@ -15,6 +15,7 @@ import type {
 
 import type {
   BasisCalculationResponse,
+  BasisCalculation
 } from "@/types/basis.types";
 
 export class BasisService {
@@ -100,19 +101,25 @@ export class BasisService {
 
   /* ================= BASIS CALCULATION ================= */
 
-  static async calculateBasis(
-    marginId: number,
-  ): Promise<BasisCalculationResponse["data"]> {
-    try {
-      const res = await apiClient.get<BasisCalculationResponse>(
-        `api/basis/margins/${marginId}/basis`,
-      );
+ static async calculateBasis(
+  marginId: number,
+): Promise<BasisCalculation> {
+  try {
+    const res = await apiClient.get<BasisCalculationResponse>(
+      `api/basis/margins/${marginId}/basis`,
+    );
 
-      return res.data.data;
-    } catch (err: any) {
-      throw new Error(
-        err?.response?.data?.message || "Failed to calculate basis",
-      );
-    }
+    const data = res.data.data;
+
+    return {
+      margin: data.margin,
+      usdRate: data.usdRate,
+      basis: Number(data.basis), 
+    };
+  } catch (err: any) {
+    throw new Error(
+      err?.response?.data?.message || "Failed to calculate basis",
+    );
   }
+}
 }
