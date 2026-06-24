@@ -134,7 +134,7 @@ export default function USDRatePage() {
         <Card className="md:col-span-1 shadow-sm border-muted/60 flex flex-col justify-between">
           <CardHeader className="pb-3">
             <CardDescription className="text-xs uppercase tracking-wider font-medium">
-              Current USD Rate (LKR)
+              Current USD Rate
             </CardDescription>
             <CardTitle className="text-4xl font-bold tracking-tight text-foreground mt-1">
               {latest ? `${Number(latest.USDRate).toFixed(2)}` : "—"}
