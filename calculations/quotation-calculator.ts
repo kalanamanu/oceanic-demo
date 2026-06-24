@@ -7,34 +7,33 @@ export class QuotationCalculator {
    */
   static calculate(item: QuotationItem, basis: BasisCalculation): QuotationItem {
     const qty = Number(item.quantity || 0);
-    const unitRate_LKR = Number(item.price || 0);
+    const unitRateLKR = Number(item.price || 0);
     const additional = Number(item.additional_charges || 0);
 
     const usdRate = Number(basis?.usdRate || 1);
     const basisValue = Number(basis?.basis || 0);
 
     // ---- LKR CALCULATION ----
-    const conva_basis = unitRate_LKR * basisValue;
+    const conva_basis = unitRateLKR * basisValue;
 
-    const total_unit_rate_rs = unitRate_LKR + additional;
-    const total_rs = total_unit_rate_rs * qty;
+    const totalUnitRateLKR = unitRateLKR + additional;
+    const totalLKR = totalUnitRateLKR * qty;
 
-    // ---- USD CALCULATION (UNCHANGED LOGIC) ----
-    const unit_rate_usd = unitRate_LKR / usdRate;
-
-    const total_unit_rate_usd = total_unit_rate_rs / usdRate;
-
-    const total_usd = total_unit_rate_usd * qty;
+    // ---- USD CALCULATION ----
+    const unitRateUSD = unitRateLKR / usdRate;
+    const totalUnitRateUSD = totalUnitRateLKR / usdRate;
+    const totalUSD = totalUnitRateUSD * qty;
 
     return {
       ...item,
 
-      unit_rate_usd: unit_rate_usd.toFixed(2),
-      total_unit_rate_usd: total_unit_rate_usd.toFixed(2),
-      conva_basis: conva_basis.toFixed(2),
-      total_unit_rate_rs: total_unit_rate_rs.toFixed(2),
-      total_rs: total_rs.toFixed(2),
-      total_usd: total_usd.toFixed(2),
+      // keep numbers internally
+      unit_rate_usd: unitRateUSD.toString(),
+      total_unit_rate_usd: totalUnitRateUSD.toString(),
+      conva_basis: conva_basis.toString(),
+      total_unit_rate_rs: totalUnitRateLKR.toString(),
+      total_rs: totalLKR.toString(),
+      total_usd: totalUSD.toString(),
     };
   }
 
@@ -57,21 +56,20 @@ export class QuotationCalculator {
     additionalCharges: { name: string; amount: string; currency: string }[],
     discountLKR: string,
   ): number {
-    const itemsTotal = items.reduce(
-      (sum, item) => sum + Number(item.total_rs || 0),
-      0,
-    );
-
     const usdRate = Number(basis?.usdRate || 1);
+
+    // ✅ ALWAYS recalc to avoid stale values
+    const itemsTotal = items.reduce((sum, item) => {
+      const calculated = this.calculate(item, basis);
+      return sum + Number(calculated.total_rs || 0);
+    }, 0);
 
     const additionalTotal = additionalCharges.reduce((sum, charge) => {
       const amount = Number(charge.amount || 0);
 
-      if (charge.currency === "USD") {
-        return sum + amount * usdRate;
-      }
-
-      return sum + amount;
+      return charge.currency === "USD"
+        ? sum + amount * usdRate
+        : sum + amount;
     }, 0);
 
     const discount = Number(discountLKR || 0);
@@ -90,19 +88,17 @@ export class QuotationCalculator {
   ): number {
     const usdRate = Number(basis?.usdRate || 1);
 
-    const itemsTotalUSD = items.reduce(
-      (sum, item) => sum + Number(item.total_usd || 0),
-      0,
-    );
+    const itemsTotalUSD = items.reduce((sum, item) => {
+      const calculated = this.calculate(item, basis);
+      return sum + Number(calculated.total_usd || 0);
+    }, 0);
 
     const additionalUSD = additionalCharges.reduce((sum, charge) => {
       const amount = Number(charge.amount || 0);
 
-      if (charge.currency === "LKR") {
-        return sum + amount / usdRate;
-      }
-
-      return sum + amount;
+      return charge.currency === "LKR"
+        ? sum + amount / usdRate
+        : sum + amount;
     }, 0);
 
     const discountUSD = Number(discountLKR || 0) / usdRate;

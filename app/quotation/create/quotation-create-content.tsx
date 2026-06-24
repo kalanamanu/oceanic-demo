@@ -272,12 +272,12 @@ export function QuotationCreateContent() {
 
   /* ================= TOTAL USD ================= */
 
+  /* ================= TOTAL USD ================= */
   const totalUSD = React.useMemo(() => {
     if (!basis) return 0;
 
-    if (!basis) return 0;
-
-    return QuotationCalculator.calculateGrandTotalLKR(
+    return QuotationCalculator.calculateGrandTotalUSD(
+      // ✅ FIX
       items,
       {
         usdRate: basis.usdRate,
