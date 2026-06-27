@@ -29,7 +29,6 @@ export function AnnouncementCard({ collapsed }: AnnouncementCardProps) {
       const res = await NotificationService.getAnnouncements();
 
       if (res.announcements?.length) {
-        // get latest (assuming sorted by createdAt OR fallback)
         const sorted = [...res.announcements].sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -50,7 +49,8 @@ export function AnnouncementCard({ collapsed }: AnnouncementCardProps) {
   };
 
   return (
-    <div className="mb-3">
+    /* Changed mb-3 to mt-auto pt-4 mb-2 to push it away from configurations and align it cleanly above logout */
+    <div className="mt-auto pt-4 mb-2 w-full">
       <button
         onClick={() => router.push("/announcements")}
         className={`
