@@ -24,6 +24,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
 import { AuthService } from "@/services/auth.service";
+import { AnnouncementCard } from "@/components/announcements/announcement-card";
 
 // Role-based sidebar configuration
 const sidebarConfig = {
@@ -313,6 +314,8 @@ export function Sidebar({
           );
         })}
       </nav>
+      {/* Announcement Card */}
+      <AnnouncementCard collapsed={collapsed} />
 
       {/* Logout */}
       <div className="mb-2 mt-8 border-t border-border/70 pt-6">
