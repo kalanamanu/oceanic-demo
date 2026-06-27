@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { AuthService } from "@/services/auth.service";
 import type { UserData } from "@/types/auth.types";
 import { ProfileService } from "@/services/profile.service";
+import { Bell } from "lucide-react";
+import { NotificationDropdown } from "@/components/notification/notification-dropdown";
 
 export function DashboardHeader() {
   const { theme, setTheme } = useTheme();
@@ -107,6 +109,8 @@ export function DashboardHeader() {
 
         {/* RIGHT CONTROLS */}
         <div className="flex items-center gap-3">
+          {/* Notifications */}
+          <NotificationDropdown />
           {/* THEME */}
           <Toggle
             aria-label="Toggle theme"
