@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Sliders,
   CalendarDays,
+  Megaphone,
 } from "lucide-react";
 
 import { AuthService } from "@/services/auth.service";
@@ -68,6 +69,15 @@ const configItems = [
     color: "text-green-500",
     bgColor: "bg-green-500/10",
   },
+  {
+    title: "Announcements",
+    description: "Create, manage and publish system announcements.",
+    href: "/system-configuration/announcements",
+    icon: Megaphone,
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+    adminOnly: true,
+  },
 ];
 
 export default function ConfigurationPage() {
@@ -77,11 +87,20 @@ export default function ConfigurationPage() {
     AuthService.checkAuth().then(setUser);
   }, []);
 
-  const restrictedRoles = ["Purchasing - Manager", "General Manager"];
-
   const filteredConfigItems = useMemo(() => {
-    return configItems;
-  }, []);
+    if (!user) return [];
+
+    const restrictedRoles = ["Purchasing - Manager", "General Manager"];
+
+    return configItems.filter((item: any) => {
+      // hide admin-only modules for restricted roles
+      if (item.adminOnly && restrictedRoles.includes(user.role)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background p-6">
