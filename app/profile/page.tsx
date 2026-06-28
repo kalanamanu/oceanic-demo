@@ -97,8 +97,6 @@ export default function ProfilePage() {
     <div className="max-w-5xl mx-auto space-y-6 py-6">
       {/* PROFILE DETAILS */}
       <ProfileForm user={user} />
-
-      {/* CHANGE PASSWORD SECTION */}
     </div>
   );
 }
