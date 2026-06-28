@@ -5,6 +5,7 @@ import type {
   UpdateInquiryRequest,
   PaginatedInquiriesResponse,
   InquiryResponse,
+   InquiryDeadlineResponse,
 } from "@/types/inquiry.types";
 
 interface PaginationParams {
@@ -116,4 +117,16 @@ export class InquiryService {
       error.message || "An unexpected error occurred.",
     );
   }
+
+  static async getInquiryDeadline(): Promise<string> {
+  try {
+    const response = await apiClient.get<InquiryDeadlineResponse>(
+      "/api/inquiry/deadline",
+    );
+
+    return response.data.data.deadline;
+  } catch (error: any) {
+    throw this.handleError(error);
+  }
+}
 }

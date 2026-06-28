@@ -68,11 +68,33 @@ export function VesselInquiryDialog({
     port: "",
     categories: [] as any[],
     inquiryReceived: undefined as Date | undefined,
-    quotationSubmission: undefined as Date | undefined,
+
     keyPicUserId: "",
     keyPicUserName: "",
     subPics: [] as SubPIC[],
   });
+  const [deadline, setDeadline] = React.useState<string | null>(null);
+  const [loadingDeadline, setLoadingDeadline] = React.useState(false);
+
+  //Fetch Deadline
+  React.useEffect(() => {
+    if (!open) return;
+
+    const fetchDeadline = async () => {
+      try {
+        setLoadingDeadline(true);
+
+        const result = await InquiryService.getInquiryDeadline();
+        setDeadline(result);
+      } catch (error: any) {
+        toast.error(error.message || "Failed to load deadline");
+      } finally {
+        setLoadingDeadline(false);
+      }
+    };
+
+    fetchDeadline();
+  }, [open]);
 
   const handleCategoryChange = (categories: InquiryCategory[]) => {
     setFields((prev) => ({ ...prev, categories }));
@@ -141,6 +163,11 @@ export function VesselInquiryDialog({
         return;
       }
 
+      if (!deadline) {
+        toast.error("Quotation deadline is not available yet");
+        return;
+      }
+
       // Transform data to match API format
       const inquiryData = {
         vessel_name: fields.vesselName,
@@ -165,14 +192,11 @@ export function VesselInquiryDialog({
 
         received_time: format(fields.inquiryReceived, "HH:mm"),
 
-        qout_submission_deadline_date: fields.quotationSubmission
-          ? format(fields.quotationSubmission, "yyyy-MM-dd")
-          : undefined,
+        qout_submission_deadline_date: format(new Date(deadline), "yyyy-MM-dd"),
 
         key_pic_usr_id: fields.keyPicUserId,
 
         pics: [
-          // KEY PIC
           ...(fields.keyPicUserId
             ? [
                 {
@@ -183,7 +207,6 @@ export function VesselInquiryDialog({
               ]
             : []),
 
-          // SUB PICS
           ...fields.subPics
             .filter((pic) => pic.userId)
             .map((pic) => ({
@@ -192,10 +215,12 @@ export function VesselInquiryDialog({
               is_key_pic: false,
             })),
         ],
+
         status: "Pending",
       };
 
       await InquiryService.createInquiry(inquiryData);
+
       toast.success("Inquiry created successfully!");
 
       // Reset form
@@ -210,7 +235,6 @@ export function VesselInquiryDialog({
         port: "",
         categories: [],
         inquiryReceived: undefined,
-        quotationSubmission: undefined,
         keyPicUserId: "",
         keyPicUserName: "",
         subPics: [],
@@ -356,12 +380,20 @@ export function VesselInquiryDialog({
                             Quotation Deadline
                           </label>
 
-                          <DateTimePicker
-                            date={fields.quotationSubmission}
-                            onDateChange={(date) =>
-                              handleDateChange("quotationSubmission", date)
+                          <input
+                            type="text"
+                            disabled
+                            value={
+                              loadingDeadline
+                                ? "Loading..."
+                                : deadline
+                                  ? format(
+                                      new Date(deadline),
+                                      "dd.MM.yyyy HH:mm",
+                                    )
+                                  : "-"
                             }
-                            placeholder="DD.MM.YYYY HH:MM"
+                            className="w-full border-2 border-input rounded-xl px-3 py-2 bg-muted cursor-not-allowed"
                           />
                         </div>
                       </div>

@@ -116,3 +116,13 @@ export interface InquiryRemarksResponse {
   message: string;
   data: InquiryRemark[];
 }
+
+export interface InquiryDeadline {
+  deadline: string;
+}
+
+export interface InquiryDeadlineResponse {
+  success: boolean;
+  message: string;
+  data: InquiryDeadline;
+}
