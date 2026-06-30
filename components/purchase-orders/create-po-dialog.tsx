@@ -120,7 +120,6 @@ export function CreatePODialog({
         reference_no: form.reference_no,
         company: form.company,
         supplier: vendor?.name || "",
-        // If your backend expects a complete timestamp use: form.ETA?.toISOString()
         ETA: form.ETA ? form.ETA.toISOString() : "",
         currency: form.currency,
         usd_rate: usdRate,
