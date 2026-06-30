@@ -8,6 +8,9 @@ import {
   GetSavedDocumentsRequest,
   GetSavedDocumentsResponse,
   GetDocumentResponse,
+  GetReferenceNumberResponse,
+  GetReferenceNumberRequest,
+  DocumentType,
 } from "@/types/document.types";
 
 export class DocumentService {
@@ -108,6 +111,20 @@ export class DocumentService {
     return res.data;
   }
 
+/**
+ * Get next reference number
+ * GET /api/document/reference-number/:doc_type
+ */
+static async getReferenceNumber(
+  docType: DocumentType,
+): Promise<GetReferenceNumberResponse> {
+  const res = await apiClient.get(
+    `/api/document/reference-number/${docType}`,
+  );
+
+  return res.data;
+}
+
   /**
    * Helper: browser download trigger
    */
@@ -128,3 +145,4 @@ export class DocumentService {
     window.URL.revokeObjectURL(url);
   }
 }
+

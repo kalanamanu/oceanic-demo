@@ -23,6 +23,7 @@ import { useDocumentEngine } from "@/hooks/use-document-job";
 import { BasisService } from "@/services/basis.service";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { DocumentService } from "@/services/document.service";
 
 interface Props {
   open: boolean;
@@ -53,20 +54,30 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
   const [currency, setCurrency] = React.useState<"LKR" | "USD">("LKR");
   const [usdRate, setUsdRate] = React.useState(1);
 
-  //Load Active Basis
+  //Load Active Basis and Reference Number
   React.useEffect(() => {
-    const loadBasis = async () => {
+    if (!open) return;
+
+    const load = async () => {
       try {
-        const usdRateData = await BasisService.getLatestUSDRate();
+        const [usdRateData, referenceData] = await Promise.all([
+          BasisService.getLatestUSDRate(),
+          DocumentService.getReferenceNumber("DISPATCHNOTE" as any),
+        ]);
 
         setUsdRate(usdRateData.USDRate);
+
+        setForm((prev) => ({
+          ...prev,
+          reference_no: referenceData.reference_no,
+        }));
       } catch (err) {
         console.error(err);
       }
     };
 
-    loadBasis();
-  }, []);
+    load();
+  }, [open]);
 
   //Auto Fill Confirmed Order
   React.useEffect(() => {

@@ -202,3 +202,16 @@ export interface ApiErrorResponse {
   success: false;
   message: string;
 }
+
+export interface GetReferenceNumberResponse {
+  success: boolean;
+  reference_no: string;
+}
+
+export interface GetReferenceNumberRequest {
+  /**
+   * Path parameter
+   * GET /api/document/reference-number/:doc_type
+   */
+  doc_type: DocumentType;
+}

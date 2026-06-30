@@ -12,7 +12,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/ui/date-picker"; // Adjust this import path to match your project structure
+import { DatePicker } from "@/components/ui/date-picker";
+import { DocumentService } from "@/services/document.service";
 
 import { Loader2 } from "lucide-react";
 import { BasisService } from "@/services/basis.service";
@@ -41,13 +42,29 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
 
   /* ================= LOAD RATE ================= */
   React.useEffect(() => {
-    const load = async () => {
-      const usdRateData = await BasisService.getLatestUSDRate();
+    if (!open) return;
 
-      setUsdRate(usdRateData.USDRate);
+    const load = async () => {
+      try {
+        const [usdRateData, referenceData] = await Promise.all([
+          BasisService.getLatestUSDRate(),
+          // Cast to any to satisfy DocumentService typing for DocumentType
+          DocumentService.getReferenceNumber("INVOICE" as any),
+        ]);
+
+        setUsdRate(usdRateData.USDRate);
+
+        setForm((prev) => ({
+          ...prev,
+          reference_no: referenceData.reference_no,
+        }));
+      } catch (error) {
+        console.error(error);
+      }
     };
+
     load();
-  }, []);
+  }, [open]);
 
   /* ================= CONVERT ================= */
   const convert = (value: number) =>
@@ -63,7 +80,8 @@ export function InvoiceDialog({ open, onOpenChange, data }: Props) {
     documentType: form.documentType,
     documentData: {
       reference_no: form.reference_no,
-      // Format to string safely during payload building if your API expects standard YYYY-MM-DD
+      invoiceNumber: form.reference_no, // ✅ ADD THIS LINE
+
       date: form.date.toISOString().split("T")[0],
       billToName: form.billToName,
 

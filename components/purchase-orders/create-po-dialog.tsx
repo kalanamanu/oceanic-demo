@@ -25,6 +25,8 @@ import { BasisService } from "@/services/basis.service";
 
 import { useDocumentEngine } from "@/hooks/use-document-job";
 
+import { DocumentService } from "@/services/document.service";
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -65,16 +67,22 @@ export function CreatePODialog({
 
     const load = async () => {
       try {
-        const [vendorRes, itemsRes, usdRateRes] = await Promise.all([
+        const [vendorRes, itemsRes, usdRateRes, refRes] = await Promise.all([
           VendorService.getVendorById(vendorId),
           PreCostVendorService.getVendorItems(preCostId, vendorId),
-          BasisService.getLatestUSDRate(), // ✅ correct
+          BasisService.getLatestUSDRate(),
+          DocumentService.getReferenceNumber("PO" as any),
         ]);
 
         setUsdRate(usdRateRes?.USDRate || 1);
 
         setVendor(vendorRes);
         setItems(itemsRes || []);
+
+        setForm((prev) => ({
+          ...prev,
+          reference_no: refRes?.reference_no || "",
+        }));
       } catch (err: any) {
         console.error(err);
         toast.error("Failed to load PO data");
@@ -190,7 +198,7 @@ export function CreatePODialog({
                   Reference Number
                 </Label>
                 <Input
-                  placeholder="e.g. PO-2026-001"
+                  placeholder="e.g. PO/OSC/2602/V12"
                   value={form.reference_no}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, reference_no: e.target.value }))
