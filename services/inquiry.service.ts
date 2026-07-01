@@ -29,6 +29,8 @@ export class InquiryService {
     }
   }
 
+
+  
   static async getAllInquiries(
     params?: PaginationParams,
   ): Promise<PaginatedInquiriesResponse> {

@@ -70,15 +70,26 @@ export interface UpdateInquiryRequest extends Partial<CreateInquiryRequest> {
   id: string;
 }
 
+export interface InquiryCount {
+  total: number;
+  pending: number;
+  confirmed: number;
+  active: number;
+  rejected: number;
+}
+
+export interface Pagination {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
 export interface PaginatedInquiriesResponse {
   success: boolean;
   data: Inquiry[];
-  pagination?: {
-    totalInquiries: number;
-    totalPages: number;
-    currentPage: number;
-    pageSize: number;
-  };
+  count: InquiryCount;
+  pagination: Pagination;
 }
 
 export interface InquiryResponse {

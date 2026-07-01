@@ -23,6 +23,14 @@ export default function InquiryPage() {
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [counts, setCounts] = useState({
+    total: 0,
+    pending: 0,
+    active: 0,
+    confirmed: 0,
+    rejected: 0,
+  });
+
   // Options for filters
   const statusOptions = Array.from(
     new Set(inquiries.map((i) => i.status || "Pending")),
@@ -67,8 +75,15 @@ export default function InquiryPage() {
         page: pageNumber,
         pageSize: 10,
       });
+
       if (response.success && response.data) {
         setInquiries(response.data);
+
+        // ✅ NEW: set counts from backend
+        if (response.count) {
+          setCounts(response.count);
+        }
+
         if (response.pagination) {
           setTotalPages(response.pagination.totalPages);
         }
@@ -82,11 +97,11 @@ export default function InquiryPage() {
 
   // Dashboard stats
   const stats = {
-    totalInquiries: inquiries.length,
-    pendingCount: inquiries.filter((i) => i.status === "Pending").length,
-    activeCount: inquiries.filter((i) => i.status === "Active").length,
-    confirmedCount: inquiries.filter((i) => i.status === "Confirmed").length,
-    rejectedCount: inquiries.filter((i) => i.status === "Rejected").length,
+    totalInquiries: counts.total,
+    pendingCount: counts.pending,
+    activeCount: counts.active,
+    confirmedCount: counts.confirmed,
+    rejectedCount: counts.rejected,
   };
 
   const handleSelectInquiry = (inquiry: Inquiry) => {

@@ -56,7 +56,7 @@ export function InquiryTable({
             <thead>
               <tr className="border-b border-border bg-muted">
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                  Inquiry ID
+                  Reference Number
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                   Vessel
