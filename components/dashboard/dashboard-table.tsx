@@ -3,7 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { VesselInquiryDialog } from "@/components/inquiry/AddVesselInquiryDialog";
 import { motion } from "framer-motion";
-import { Ship, MapPin, CalendarDays, Clock } from "lucide-react";
+import {
+  Ship,
+  MapPin,
+  CalendarDays,
+  Clock,
+  ArrowRight,
+  Activity,
+} from "lucide-react";
+import Link from "next/link";
 
 interface RecentInquiry {
   title: string;
@@ -41,25 +49,37 @@ export default function DashboardTable({ activities }: DashboardTableProps) {
 
   return (
     <section className="pt-4">
-      {/* HEADER */}
+      {/* HEADER & OVERVIEW CARD */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="mb-6 flex items-center justify-between"
+        className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            Recent Inquiries
-          </h2>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+              Recent Inquiries
+            </h2>
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Latest vessel inquiries received by the system
-          </p>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              <span>Latest vessel inquiries received by the system</span>
+              <span className="hidden sm:inline text-muted-foreground/40">
+                •
+              </span>
+              <Link
+                href="/inquiry"
+                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+              >
+                View all inquiries
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
         </div>
 
         <VesselInquiryDialog>
-          <Button size="lg" className="shadow-sm">
+          <Button size="lg" className="shadow-sm w-full sm:w-auto">
             Create Inquiry
           </Button>
         </VesselInquiryDialog>

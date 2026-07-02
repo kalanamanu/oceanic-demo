@@ -104,7 +104,11 @@ export function VesselInquiryDialog({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setFields({ ...fields, [name]: value });
+
+    setFields((prev) => ({
+      ...prev,
+      [name]: value.toUpperCase(),
+    }));
   };
 
   const handleDateChange = (name: string, date: Date | undefined) => {
