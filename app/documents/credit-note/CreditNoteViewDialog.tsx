@@ -88,8 +88,8 @@ export default function CreditNoteViewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
-        <DialogHeader className="pb-2 border-b">
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-5xl p-6 sm:p-8">
+        <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-xl font-bold tracking-tight">
             Credit Note Details
           </DialogTitle>
@@ -99,34 +99,34 @@ export default function CreditNoteViewDialog({
         </DialogHeader>
 
         {!doc ? (
-          <div className="flex items-center justify-center py-8 text-sm text-muted-foreground gap-2">
+          <div className="flex items-center justify-center py-12 text-sm text-muted-foreground gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             Loading information...
           </div>
         ) : (
           <div className="space-y-6 my-4 text-sm">
             {/* ================= DOCUMENT & COMPANY META ================= */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/40 p-4 rounded-lg border">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted/40 p-5 rounded-lg border">
+              <div className="space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  <FileText className="w-3.5 h-3.5" />
+                  <FileText className="w-4 h-4" />
                   <span>Document Details</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between border-b pb-1">
                   <span className="text-muted-foreground">Reference No:</span>{" "}
                   <span className="font-semibold">
                     {data?.crnNo || doc.reference_no}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between border-b pb-1">
                   <span className="text-muted-foreground">Issue Date:</span>{" "}
                   <span className="font-medium">{data?.date}</span>
                 </div>
               </div>
 
-              <div className="space-y-2 border-t md:border-t-0 md:border-l md:pl-4 pt-2 md:pt-0">
+              <div className="space-y-2.5 border-t md:border-t-0 md:border-l md:pl-6 pt-4 md:pt-0">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  <Building className="w-3.5 h-3.5" />
+                  <Building className="w-4 h-4" />
                   <span>Company Info</span>
                 </div>
                 <div className="truncate">
@@ -136,7 +136,8 @@ export default function CreditNoteViewDialog({
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground truncate">
-                  {data?.companyAddressLine1} {data?.companyPostal}
+                  {data?.companyAddressLine1} {data?.companyAddressLine2}{" "}
+                  {data?.companyPostal}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   BR No: {data?.companyBR || "—"} | Lic:{" "}
@@ -145,13 +146,15 @@ export default function CreditNoteViewDialog({
               </div>
             </div>
 
-            {/* ================= BILL TO (CUSTOMER) ================= */}
-            <div className="space-y-2">
+            <Separator />
+
+            {/* ================= BILL TO & CUSTOMER DETAILS ================= */}
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                <User className="w-3.5 h-3.5" />
+                <User className="w-4 h-4" />
                 <span>Bill To (Customer)</span>
               </div>
-              <div className="border rounded-lg p-3.5 space-y-1.5 bg-background shadow-sm">
+              <div className="border rounded-lg p-4 space-y-1.5 bg-background shadow-sm">
                 <div className="font-semibold text-base">
                   {data?.billToName || "—"}
                 </div>
@@ -161,67 +164,82 @@ export default function CreditNoteViewDialog({
               </div>
             </div>
 
+            <Separator />
+
             {/* ================= VESSEL INFORMATION ================= */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                <Ship className="w-3.5 h-3.5" />
+                <Ship className="w-4 h-4" />
                 <span>Vessel Information</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 border rounded-lg p-4 bg-background shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 border rounded-lg p-5 bg-background shadow-sm">
                 <div>
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground mb-0.5">
                     Vessel Name
                   </span>
-                  <span className="font-medium">{data?.vesselName || "—"}</span>
+                  <span className="font-medium text-sm">
+                    {data?.vesselName || "—"}
+                  </span>
                 </div>
                 <div>
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground mb-0.5">
                     IMO Number
                   </span>
-                  <span className="font-medium font-mono">
+                  <span className="font-medium font-mono text-sm">
                     {data?.imo || "—"}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground mb-0.5">
                     Gross Tonnage (GRT)
                   </span>
-                  <span className="font-medium">{data?.grt || "—"}</span>
-                </div>
-                <div className="sm:col-span-2">
-                  <span className="block text-xs text-muted-foreground">
-                    Port / Service Location
-                  </span>
-                  <span className="font-medium">
-                    {data?.port}
-                    {data?.portCountry ? `, ${data.portCountry}` : ""}
+                  <span className="font-medium text-sm">
+                    {data?.grt || "—"}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground mb-0.5">
+                    Port / Service Location
+                  </span>
+                  <span className="font-medium text-sm">
+                    {data?.port || "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-xs text-muted-foreground mb-0.5">
+                    Port Country
+                  </span>
+                  <span className="font-medium text-sm">
+                    {data?.portCountry || "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-xs text-muted-foreground mb-0.5">
                     Maritime Agent
                   </span>
-                  <span className="font-medium">
+                  <span className="font-medium text-sm">
                     {data?.nameOfAgent || "—"}
                   </span>
                 </div>
               </div>
             </div>
 
+            <Separator />
+
             {/* ================= LINE ITEMS ================= */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                <DollarSign className="w-3.5 h-3.5" />
+                <DollarSign className="w-4 h-4" />
                 <span>Service Items Summary</span>
               </div>
               <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
                 <table className="w-full text-left border-collapse text-xs sm:text-sm">
                   <thead>
-                    <tr className="border-b bg-muted/50 text-xs font-medium text-muted-foreground uppercase">
-                      <th className="p-3">Description</th>
-                      <th className="p-3 text-center w-16">Qty</th>
-                      <th className="p-3 text-right w-28">Unit Price</th>
-                      <th className="p-3 text-right w-28">Amount</th>
+                    <tr className="border-b bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      <th className="p-4 pl-5">Service Description</th>
+                      <th className="p-4 text-center w-24">Qty</th>
+                      <th className="p-4 text-right w-36">Unit Price</th>
+                      <th className="p-4 text-right w-36 pr-5">Amount</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -231,16 +249,16 @@ export default function CreditNoteViewDialog({
                           key={idx}
                           className="hover:bg-muted/20 transition-colors"
                         >
-                          <td className="p-3 font-medium max-w-[200px] sm:max-w-none truncate">
+                          <td className="p-4 pl-5 font-medium">
                             {item.description || "—"}
                           </td>
-                          <td className="p-3 text-center font-mono">
+                          <td className="p-4 text-center font-mono text-muted-foreground">
                             {item.quantity}
                           </td>
-                          <td className="p-3 text-right font-mono">
+                          <td className="p-4 text-right font-mono text-muted-foreground">
                             {Number(item.unit_price || 0).toFixed(2)}
                           </td>
-                          <td className="p-3 text-right font-mono font-medium">
+                          <td className="p-4 text-right font-mono font-medium pr-5">
                             {(
                               Number(item.quantity || 0) *
                               Number(item.unit_price || 0)
@@ -252,7 +270,7 @@ export default function CreditNoteViewDialog({
                       <tr>
                         <td
                           colSpan={4}
-                          className="p-4 text-center text-muted-foreground"
+                          className="p-6 text-center text-muted-foreground"
                         >
                           No service items tracked.
                         </td>
@@ -260,12 +278,12 @@ export default function CreditNoteViewDialog({
                     )}
                   </tbody>
                 </table>
-                <div className="bg-muted/40 p-3.5 flex justify-end border-t">
+                <div className="bg-muted/40 p-4 flex justify-end border-t pr-5">
                   <div className="text-right">
-                    <span className="text-xs font-medium uppercase text-muted-foreground mr-2">
+                    <span className="text-xs font-semibold uppercase text-muted-foreground mr-3">
                       Total Refundable:
                     </span>
-                    <span className="font-mono text-base font-bold text-foreground">
+                    <span className="font-mono text-lg font-bold text-foreground">
                       LKR {Number(data?.totalAmount || 0).toFixed(2)}
                     </span>
                   </div>
@@ -273,23 +291,33 @@ export default function CreditNoteViewDialog({
               </div>
             </div>
 
+            <Separator />
+
             {/* ================= APPROVAL AUTHORITY ================= */}
-            <div className="flex items-center justify-between border-t pt-3 text-xs">
-              <span className="text-muted-foreground font-medium uppercase tracking-wide">
+            <div className="flex items-center justify-between pt-2 text-xs">
+              <span className="text-muted-foreground font-semibold uppercase tracking-wide">
                 Approval Signature Profile:
               </span>
-              <span className="font-semibold px-2.5 py-1 bg-secondary rounded text-secondary-foreground">
+              <span className="font-semibold px-3 py-1.5 bg-secondary rounded text-secondary-foreground text-sm shadow-sm">
                 {data?.approvedBy || "Pending Review"}
               </span>
             </div>
           </div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-3 sm:gap-0 border-t pt-5">
+          <Button
+            variant="outline"
+            className="px-5"
+            onClick={() => onOpenChange(false)}
+          >
             Close View
           </Button>
-          <Button onClick={handleDownload} disabled={!doc || loading}>
+          <Button
+            onClick={handleDownload}
+            disabled={!doc || loading}
+            className="px-5"
+          >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -36,7 +36,7 @@ export default function CreditNotePage() {
     const loadCreditNotes = async () => {
       try {
         const res = await DocumentService.getSavedDocuments({
-          documentType: "creditnote" as any, // 👈 IMPORTANT FIX
+          documentType: "CREDIT NOTE" as any, // 👈 IMPORTANT FIX
         });
 
         if (res.success) {
