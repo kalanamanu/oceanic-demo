@@ -20,26 +20,26 @@ export default function CreditNotePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // VIEW
+  /* ================= VIEW ================= */
+  const [viewDoc, setViewDoc] = useState<any>(null);
   const [viewOpen, setViewOpen] = useState(false);
-  const [viewDocId, setViewDocId] = useState<string | null>(null);
 
-  // EDIT
+  /* ================= EDIT ================= */
+  const [editDoc, setEditDoc] = useState<any>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [editDocId, setEditDocId] = useState<string | null>(null);
 
-  // CREATE (NEW)
+  /* ================= CREATE ================= */
   const [createOpen, setCreateOpen] = useState(false);
 
-  /* ================= LOAD ================= */
+  /* ================= LOAD LIST ================= */
   useEffect(() => {
     const loadCreditNotes = async () => {
       try {
         const res = await DocumentService.getSavedDocuments({
-          documentType: "CREDITNOTE" as any,
+          documentType: "creditnote" as any, // 👈 IMPORTANT FIX
         });
 
-        if (res?.success) {
+        if (res.success) {
           setDocuments(res.savedDocuments || []);
         }
       } catch (err) {
@@ -62,17 +62,38 @@ export default function CreditNotePage() {
   });
 
   /* ================= VIEW ================= */
-  const handleView = (docId: string) => {
-    setViewDocId(docId);
-    setViewOpen(true);
+  const handleViewDocument = async (docId: string) => {
+    try {
+      setViewOpen(true);
+      setViewDoc(null);
+
+      const res = await DocumentService.getDocument(docId);
+
+      if (res.success) {
+        setViewDoc(res.document);
+      }
+    } catch (err) {
+      console.error("View failed:", err);
+    }
   };
 
   /* ================= EDIT ================= */
-  const handleEdit = (docId: string) => {
-    setEditDocId(docId);
-    setEditOpen(true);
+  const handleEditDocument = async (docId: string) => {
+    try {
+      setEditOpen(true);
+      setEditDoc(null);
+
+      const res = await DocumentService.getDocument(docId);
+
+      if (res.success) {
+        setEditDoc(res.document);
+      }
+    } catch (err) {
+      console.error("Edit failed:", err);
+    }
   };
 
+  /* ================= LOADING ================= */
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -106,7 +127,7 @@ export default function CreditNotePage() {
               />
             </div>
 
-            {/* CREATE BUTTON → OPENS DIALOG */}
+            {/* CREATE (OPENS DIALOG) */}
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Create Credit Note
@@ -134,29 +155,32 @@ export default function CreditNotePage() {
                       {doc.reference_no}
                     </CardTitle>
                   </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleView(doc.doc_id)}
-                    >
-                      View
-                    </Button>
-
-                    <Button size="sm" onClick={() => handleEdit(doc.doc_id)}>
-                      Edit
-                    </Button>
-                  </div>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
                     Created:{" "}
                     {doc.createdAt
                       ? new Date(doc.createdAt).toLocaleDateString("en-GB")
                       : "-"}
                   </p>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewDocument(doc.doc_id)}
+                    >
+                      View
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => handleEditDocument(doc.doc_id)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -184,31 +208,21 @@ export default function CreditNotePage() {
         )}
       </div>
 
-      {/* VIEW */}
-      {viewOpen && viewDocId && (
-        <CreditNoteViewDialog
-          docId={viewDocId}
-          open={viewOpen}
-          onClose={() => {
-            setViewOpen(false);
-            setViewDocId(null);
-          }}
-        />
-      )}
+      {/* ================= VIEW ================= */}
+      <CreditNoteViewDialog
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        document={viewDoc}
+      />
 
-      {/* EDIT */}
-      {editOpen && editDocId && (
-        <EditCreditNoteDialog
-          docId={editDocId}
-          open={editOpen}
-          onClose={() => {
-            setEditOpen(false);
-            setEditDocId(null);
-          }}
-        />
-      )}
+      {/* ================= EDIT ================= */}
+      <EditCreditNoteDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        document={editDoc}
+      />
 
-      {/* CREATE DIALOG */}
+      {/* ================= CREATE ================= */}
       <CreditNoteCreateDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
