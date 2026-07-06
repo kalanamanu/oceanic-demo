@@ -38,7 +38,7 @@ type DocumentCardConfig = {
 };
 
 const DOCUMENT_TYPE_CONFIG: Record<string, DocumentCardConfig> = {
-  // PRECOST: {
+  // "CREDITNOTE: {
   //   title: "Pre-Costing",
   //   description: "Estimations and initial cost analysis for vessel inquiries.",
   //   icon: FileText,
