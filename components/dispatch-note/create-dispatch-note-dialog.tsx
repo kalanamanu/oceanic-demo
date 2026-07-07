@@ -6,19 +6,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2, Plus, Trash2, FileSpreadsheet, FileText } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useDocumentEngine } from "@/hooks/use-document-job";
 import { BasisService } from "@/services/basis.service";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -32,9 +25,8 @@ interface Props {
 }
 
 interface DispatchItem {
+  selected: boolean;
   product: string;
-  supplier: string;
-  po_no: string;
   rcvd_qty: string;
   issued_qty: string;
   exp_date: string;
@@ -51,62 +43,6 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
     pollInterval: 2000,
     maxAttempts: 5,
   });
-  const [currency, setCurrency] = React.useState<"LKR" | "USD">("LKR");
-  const [usdRate, setUsdRate] = React.useState(1);
-
-  //Load Active Basis and Reference Number
-  React.useEffect(() => {
-    if (!open) return;
-
-    const load = async () => {
-      try {
-        const [usdRateData, referenceData] = await Promise.all([
-          BasisService.getLatestUSDRate(),
-          DocumentService.getReferenceNumber("DISPATCHNOTE" as any),
-        ]);
-
-        setUsdRate(usdRateData.USDRate);
-
-        setForm((prev) => ({
-          ...prev,
-          reference_no: referenceData.reference_no,
-        }));
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    load();
-  }, [open]);
-
-  //Auto Fill Confirmed Order
-  React.useEffect(() => {
-    if (!data) return;
-
-    setForm((prev) => ({
-      ...prev,
-      reference_no: data.pre_cost_id || data.confirmed_pre_cost_id || "",
-    }));
-
-    if (data.confirmedItems?.length) {
-      setItems(
-        data.confirmedItems.map((item: any) => ({
-          product: item.item_name || "",
-          supplier: "",
-          po_no: "",
-          rcvd_qty: String(item.quantity || ""),
-          issued_qty: String(item.quantity || ""),
-          exp_date: "",
-          revd_time: "",
-          date: "",
-          rejects: "",
-          fat_con: "",
-          remark: item.customer_remark || "",
-          unit: item.unit || "",
-        })),
-      );
-    }
-  }, [data]);
 
   const [form, setForm] = React.useState({
     reference_no: "",
@@ -122,18 +58,17 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
     company: "",
     port: "",
     supplier: "",
+    po_no: "",
     ETA: "",
-    discount: 0,
-    transport_cost: 0,
-    full_total_cost: 0,
     date: new Date().toISOString().split("T")[0],
     documentType: "pdf" as "pdf" | "excel",
   });
+
+  // Defaulting 'selected' to false so items start grayed out
   const [items, setItems] = React.useState<DispatchItem[]>([
     {
+      selected: false,
       product: "",
-      supplier: "",
-      po_no: "",
       rcvd_qty: "",
       issued_qty: "",
       exp_date: "",
@@ -145,22 +80,69 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
       unit: "",
     },
   ]);
-  const updateItem = (
-    index: number,
-    field: keyof DispatchItem,
-    value: string,
-  ) => {
+
+  // Load Active Basis and Reference Number
+  React.useEffect(() => {
+    if (!open) return;
+
+    const load = async () => {
+      try {
+        const referenceData = await DocumentService.getReferenceNumber(
+          "DISPATCHNOTE" as any,
+        );
+
+        setForm((prev) => ({
+          ...prev,
+          reference_no: referenceData.reference_no,
+        }));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    load();
+  }, [open]);
+
+  // Auto Fill Confirmed Order
+  React.useEffect(() => {
+    console.log("DISPATCH DATA:", data);
+
+    if (!data || !Array.isArray(data)) return;
+
+    setItems(
+      data.map((item: any) => ({
+        selected: false,
+        product: item.item_name || "",
+        rcvd_qty: String(item.quantity || ""),
+        issued_qty: String(item.quantity || ""),
+        exp_date: "",
+        revd_time: "",
+        date: "",
+        rejects: "",
+        fat_con: "",
+        remark: item.customer_remark || "",
+        unit: item.unit || "",
+      })),
+    );
+
+    setForm((prev) => ({
+      ...prev,
+      reference_no: data?.[0]?.pre_cost_id || "",
+    }));
+  }, [data, open]);
+
+  const updateItem = (index: number, field: keyof DispatchItem, value: any) => {
     setItems((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
   };
+
   const addItem = () => {
     setItems((prev) => [
       ...prev,
       {
+        selected: false, // Default to false for new rows
         product: "",
-        supplier: "",
-        po_no: "",
         rcvd_qty: "",
         issued_qty: "",
         exp_date: "",
@@ -173,19 +155,36 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
       },
     ]);
   };
+
   const removeItem = (index: number) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
-  const baseLkr = Number(data?.confirmed_total_lkr || 0);
 
-  const baseUsd = Number(data?.confirmed_total_usd || 0);
+  // Select All or Deselect All Master Logic
+  const isAllSelected =
+    items.length > 0 && items.every((item) => item.selected);
+  const handleSelectAllChange = (checked: boolean) => {
+    setItems((prev) => prev.map((item) => ({ ...item, selected: checked })));
+  };
 
-  const subTotal = currency === "USD" ? baseUsd : baseLkr;
-  const discount = Number(form.discount || 0);
-  const transportCost = Number(form.transport_cost || 0);
-  const grandTotal = subTotal - discount + transportCost;
   const handleDownload = async () => {
     try {
+      const targetedItems = items
+        .filter((item) => item.selected)
+        .map((item, index) => ({
+          no: index + 1,
+          product: item.product,
+          rcvd_qty: item.rcvd_qty,
+          issued_qty: item.issued_qty,
+          exp_date: item.exp_date,
+          revd_time: item.revd_time,
+          date: item.date,
+          rejects: item.rejects,
+          fat_con: item.fat_con,
+          remark: item.remark,
+          unit: item.unit,
+        }));
+
       const payload = {
         document: "DISPATCHNOTE",
         documentType: form.documentType,
@@ -203,31 +202,22 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
           company: form.company,
           port: form.port,
           supplier: form.supplier,
-          ETA: form.ETA,
-          currency,
-
-          discount,
-
-          sub_total: Number(subTotal.toFixed(2)),
-
-          full_total_cost: Number(grandTotal.toFixed(2)),
-
-          transport_cost: transportCost,
+          po_no: form.po_no,
           date: form.date,
-          items: items.map((item, index) => ({ no: index + 1, ...item })),
+          items: targetedItems,
         },
       };
+
       await runJob(payload, "Dispatch Note");
       onOpenChange(false);
     } catch (error) {
       console.error(error);
     }
   };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Changed window constraints to override shadcn defaults to use 90vw width properly */}
       <DialogContent className="sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] xl:max-w-[1200px] max-h-[90vh] flex flex-col p-0 overflow-hidden gap-0">
-        {/* Persistent Premium Header */}
         <div className="p-6 border-b bg-muted/20">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold tracking-tight">
@@ -240,9 +230,7 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
           </DialogHeader>
         </div>
 
-        {/* Scrollable Layout Context Container */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Metadata Section Split (Horizontal layout block) */}
           <div className="flex flex-col md:flex-row gap-8">
             {/* Left Column: Shipping & Vessel Info */}
             <div className="flex-1 space-y-4">
@@ -280,10 +268,14 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                   value={form.supplier}
                   onChange={(v) => setForm({ ...form, supplier: v })}
                 />
+                <Field
+                  label="PO No"
+                  value={form.po_no}
+                  onChange={(v) => setForm({ ...form, po_no: v })}
+                />
               </div>
             </div>
 
-            {/* Vertical Divider for Clear Space Division */}
             <div className="hidden md:block w-px bg-border self-stretch" />
 
             {/* Right Column: Timelines & Logistics */}
@@ -377,7 +369,8 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                   Dispatch Manifesto
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Edit log data directly within the rows below.
+                  Edit log data directly within the rows below. Unmarked rows
+                  are omitted from generation.
                 </p>
               </div>
               <Button
@@ -391,22 +384,30 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
             </div>
 
             <div className="border rounded-lg overflow-x-auto shadow-inner bg-card max-w-full">
-              <table className="w-full min-w-[1400px] text-left border-collapse table-fixed">
+              <table className="w-full min-w-[1200px] text-left border-collapse table-fixed">
                 <thead>
                   <tr className="bg-muted/70 text-muted-foreground text-[11px] font-bold uppercase border-b tracking-wider">
+                    <th className="p-2.5 w-16 text-center">
+                      <div className="flex flex-col items-center justify-center gap-1 select-none">
+                        <Checkbox
+                          checked={isAllSelected}
+                          onCheckedChange={(checked) =>
+                            handleSelectAllChange(!!checked)
+                          }
+                        />
+                      </div>
+                    </th>
                     <th className="p-2.5 w-10 text-center">#</th>
-                    <th className="p-2.5 w-[160px]">Product</th>
-                    <th className="p-2.5 w-[140px]">Supplier</th>
-                    <th className="p-2.5 w-[100px]">PO No</th>
-                    <th className="p-2.5 w-[80px]">Unit</th>
-                    <th className="p-2.5 w-[95px]">Rcvd Qty</th>
-                    <th className="p-2.5 w-[95px]">Issd Qty</th>
-                    <th className="p-2.5 w-[90px]">Rejects</th>
-                    <th className="p-2.5 w-[90px]">Fat Con</th>
+                    <th className="p-2.5 w-[220px]">Product</th>
+                    <th className="p-2.5 w-[90px]">Unit</th>
+                    <th className="p-2.5 w-[100px]">Rcvd Qty</th>
+                    <th className="p-2.5 w-[100px]">Issd Qty</th>
+                    <th className="p-2.5 w-[95px]">Rejects</th>
+                    <th className="p-2.5 w-[95px]">Fat Con</th>
                     <th className="p-2.5 w-[160px]">Expiry Date</th>
                     <th className="p-2.5 w-[230px]">Rcvd Time</th>
                     <th className="p-2.5 w-[160px]">Date</th>
-                    <th className="p-2.5 w-[160px]">Remark</th>
+                    <th className="p-2.5 w-[180px]">Remark</th>
                     <th className="p-2.5 w-12 text-center"></th>
                   </tr>
                 </thead>
@@ -414,56 +415,64 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                   {items.map((item, index) => (
                     <tr
                       key={index}
-                      className="hover:bg-muted/40 transition-colors"
+                      className={`transition-colors duration-150 ${
+                        item.selected
+                          ? "bg-background hover:bg-muted/30 text-foreground"
+                          : "bg-muted/30 text-muted-foreground/60 opacity-60 select-none"
+                      }`}
                     >
+                      <td className="p-1.5 text-center">
+                        <Checkbox
+                          checked={item.selected}
+                          onCheckedChange={(checked) =>
+                            updateItem(index, "selected", !!checked)
+                          }
+                        />
+                      </td>
                       <td className="p-1.5 text-center font-medium text-muted-foreground">
                         {index + 1}
                       </td>
                       <td className="p-1.5">
                         <TableInput
                           value={item.product}
+                          readOnly
+                          className="bg-muted/40 font-medium select-none cursor-not-allowed text-muted-foreground/90 border-dashed"
                           onChange={(v) => updateItem(index, "product", v)}
                         />
                       </td>
                       <td className="p-1.5">
                         <TableInput
-                          value={item.supplier}
-                          onChange={(v) => updateItem(index, "supplier", v)}
-                        />
-                      </td>
-                      <td className="p-1.5">
-                        <TableInput
-                          value={item.po_no}
-                          onChange={(v) => updateItem(index, "po_no", v)}
-                        />
-                      </td>
-                      <td className="p-1.5">
-                        <TableInput
                           value={item.unit}
+                          readOnly
+                          className="bg-muted/40 text-center font-medium select-none cursor-not-allowed text-muted-foreground/90 border-dashed"
                           onChange={(v) => updateItem(index, "unit", v)}
                         />
                       </td>
                       <td className="p-1.5">
                         <TableInput
                           value={item.rcvd_qty}
+                          disabled={!item.selected}
                           onChange={(v) => updateItem(index, "rcvd_qty", v)}
                         />
                       </td>
                       <td className="p-1.5">
                         <TableInput
                           value={item.issued_qty}
+                          disabled={!item.selected}
                           onChange={(v) => updateItem(index, "issued_qty", v)}
                         />
                       </td>
                       <td className="p-1.5">
                         <TableInput
                           value={item.rejects}
+                          disabled={!item.selected}
                           onChange={(v) => updateItem(index, "rejects", v)}
                         />
                       </td>
                       <td className="p-1.5">
                         <TableInput
                           value={item.fat_con}
+                          disabled={!item.selected}
                           onChange={(v) => updateItem(index, "fat_con", v)}
                         />
                       </td>
@@ -472,6 +481,7 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                           date={
                             item.exp_date ? new Date(item.exp_date) : undefined
                           }
+                          disabled={!item.selected}
                           onDateChange={(v) =>
                             updateItem(
                               index,
@@ -488,6 +498,7 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                               ? new Date(item.revd_time)
                               : undefined
                           }
+                          disabled={!item.selected}
                           onDateChange={(v) =>
                             updateItem(
                               index,
@@ -500,6 +511,7 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                       <td className="p-1.5">
                         <DatePicker
                           date={item.date ? new Date(item.date) : undefined}
+                          disabled={!item.selected}
                           onDateChange={(v) =>
                             updateItem(
                               index,
@@ -512,6 +524,7 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
                       <td className="p-1.5">
                         <TableInput
                           value={item.remark}
+                          disabled={!item.selected}
                           onChange={(v) => updateItem(index, "remark", v)}
                         />
                       </td>
@@ -533,110 +546,8 @@ export function CreateDispatchNoteDialog({ open, onOpenChange, data }: Props) {
               </table>
             </div>
           </div>
-
-          {/* Financial Totals Ledger Row */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-t pt-6 bg-muted/10 p-4 rounded-xl">
-            <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
-                Currency Standard
-              </Label>
-              <div className="flex bg-muted p-1 rounded-lg border shadow-inner">
-                <button
-                  type="button"
-                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${currency === "LKR" ? "bg-background shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}
-                  onClick={() => setCurrency("LKR")}
-                >
-                  LKR
-                </button>
-                <button
-                  type="button"
-                  className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${currency === "USD" ? "bg-background shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground"}`}
-                  onClick={() => setCurrency("USD")}
-                >
-                  USD
-                </button>
-              </div>
-            </div>
-
-            <div className="w-full md:w-80 grid grid-cols-1 gap-2.5">
-              <div className="flex justify-between items-center text-xs font-medium border-b pb-1.5">
-                <span className="text-muted-foreground">
-                  Sub Total ({currency})
-                </span>
-                <span className="font-mono">{subTotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center gap-4 text-xs font-medium border-b pb-1.5">
-                <span className="text-muted-foreground">Discount Value</span>
-                <div className="w-24">
-                  <TableInput
-                    type="number"
-                    className="text-right h-6 py-0 font-mono bg-background border"
-                    value={String(form.discount)}
-                    onChange={(v) =>
-                      setForm({ ...form, discount: Number(v) || 0 })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between items-center gap-4 text-xs font-medium border-b pb-1.5">
-                <span className="text-muted-foreground">Transport Cost</span>
-                <div className="w-24">
-                  <TableInput
-                    type="number"
-                    className="text-right h-6 py-0 font-mono bg-background border"
-                    value={String(form.transport_cost)}
-                    onChange={(v) =>
-                      setForm({ ...form, transport_cost: Number(v) || 0 })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between items-center font-bold text-base pt-1 text-foreground">
-                <span>Grand Total</span>
-                <span className="font-mono tracking-tight text-emerald-500">
-                  {currency}{" "}
-                  {grandTotal.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Export File Profile Select */}
-          {/* <div className="w-full md:w-64 space-y-1.5 border-t pt-6">
-            <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
-              Export Engine Profile
-            </Label>
-            <Select
-              value={form.documentType}
-              onValueChange={(v) =>
-                setForm({ ...form, documentType: v as "pdf" | "excel" })
-              }
-            >
-              <SelectTrigger className="bg-card shadow-sm h-9 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pdf">
-                  <span className="flex items-center gap-2 text-destructive">
-                    <FileText className="w-3.5 h-3.5" /> Portable Document
-                    Format (.pdf)
-                  </span>
-                </SelectItem>
-                <SelectItem value="excel">
-                  <span className="flex items-center gap-2 text-emerald-500">
-                    <FileSpreadsheet className="w-3.5 h-3.5" /> Microsoft Excel
-                    Sheet (.xlsx)
-                  </span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div> */}
         </div>
 
-        {/* Fixed Footer Stack */}
         <div className="p-4 border-t bg-muted/20 flex justify-end gap-3">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
@@ -681,16 +592,22 @@ function TableInput({
   onChange,
   type = "text",
   className = "",
+  readOnly = false,
+  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   type?: string;
   className?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <Input
       type={type}
       value={value}
+      readOnly={readOnly}
+      disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
       className={`h-8 text-xs bg-muted/20 border-border focus-visible:ring-1 focus-visible:bg-card px-2 rounded ${className}`}
     />
