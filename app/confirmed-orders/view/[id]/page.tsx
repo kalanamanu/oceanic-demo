@@ -217,10 +217,10 @@ export default function ConfirmedOrderDetailPage() {
                 </DropdownMenuItem>
 
                 {/* Dispatch Note */}
-                <DropdownMenuItem onClick={() => setDispatchOpen(true)}>
+                {/* <DropdownMenuItem onClick={() => setDispatchOpen(true)}>
                   <Send className="w-4 h-4 mr-2" />
                   Dispatch Note
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -29,6 +29,8 @@ import { CreateDispatchNoteDialog } from "@/components/dispatch-note/create-disp
 
 import type { PreCostVendorItem } from "@/types/precost-vendor.types";
 
+import { ActionDialog } from "@/components/dispatch-note/action-dialog";
+
 export default function VendorItemsPage() {
   const router = useRouter();
   const params = useParams<{ preCostId: string; vendorId: string }>();
@@ -41,6 +43,8 @@ export default function VendorItemsPage() {
 
   const [poDialogOpen, setPoDialogOpen] = React.useState(false);
   const [dispatchOpen, setDispatchOpen] = React.useState(false);
+
+  const [actionOpen, setActionOpen] = React.useState(false);
 
   /* ================= LOAD ================= */
   const loadItems = async () => {
@@ -131,9 +135,9 @@ export default function VendorItemsPage() {
             <Button
               size="sm"
               className="gap-1.5 text-xs font-medium shadow-sm"
-              onClick={() => setPoDialogOpen(true)}
+              onClick={() => setActionOpen(true)}
             >
-              Generate Purchase Order
+              Action
             </Button>
 
             {/* 3 DOT MENU */}
@@ -155,10 +159,10 @@ export default function VendorItemsPage() {
                   Dispatch Note
                 </DropdownMenuItem>
 
-                <DropdownMenuItem onClick={loadItems}>
+                {/* <DropdownMenuItem onClick={loadItems}>
                   <RefreshCcw className="w-4 h-4 mr-2" />
                   Refresh Items
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -183,6 +187,9 @@ export default function VendorItemsPage() {
           onOpenChange={setDispatchOpen}
           data={items}
         />
+
+        {/* Action Dialog */}
+        <ActionDialog open={actionOpen} onOpenChange={setActionOpen} />
       </main>
     </div>
   );
