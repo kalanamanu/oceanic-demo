@@ -564,8 +564,8 @@ export default function DispatchEditDialog({
           </div>
 
           {/* Financial Totals Ledger Row */}
-          <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-t pt-6 bg-muted/10 p-4 rounded-xl">
-            <div className="space-y-2">
+          {/* <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-t pt-6 bg-muted/10 p-4 rounded-xl"> */}
+          {/* <div className="space-y-2">
               <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
                 Currency Standard
               </Label>
@@ -585,9 +585,9 @@ export default function DispatchEditDialog({
                   USD
                 </button>
               </div>
-            </div>
+            </div> */}
 
-            <div className="w-full md:w-80 grid grid-cols-1 gap-2.5">
+          {/* <div className="w-full md:w-80 grid grid-cols-1 gap-2.5">
               <div className="flex justify-between items-center text-xs font-medium border-b pb-1.5">
                 <span className="text-muted-foreground">
                   Sub Total ({currency})
@@ -630,11 +630,11 @@ export default function DispatchEditDialog({
                   })}
                 </span>
               </div>
-            </div>
-          </div>
+            </div> */}
+        </div>
 
-          {/* Export File Profile Select */}
-          {/* <div className="w-full md:w-64 space-y-1.5 border-t pt-6">
+        {/* Export File Profile Select */}
+        {/* <div className="w-full md:w-64 space-y-1.5 border-t pt-6">
             <Label className="text-xs font-bold uppercase text-muted-foreground tracking-wide">
               Export Engine Profile
             </Label>
@@ -663,7 +663,7 @@ export default function DispatchEditDialog({
               </SelectContent>
             </Select>
           </div> */}
-        </div>
+        {/* </div> */}
 
         {/* Fixed Footer Stack */}
         <div className="p-4 border-t bg-muted/20 flex justify-end gap-3">

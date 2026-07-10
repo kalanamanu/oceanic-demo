@@ -177,7 +177,7 @@ export default function DispatchViewDialog({
           </div>
 
           {/* SUMMARY */}
-          <div className="border rounded p-4 space-y-2 bg-muted/10 text-sm">
+          {/* <div className="border rounded p-4 space-y-2 bg-muted/10 text-sm">
             <div className="flex justify-between">
               <span>Sub Total ({currency})</span>
               <span>{subTotal.toFixed(2)}</span>
@@ -196,7 +196,7 @@ export default function DispatchViewDialog({
                 {currency} {grandTotal.toLocaleString()}
               </span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* FOOTER ACTIONS */}

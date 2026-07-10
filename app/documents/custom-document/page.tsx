@@ -1,49 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, ShieldCheck, ArrowRight } from "lucide-react";
+import { Search, ShieldCheck, Plus } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 import { DocumentService } from "@/services/document.service";
 import { SavedDocument } from "@/types/document.types";
 
-export default function CustomDocumentPage() {
-  const router = useRouter();
+/* ===== DIALOGS ===== */
+import CustomDocumentViewDialog from "./CustomDocumentViewDialog";
+import CustomDocumentEditDialog from "./CustomDocumentEditDialog";
+import { CustomDocumentCreateDialog } from "./CustomDocumentCreateDialog";
 
+export default function CustomDocumentPage() {
   const [documents, setDocuments] = useState<SavedDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const loadCustomDocuments = async () => {
-      try {
-        const res = await DocumentService.getSavedDocuments({
-          documentType: "CUSTOMDOCUMENT" as any,
-        });
+  /* ================= VIEW ================= */
+  const [viewDoc, setViewDoc] = useState<any>(null);
+  const [viewOpen, setViewOpen] = useState(false);
 
-        if (res.success) {
-          setDocuments(res.savedDocuments);
-        }
-      } catch (err) {
-        console.error("Failed to load custom documents:", err);
-      } finally {
-        setLoading(false);
+  /* ================= EDIT ================= */
+  const [editDoc, setEditDoc] = useState<any>(null);
+  const [editOpen, setEditOpen] = useState(false);
+
+  /* ================= CREATE ================= */
+  const [createOpen, setCreateOpen] = useState(false);
+
+  /* ================= LOAD ================= */
+  const loadDocuments = async () => {
+    try {
+      const res = await DocumentService.getSavedDocuments({
+        documentType: "CUSTOMDOCUMENT" as any,
+      });
+
+      if (res.success) {
+        setDocuments(res.savedDocuments || []);
       }
-    };
+    } catch (err) {
+      console.error("Failed to load custom documents:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadCustomDocuments();
+  useEffect(() => {
+    loadDocuments();
   }, []);
 
+  /* ================= FILTER ================= */
   const filteredDocuments = documents.filter((doc) => {
     const ref = doc.reference_no?.toLowerCase() || "";
     const status = doc.status?.toLowerCase() || "";
@@ -52,6 +62,50 @@ export default function CustomDocumentPage() {
     return ref.includes(query) || status.includes(query);
   });
 
+  /* ================= VIEW ================= */
+  const handleViewDocument = async (docId: string) => {
+    try {
+      setViewOpen(true);
+      setViewDoc(null);
+
+      const res = await DocumentService.getDocument(docId);
+
+      if (res.success) {
+        setViewDoc(res.document);
+      }
+    } catch (err) {
+      console.error("View failed:", err);
+    }
+  };
+
+  /* ================= EDIT ================= */
+  const handleEditDocument = async (docId: string) => {
+    try {
+      setEditOpen(true);
+      setEditDoc(null);
+
+      const res = await DocumentService.getDocument(docId);
+
+      if (res.success) {
+        setEditDoc(res.document);
+      }
+    } catch (err) {
+      console.error("Edit failed:", err);
+    }
+  };
+
+  /* ================= CREATE SUBMIT ================= */
+  const handleCreateSubmit = async (payload: any) => {
+    try {
+      await (DocumentService as any).createDocument(payload);
+      setCreateOpen(false);
+      loadDocuments(); // refresh list
+    } catch (err) {
+      console.error("Create failed:", err);
+    }
+  };
+
+  /* ================= LOADING ================= */
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -63,7 +117,7 @@ export default function CustomDocumentPage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        {/* Header */}
+        {/* ================= HEADER ================= */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Custom Documents</h1>
@@ -72,20 +126,28 @@ export default function CustomDocumentPage() {
             </p>
           </div>
 
-          {/* Search */}
-          <div className="relative w-full md:w-72">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="flex flex-col gap-3 md:flex-row">
+            {/* SEARCH */}
+            <div className="relative w-full md:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-            <Input
-              className="pl-9"
-              placeholder="Search reference no..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+              <Input
+                className="pl-9"
+                placeholder="Search reference..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {/* CREATE BUTTON */}
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Custom Document
+            </Button>
           </div>
         </div>
 
-        {/* List */}
+        {/* ================= LIST ================= */}
         <div className="grid grid-cols-1 gap-4">
           {filteredDocuments.map((doc, index) => (
             <motion.div
@@ -94,41 +156,50 @@ export default function CustomDocumentPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <Card
-                className="cursor-pointer transition hover:border-primary/50"
-                onClick={() =>
-                  router.push(`/documents/custom-document/${doc.doc_id}`)
-                }
-              >
+              <Card className="transition hover:border-primary/50">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-red-500/10 p-2">
                       <ShieldCheck className="h-5 w-5 text-red-500" />
                     </div>
 
-                    <div>
-                      <CardTitle className="text-base">
-                        {doc.reference_no}
-                      </CardTitle>
-
-                      {/* <CardDescription>Status: {doc.status}</CardDescription> */}
-                    </div>
+                    <CardTitle className="text-base">
+                      {doc.reference_no}
+                    </CardTitle>
                   </div>
-
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    Created: {new Date(doc.createdAt).toLocaleDateString()}
+                    Created:{" "}
+                    {doc.createdAt
+                      ? new Date(doc.createdAt).toLocaleDateString("en-GB")
+                      : "-"}
                   </p>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewDocument(doc.doc_id)}
+                    >
+                      View
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => handleEditDocument(doc.doc_id)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
 
-        {/* Empty state */}
+        {/* ================= EMPTY ================= */}
         {!loading && filteredDocuments.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <ShieldCheck className="h-10 w-10 text-muted-foreground" />
@@ -138,11 +209,38 @@ export default function CustomDocumentPage() {
             </h3>
 
             <p className="text-muted-foreground">
-              Try changing your search query
+              Create your first custom document
             </p>
+
+            <Button className="mt-5" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Custom Document
+            </Button>
           </div>
         )}
       </div>
+
+      {/* ================= VIEW ================= */}
+      <CustomDocumentViewDialog
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        document={viewDoc}
+      />
+
+      {/* ================= EDIT ================= */}
+      <CustomDocumentEditDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        document={editDoc}
+        onSuccess={loadDocuments}
+      />
+
+      {/* ================= CREATE ================= */}
+      <CustomDocumentCreateDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onSubmit={handleCreateSubmit} // ✅ FIXED
+      />
     </div>
   );
 }
