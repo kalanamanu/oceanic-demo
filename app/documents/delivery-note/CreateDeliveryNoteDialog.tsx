@@ -1,9 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  FileSpreadsheet,
+  Calendar,
+  User,
+  MapPin,
+} from "lucide-react";
 
 import {
   Dialog,
@@ -22,11 +31,9 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useDocumentEngine } from "@/hooks/use-document-job";
 import { DocumentService } from "@/services/document.service";
 
-import { Plus, Trash2, Loader2, FileSpreadsheet, Calendar } from "lucide-react";
-
 type Item = {
   description: string;
-  remarks: string; // Captured via input row
+  remarks: string;
   unit: string;
   quantity: number;
 };
@@ -52,7 +59,8 @@ export const CreateDeliveryNoteDialog = ({
   onClose,
   confirmedItems,
 }: Props) => {
-  const { runJob, loading } = useDocumentEngine();
+  const { runJob, loading, saveDraft } = useDocumentEngine();
+  const [fetchingRef, setFetchingRef] = useState(false);
 
   const { control, register, handleSubmit, reset, setValue } =
     useForm<FormValues>({
@@ -72,7 +80,7 @@ export const CreateDeliveryNoteDialog = ({
     name: "items",
   });
 
-  /* ================= FETCH REFERENCE NUMBER ================= */
+  /* ================= FETCH REFERENCE NUMBER & RESET ================= */
   useEffect(() => {
     if (!open) {
       reset();
@@ -81,6 +89,7 @@ export const CreateDeliveryNoteDialog = ({
 
     const fetchSequenceReference = async () => {
       try {
+        setFetchingRef(true);
         const referenceData = await DocumentService.getReferenceNumber(
           "DELIVERYNOTE" as any,
         );
@@ -89,6 +98,9 @@ export const CreateDeliveryNoteDialog = ({
         }
       } catch (error) {
         console.error("Failed fetching delivery note sequence context:", error);
+        toast.error("Could not generate reference number automatically");
+      } finally {
+        setFetchingRef(false);
       }
     };
 
@@ -108,36 +120,37 @@ export const CreateDeliveryNoteDialog = ({
     }
   }, [open, confirmedItems, setValue]);
 
+  /* ================= PAYLOAD BUILDER ================= */
+  const buildPayload = (data: FormValues) => ({
+    document: "DELIVERYNOTE",
+    documentType: "pdf",
+    documentData: {
+      reference_no: data.referenceNumber,
+      date:
+        data.date instanceof Date
+          ? data.date.toLocaleDateString("en-GB")
+          : data.date,
+      supplyDate:
+        data.supplyDate instanceof Date
+          ? data.supplyDate.toLocaleDateString("en-GB")
+          : data.supplyDate,
+      billToName: data.billToName,
+      billToAddress: data.billToAddress,
+      poNumber: data.poNumber,
+      items: data.items.map((item, index) => ({
+        no: index + 1,
+        item_name: item.description,
+        customer_remark: item.remarks || "—",
+        unit: item.unit || "PCS",
+        quantity: Number(item.quantity || 0),
+      })),
+    },
+  });
+
+  /* ================= ACTIONS ================= */
   const onSubmit = async (data: FormValues) => {
     try {
-      const payload = {
-        document: "DELIVERYNOTE",
-        documentType: "pdf",
-        documentData: {
-          reference_no: data.referenceNumber,
-          date:
-            data.date instanceof Date
-              ? data.date.toLocaleDateString("en-GB")
-              : data.date,
-          supplyDate:
-            data.supplyDate instanceof Date
-              ? data.supplyDate.toLocaleDateString("en-GB")
-              : data.supplyDate,
-          billToName: data.billToName,
-          billToAddress: data.billToAddress,
-          poNumber: data.poNumber,
-          // 🚀 Maps 'remarks' from form to 'customer_remark' to match the View payload pipeline
-          items: data.items.map((item, index) => ({
-            no: index + 1,
-            item_name: item.description,
-            customer_remark: item.remarks || "—",
-            unit: item.unit || "PCS",
-            quantity: Number(item.quantity || 0),
-          })),
-        },
-      };
-
-      await runJob(payload, "Delivery Note");
+      await runJob(buildPayload(data), "Delivery Note");
       toast.success("Delivery Note generated successfully!");
       onClose();
     } catch (err) {
@@ -145,6 +158,16 @@ export const CreateDeliveryNoteDialog = ({
       toast.error("Failed to generate delivery note");
     }
   };
+
+  const handleSaveDraft = handleSubmit(async (data) => {
+    try {
+      await saveDraft(buildPayload(data));
+      toast.success("Draft saved successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save draft");
+    }
+  });
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -170,7 +193,7 @@ export const CreateDeliveryNoteDialog = ({
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* ================= SECTION: METADATA & SHIPMENT DETAILS ================= */}
             <div className="space-y-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" /> Core Metadata & Logistics
               </h3>
 
@@ -184,7 +207,12 @@ export const CreateDeliveryNoteDialog = ({
                   </Label>
                   <Input
                     id="referenceNumber"
-                    placeholder="Fetching reference code..."
+                    placeholder={
+                      fetchingRef
+                        ? "Fetching reference code..."
+                        : "e.g. DN-2026-0001"
+                    }
+                    disabled={fetchingRef}
                     {...register("referenceNumber")}
                   />
                 </div>
@@ -235,8 +263,12 @@ export const CreateDeliveryNoteDialog = ({
                 </div>
 
                 <div className="space-y-1.5 md:col-span-2">
-                  <Label htmlFor="billToName" className="text-xs font-medium">
-                    Client / Consignee Name
+                  <Label
+                    htmlFor="billToName"
+                    className="text-xs font-medium flex items-center gap-1"
+                  >
+                    <User className="w-3 h-3 text-muted-foreground" /> Client /
+                    Consignee Name
                   </Label>
                   <Input
                     id="billToName"
@@ -247,8 +279,12 @@ export const CreateDeliveryNoteDialog = ({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="billToAddress" className="text-xs font-medium">
-                  Delivery Destination Address
+                <Label
+                  htmlFor="billToAddress"
+                  className="text-xs font-medium flex items-center gap-1"
+                >
+                  <MapPin className="w-3 h-3 text-muted-foreground" /> Delivery
+                  Destination Address
                 </Label>
                 <Input
                   id="billToAddress"
@@ -363,10 +399,24 @@ export const CreateDeliveryNoteDialog = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="px-5">
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Generate Delivery Note
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSaveDraft}
+                disabled={loading || fetchingRef}
+              >
+                Save Draft
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading || fetchingRef}
+                className="px-5"
+              >
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Generate Delivery Note
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
