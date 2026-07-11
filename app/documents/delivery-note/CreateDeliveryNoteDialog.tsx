@@ -26,7 +26,7 @@ import { Plus, Trash2, Loader2, FileSpreadsheet, Calendar } from "lucide-react";
 
 type Item = {
   description: string;
-  remarks?: string;
+  remarks: string; // Captured via input row
   unit: string;
   quantity: number;
 };
@@ -99,8 +99,8 @@ export const CreateDeliveryNoteDialog = ({
   useEffect(() => {
     if (open && confirmedItems?.length) {
       const mappedItems = confirmedItems.map((item) => ({
-        description: item.item_name || "",
-        remarks: item.customer_remark || "",
+        description: item.item_name || item.description || "",
+        remarks: item.customer_remark || item.remarks || "",
         unit: item.unit || "PCS",
         quantity: Number(item.quantity || 1),
       }));
@@ -114,7 +114,7 @@ export const CreateDeliveryNoteDialog = ({
         document: "DELIVERYNOTE",
         documentType: "pdf",
         documentData: {
-          ...data,
+          reference_no: data.referenceNumber,
           date:
             data.date instanceof Date
               ? data.date.toLocaleDateString("en-GB")
@@ -123,9 +123,16 @@ export const CreateDeliveryNoteDialog = ({
             data.supplyDate instanceof Date
               ? data.supplyDate.toLocaleDateString("en-GB")
               : data.supplyDate,
-          items: data.items.map((item) => ({
-            ...item,
-            quantity: Number(item.quantity),
+          billToName: data.billToName,
+          billToAddress: data.billToAddress,
+          poNumber: data.poNumber,
+          // 🚀 Maps 'remarks' from form to 'customer_remark' to match the View payload pipeline
+          items: data.items.map((item, index) => ({
+            no: index + 1,
+            item_name: item.description,
+            customer_remark: item.remarks || "—",
+            unit: item.unit || "PCS",
+            quantity: Number(item.quantity || 0),
           })),
         },
       };
@@ -141,7 +148,6 @@ export const CreateDeliveryNoteDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      {/* 🚀 Updated UI wrapper styles to match your requested wide Dispatch Note configuration precisely */}
       <DialogContent className="sm:max-w-[90vw] md:max-w-[85vw] lg:max-w-[80vw] xl:max-w-[1200px] max-h-[90vh] flex flex-col p-0 overflow-hidden gap-0">
         <DialogHeader className="p-6 border-b shrink-0">
           <div className="flex items-center gap-2">
@@ -156,7 +162,6 @@ export const CreateDeliveryNoteDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        {/* 🚀 Changed form container to correctly layout via flex-col with independent scrolling body content */}
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col flex-1 overflow-hidden"
@@ -282,7 +287,7 @@ export const CreateDeliveryNoteDialog = ({
               {fields.length > 0 && (
                 <div className="hidden md:grid grid-cols-12 gap-3 px-2 text-xs font-medium text-muted-foreground">
                   <div className="col-span-5">Item Description</div>
-                  <div className="col-span-3">Internal Remarks</div>
+                  <div className="col-span-3">Remarks</div>
                   <div className="col-span-2">Unit</div>
                   <div className="col-span-1.5">Quantity</div>
                   <div className="col-span-0.5"></div>
