@@ -158,9 +158,9 @@ export default function DispatchNotePage() {
                     </Button>
 
                     {/* EDIT */}
-                    <Button size="sm" onClick={() => handleEdit(doc.doc_id)}>
+                    {/* <Button size="sm" onClick={() => handleEdit(doc.doc_id)}>
                       Edit
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardHeader>
 

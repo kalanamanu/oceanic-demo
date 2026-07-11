@@ -94,17 +94,6 @@ export default function CustomDocumentPage() {
     }
   };
 
-  /* ================= CREATE SUBMIT ================= */
-  const handleCreateSubmit = async (payload: any) => {
-    try {
-      await (DocumentService as any).createDocument(payload);
-      setCreateOpen(false);
-      loadDocuments(); // refresh list
-    } catch (err) {
-      console.error("Create failed:", err);
-    }
-  };
-
   /* ================= LOADING ================= */
   if (loading) {
     return (
@@ -186,12 +175,12 @@ export default function CustomDocumentPage() {
                       View
                     </Button>
 
-                    <Button
+                    {/* <Button
                       size="sm"
                       onClick={() => handleEditDocument(doc.doc_id)}
                     >
                       Edit
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>
@@ -236,10 +225,11 @@ export default function CustomDocumentPage() {
       />
 
       {/* ================= CREATE ================= */}
+      {/* 🚀 Changed: Added dynamic refresh triggers here */}
       <CustomDocumentCreateDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onSubmit={handleCreateSubmit} // ✅ FIXED
+        onSuccess={loadDocuments}
       />
     </div>
   );

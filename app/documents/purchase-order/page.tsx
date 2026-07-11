@@ -166,13 +166,13 @@ export default function PurchaseOrderPage() {
                     </Button>
 
                     {/* EDIT */}
-                    <Button
+                    {/* <Button
                       size="sm"
                       onClick={() => handleEdit(doc.doc_id)}
                       disabled={loadingDocId === doc.doc_id}
                     >
                       {loadingDocId === doc.doc_id ? "Loading..." : "Edit"}
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardHeader>
 

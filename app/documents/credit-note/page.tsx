@@ -174,12 +174,12 @@ export default function CreditNotePage() {
                       View
                     </Button>
 
-                    <Button
+                    {/* <Button
                       size="sm"
                       onClick={() => handleEditDocument(doc.doc_id)}
                     >
                       Edit
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>
