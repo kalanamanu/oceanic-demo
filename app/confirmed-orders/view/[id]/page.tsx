@@ -31,6 +31,8 @@ import { ConfirmedItemsTable } from "@/components/confirmed-orders/confirmed-ite
 import { CreateDispatchNoteDialog } from "@/components/dispatch-note/create-dispatch-note-dialog";
 
 import { InvoiceDialog } from "@/components/invoices/create-invoice-dialog";
+// 🚀 Imported the Delivery Note Dialog component
+import { CreateDeliveryNoteDialog } from "@/app/documents/delivery-note/CreateDeliveryNoteDialog";
 
 export default function ConfirmedOrderDetailPage() {
   const router = useRouter();
@@ -45,6 +47,8 @@ export default function ConfirmedOrderDetailPage() {
 
   const [invoiceOpen, setInvoiceOpen] = React.useState(false);
   const [dispatchOpen, setDispatchOpen] = React.useState(false);
+  // 🚀 Added open state configuration for the delivery note overlay
+  const [deliveryNoteOpen, setDeliveryNoteOpen] = React.useState(false);
 
   /* ================= AUTH ================= */
   React.useEffect(() => {
@@ -209,9 +213,8 @@ export default function ConfirmedOrderDetailPage() {
                 </DropdownMenuItem>
 
                 {/* Delivery Note */}
-                <DropdownMenuItem
-                  onClick={() => toast.info("Delivery Note coming soon")}
-                >
+                {/* 🚀 Changed to open the delivery note generation dialog overlay layout configuration */}
+                <DropdownMenuItem onClick={() => setDeliveryNoteOpen(true)}>
                   <Truck className="w-4 h-4 mr-2" />
                   Delivery Note
                 </DropdownMenuItem>
@@ -327,6 +330,14 @@ export default function ConfirmedOrderDetailPage() {
           onOpenChange={setInvoiceOpen}
           data={data}
         />
+
+        {/* 🚀 Rendered the structural delivery note modal overlay layout here */}
+        <CreateDeliveryNoteDialog
+          open={deliveryNoteOpen}
+          onClose={() => setDeliveryNoteOpen(false)}
+          confirmedItems={data.confirmedItems}
+        />
+
         <CreateDispatchNoteDialog
           open={dispatchOpen}
           onOpenChange={setDispatchOpen}
